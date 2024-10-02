@@ -1,4 +1,5 @@
 import sys
+from typing import List
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout
 
 
@@ -19,6 +20,15 @@ class MyApp(QWidget):
 
         layout.addWidget(self.count_label)
         layout.addWidget(self.push_botton)
+
+        self.count: List[int, int] = [0, 0]
+        self.total_count: int = 0
+
+        self.push_botton.clicked.connect(self.counter)
+
+    def counter(self):
+        self.count[0] += 1
+        self.count_label.setText(f"Count from this client: {self.count[0]} \n Total count: {self.total_count}")
 
 
 if __name__ == "__main__":

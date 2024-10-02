@@ -11,8 +11,7 @@ DISCONNECTION_INFO: str = "!DISCONNECT"
 
 
 # 1. build server
-# server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDRESS)
 
 # 2. build client

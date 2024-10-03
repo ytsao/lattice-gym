@@ -29,7 +29,7 @@ class MyApp(QWidget):
 
         # widgets
         self.count_label = QLabel()
-        self.count_label.setText("Hello, just for testing")
+        self.count_label.setText("Hello, Welcome to lattice gym!")
         self.debug_label = QLabel()
         self.debug_label.setText("Debugging Information")
         self.push_button = QPushButton()
@@ -49,7 +49,7 @@ class MyApp(QWidget):
     def request_value(self):
         # user interface function
         self.count_label.setText(f"Current value: {self._value()}")
-        self.debug_label.setText(self.state_vector)
+        self.debug_label.setText(f"{self.state_vector[0]},{self.state_vector[1]}")
 
     def increment(self):
         # user interface function
@@ -66,7 +66,7 @@ class MyApp(QWidget):
     def _merge(self, other_state_vector: list):
         # called asynchronously
         # coordinatewise max
-        for i in range(len(self.count)):
+        for i in range(len(self.state_vector)):
             self.state_vector[i] = max(self.state_vector[i], other_state_vector[i])
 
     def _value(self):
@@ -91,7 +91,7 @@ class MyApp(QWidget):
                     first_state, second_state = message[message.index(":")+1:].split(",")
                     print(f"first_state: {first_state}, second_state: {second_state}")
                     state_vector_from_another: list = [int(first_state), int(second_state)]
-                    self._merge(other_count=state_vector_from_another)
+                    self._merge(other_state_vector=state_vector_from_another)
 
                     # update count label
                     self.request_value()

@@ -41,8 +41,7 @@ class MyApp(QWidget):
 
         # initial value, after connection, it is going to be either 0 or 1.
         self.node_id: int = -1
-        self.count: list = [0, 0]
-        self.local_count: int = 0
+        self.state_vector: list = [0, 0]
         self.push_button.clicked.connect(self.increment)
         self.start_CRDT: bool = False
         self.dest_address: Tuple[str,int]
@@ -50,6 +49,7 @@ class MyApp(QWidget):
     def request_value(self):
         # user interface function
         self.count_label.setText(f"Current value: {self._value()}")
+        self.debug_label.setText(self.state_vector)
 
     def increment(self):
         # user interface function
@@ -59,30 +59,35 @@ class MyApp(QWidget):
         # CRDT implementation -> user interface : increment
         # increments at vector index corresponding to local node id
         if self.node_id != -1:
-            self.count[self.node_id] += 1
+            self.state_vector[self.node_id] += 1
         else:
             print("there is only 1 client")
 
-    def _merge(self, other_count: list):
+    def _merge(self, other_state_vector: list):
         # called asynchronously
         # coordinatewise max
         for i in range(len(self.count)):
-            self.count[i] = max(self.count[i], other_count[i])
+            self.state_vector[i] = max(self.state_vector[i], other_state_vector[i])
 
     def _value(self):
         # CRDT implementation -> user interface : value
         # sum all Ints in vector
-        return sum(self.count)
+        return sum(self.state_vector)
 
     def receive(self):
-        # receive count vector from another client
+        # receive "state_vector" from another client
         # call merge function
         while True:
             try:
                 message, _ = self.client.recvfrom(1024)
                 message = message.decode(self.DATA_FORMAT)
                 self.debug_label.setText(message)
-                if len(message) > 0 and "state_vector: " in message:
+                if message.startswith("INFO:"):
+                    str_node_id, connection, port = message.split(":")[1].split(", ")
+                    self.node_id = int(str_node_id)
+                    self.dest_address = (connection, int(port))
+                    print("Got another client's information")
+                elif len(message) > 0 and "state_vector: " in message:
                     first_state, second_state = message[message.index(":")+1:].split(",")
                     print(f"first_state: {first_state}, second_state: {second_state}")
                     state_vector_from_another: list = [int(first_state), int(second_state)]
@@ -90,11 +95,6 @@ class MyApp(QWidget):
 
                     # update count label
                     self.request_value()
-                elif message.startswith("INFO:"):
-                    str_node_id, connection, port = message.split(":")[1].split(", ")
-                    self.node_id = int(str_node_id)
-                    self.dest_address = (connection, int(port))
-                    print("Got another client's information")
             except Exception as e:
                 self.debug_label.setText(e)
 
@@ -110,10 +110,7 @@ class MyApp(QWidget):
         print("start CRDT")
         while True:
             time.sleep(10)
-            self.client.sendto(f"state_vector: {self.count[0]},{self.count[1]}".encode(self.DATA_FORMAT), self.dest_address)
-
-
-
+            self.client.sendto(f"state_vector: {self.state_vector[0]},{self.state_vector[1]}".encode(self.DATA_FORMAT), self.dest_address)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

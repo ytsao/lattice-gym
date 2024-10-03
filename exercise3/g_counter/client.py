@@ -1,5 +1,5 @@
 import sys
-from typing import Tuple
+from typing import Tuple, List
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout
 import random
 import socket
@@ -41,15 +41,17 @@ class MyApp(QWidget):
 
         # initial value, after connection, it is going to be either 0 or 1.
         self.node_id: int = -1
-        self.state_vector: list = [0, 0]
+        self.state_vector: List[int] = [0]
         self.push_button.clicked.connect(self.increment)
         self.start_CRDT: bool = False
-        self.dest_address: Tuple[str,int]
+        # self.dest_address: Tuple[str,int]
+        self.dest_address: List[Tuple[str,int]] = []
 
     def request_value(self):
         # user interface function
         self.count_label.setText(f"Current value: {self._value()}")
-        self.debug_label.setText(f"{self.state_vector[0]},{self.state_vector[1]}")
+        sv: str = ",".join([str(i) for i in self.state_vector])
+        self.debug_label.setText(f"{sv}")
 
     def increment(self):
         # user interface function
@@ -85,12 +87,12 @@ class MyApp(QWidget):
                 if message.startswith("INFO:"):
                     str_node_id, connection, port = message.split(":")[1].split(", ")
                     self.node_id = int(str_node_id)
-                    self.dest_address = (connection, int(port))
+                    self.dest_address.append((connection, int(port)))
+                    self.state_vector.append(0)
                     print("Got another client's information")
                 elif len(message) > 0 and "state_vector: " in message:
-                    first_state, second_state = message[message.index(":")+1:].split(",")
-                    print(f"first_state: {first_state}, second_state: {second_state}")
-                    state_vector_from_another: list = [int(first_state), int(second_state)]
+                    list_str_sv: List[str] = message[message.index(":")+1:].split(",")
+                    state_vector_from_another: list = [int(x) for x in list_str_sv]
                     self._merge(other_state_vector=state_vector_from_another)
 
                     # update count label
@@ -108,9 +110,14 @@ class MyApp(QWidget):
         # connect with another client
         # send the "state_vector" to another client every 10 seconds
         print("start CRDT")
+        print("jfioajdf oijdaoijf aoij oia")
         while True:
-            time.sleep(10)
-            self.client.sendto(f"state_vector: {self.state_vector[0]},{self.state_vector[1]}".encode(self.DATA_FORMAT), self.dest_address)
+            time.sleep(5)
+            # self.client.sendto(f"state_vector: {self.state_vector[0]},{self.state_vector[1]}".encode(self.DATA_FORMAT), self.dest_address)
+            sv: str = ",".join([str(i) for i in self.state_vector])
+            for each_dest_address in self.dest_address:
+                self.client.sendto(f"state_vector: {sv}".encode(self.DATA_FORMAT), each_dest_address)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

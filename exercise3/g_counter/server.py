@@ -33,20 +33,26 @@ def broadcast():
                 name = message.decode(DATA_FORMAT)[message.decode(DATA_FORMAT).index(":")+1:]
                 server.sendto(f"{name} joined!".encode(DATA_FORMAT), client_address)
                 clients.append(client_address)
-            if len(clients) == 2:
-                print("there are two clients")
+            if len(clients) == 3:
+                print("there are more than two clients")
                 break
 
         # send to client 1
         # send to client 2
-        print("send connection information to both clients")
-        client1_info: str = f"INFO:0, {clients[1][0]}, {clients[1][1]}"
-        client2_info: str = f"INFO:1, {clients[0][0]}, {clients[0][1]}"
-        server.sendto(client1_info.encode(DATA_FORMAT), clients[0])
-        server.sendto(client2_info.encode(DATA_FORMAT), clients[1])
-        print("server finished its jobs, terminate")
-        # sys.exit()
-        # break
+        # print("send connection information to both clients")
+        # client1_info: str = f"INFO:0, {clients[1][0]}, {clients[1][1]}"
+        # client2_info: str = f"INFO:1, {clients[0][0]}, {clients[0][1]}"
+        # server.sendto(client1_info.encode(DATA_FORMAT), clients[0])
+        # server.sendto(client2_info.encode(DATA_FORMAT), clients[1])
+        # print("server finished its jobs, terminate")
+
+        for i in range(len(clients)):
+            connection_information: str = f"INFO:{i}"
+            for j in range(len(clients)):
+                if i != j:
+                    server.sendto(f"{connection_information}, {clients[j][0]}, {clients[j][1]}".encode(DATA_FORMAT), clients[i])
+        
+                
 
 
 t1 = threading.Thread(target=receive)

@@ -12,6 +12,7 @@ server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server.bind(ADDRESS)
 messages = queue.Queue()
 clients: List = []
+num_clients: int = -1
 
 
 def receive():
@@ -33,8 +34,8 @@ def broadcast():
                 name = message.decode(DATA_FORMAT)[message.decode(DATA_FORMAT).index(":")+1:]
                 server.sendto(f"{name} joined!".encode(DATA_FORMAT), client_address)
                 clients.append(client_address)
-            if len(clients) == 3:
-                print("there are more than two clients")
+            if len(clients) == num_clients:
+                print(f"there are {num_clients} clients")
                 break
 
         # send to client 1
@@ -59,4 +60,5 @@ t1 = threading.Thread(target=receive)
 t2 = threading.Thread(target=broadcast)
 t1.start()
 t2.start()
+num_clients = int(input("Enter the number of clients in the counter: "))
 print("server is starting ...")

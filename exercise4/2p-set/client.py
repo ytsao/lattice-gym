@@ -1,6 +1,6 @@
 import sys
-from typing import Tuple, List
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout
+from typing import Tuple, List, Set
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QLineEdit
 import random
 import socket
 import threading
@@ -28,71 +28,101 @@ class MyApp(QWidget):
         self.client.bind(self.CLIENT_ADDRESS)
 
         # widgets
-        self.count_label = QLabel()
-        self.count_label.setText("Hello, Welcome to lattice gym!")
-        self.debug_label = QLabel()
-        self.debug_label.setText("Debugging Information")
-        self.increment_button = QPushButton()
-        self.increment_button.setText("Increment")
-        self.decrement_button = QPushButton()
-        self.decrement_button.setText("Decrement")
+        self.state_label = QLabel()
+        self.state_label.setText("Current State: ")
+        self.info_label = QLabel()
+        self.info_label.setText("Information: ")
 
-        layout.addWidget(self.count_label)
-        layout.addWidget(self.debug_label)
-        layout.addWidget(self.increment_button)
-        layout.addWidget(self.decrement_button)
+        self.add_text = QLineEdit()
+        self.add_text.setText("Enter the element to add")
+        self.add_button = QPushButton()
+        self.add_button.setText("Add")
+        self.remove_text = QLineEdit()
+        self.remove_text.setText("Enter the element to remove") 
+        self.remove_button = QPushButton()
+        self.remove_button.setText("Remove")
+        self.lookup_text = QLineEdit()
+        self.lookup_text.setText("Enter the element to lookup")
+        self.lookup_button = QPushButton()
+        self.lookup_button.setText("Lookup")
+
+        layout.addWidget(self.state_label)
+        layout.addWidget(self.info_label)
+
+        layout.addWidget(self.add_text)
+        layout.addWidget(self.remove_text)
+        layout.addWidget(self.add_button)
+        layout.addWidget(self.remove_button)
+        layout.addWidget(self.lookup_text)
+        layout.addWidget(self.lookup_button)
+
+        self.add_button.clicked.connect(self.add)
+        self.remove_button.clicked.connect(self.remove) 
+        self.lookup_button.clicked.connect(self.lookup)
 
         # initial value, after connection, it is going to be either 0 or 1.
         self.node_id: int = -1
-        self.p_state_vector: List[int] = [0]
-        self.n_state_vector: List[int] = [0]
-        self.increment_button.clicked.connect(self.increment)
-        self.decrement_button.clicked.connect(self.decrement)
+        self.A: Set[str] = set()
+        self.R: Set[str] = set()
         
         self.start_CRDT: bool = False
-        # self.dest_address: Tuple[str,int]
         self.dest_address: List[Tuple[str,int]] = []
 
     def request_value(self):
         # user interface function
-        self.count_label.setText(f"Current value: {self._value()}")
-        psv: str = ",".join([str(i) for i in self.p_state_vector])
-        nsv: str = ",".join([str(i) for i in self.n_state_vector])
-        self.debug_label.setText(f"{psv}, {nsv}")
+        self.state_label.setText(f"Current State: {self._value()}")
+        self.info_label.setText(f"Information: A: {self.A}, R: {self.R}")
 
-    def increment(self):
+    def add(self):
         # user interface function
-        self._update(isIncrement=True)
-    
-    def decrement(self):
+        add_value: str = self.add_text.text()
+        if add_value != "" or add_value != "Enter the element to add":
+            self.A.add(self.add_text.text())
+
+    def lookup(self):
         # user interface function
-        self._update(isIncrement=False)
+        lookup_value: str = self.lookup_text.text()
+        return self._lookup(lookup_value)
 
-    def _update(self, isIncrement: bool):
-        # CRDT implementation -> user interface : increment
-        # increments at vector index corresponding to local node id
-        if self.node_id != -1:
-            if isIncrement:
-                self.p_state_vector[self.node_id] += 1
-            else:
-                self.n_state_vector[self.node_id] += 1
-        else:
-            print("there is only 1 client")
+    def _lookup(self, lookup_value: str):
+        # CRDT implementation -> user interface : lookup
+        isAdded: bool = lookup_value in self.A
+        isNotRemoved: bool = lookup_value not in self.R
 
-    def _merge(self, other_state_vector: list, isIncrement: bool):
-        # called asynchronously
-        # coordinatewise max
-        if isIncrement:
-            for i in range(len(self.p_state_vector)):
-                self.state_vector[i] = max(self.p_state_vector[i], other_state_vector[i])
-        else:
-            for i in range(len(self.n_state_vector)):    
-                self.state_vector[i] = max(self.n_state_vector[i], other_state_vector[i])
+        return isAdded and isNotRemoved
+
+    def remove(self):
+        # user interface function
+        remove_value: str = self.remove_text.text()
+        if remove_value != "" or remove_value != "Enter the element to remove":
+            if self._lookup(remove_value):
+                self.R.add(remove_value)
+
+    # def _update(self, isIncrement: bool):
+    #     # CRDT implementation -> user interface : increment
+    #     # increments at vector index corresponding to local node id
+    #     if self.node_id != -1:
+    #         if isIncrement:
+    #             self.p_state_vector[self.node_id] += 1
+    #         else:
+    #             self.n_state_vector[self.node_id] += 1
+    #     else:
+    #         print("there is only 1 client")
+
+    # def _merge(self, other_state_vector: list, isIncrement: bool):
+    #     # called asynchronously
+    #     # coordinatewise max
+    #     if isIncrement:
+    #         for i in range(len(self.p_state_vector)):
+    #             self.state_vector[i] = max(self.p_state_vector[i], other_state_vector[i])
+    #     else:
+    #         for i in range(len(self.n_state_vector)):    
+    #             self.state_vector[i] = max(self.n_state_vector[i], other_state_vector[i])
 
     def _value(self):
         # CRDT implementation -> user interface : value
         # sum all Ints in vector
-        return sum(self.p_state_vector) - sum(self.n_state_vector)
+        return self.A - self.R
 
     def receive(self):
         # receive "state_vector" from another client

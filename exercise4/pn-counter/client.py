@@ -56,9 +56,13 @@ class MyApp(QWidget):
     def request_value(self):
         # user interface function
         self.count_label.setText(f"Current value: {self._value()}")
-        psv: str = ",".join([str(i) for i in self.p_state_vector])
-        nsv: str = ",".join([str(i) for i in self.n_state_vector])
-        self.debug_label.setText(f"{psv}, {nsv}")
+        #psv: str = ",".join([str(i) for i in self.p_state_vector])
+        #nsv: str = ",".join([str(i) for i in self.n_state_vector])
+        
+        info: str = ""
+        for i in range(len(self.p_state_vector)):
+            info += f"nocde {i}: ({self.p_state_vector[i]}, {self.n_state_vector[i]})\n"
+        self.debug_label.setText(info)
 
     def increment(self):
         # user interface function
@@ -84,28 +88,16 @@ class MyApp(QWidget):
         # coordinatewise max
         if isIncrement:
             for i in range(len(self.p_state_vector)):
-                self.state_vector[i] = max(self.p_state_vector[i], other_state_vector[i])
+                self.p_state_vector[i] = max(self.p_state_vector[i], other_state_vector[i])
         else:
             for i in range(len(self.n_state_vector)):    
-                self.state_vector[i] = max(self.n_state_vector[i], other_state_vector[i])
+                self.n_state_vector[i] = max(self.n_state_vector[i], other_state_vector[i])
 
     def _value(self):
         # CRDT implementation -> user interface : value
         # sum all Ints in vector
         return sum(self.p_state_vector) - sum(self.n_state_vector)
-#    
-    
-    def _lookup(self):
-        pass
-    
-    def _add(self):
-        pass
-    
-    
-    
-    
-    
-#
+
     def receive(self):
         # receive "state_vector" from another client
         # call merge function

@@ -126,29 +126,6 @@ class MyApp(QWidget):
         # CRDT implementation -> user interface : value
         return self.A - self.R
    
-    def operation(self):
-        # prepare();
-        # effect();
-        # broadcast message to other replicas;
-        pass
-    
-    def receive(self):
-        pass
-    
-    def query(self):
-        pass
-    
-    def _eval(self):
-        pass
-    
-    def _prepare(self):
-        pass
-    
-    def _effect(self):
-        pass
-    
-    
-
     def receive(self):
         # receive "state_vector" from another client
         # call merge function

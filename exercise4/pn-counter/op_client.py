@@ -5,6 +5,7 @@ import random
 import socket
 import threading
 import time
+from functools import partial
 
 
 class MyApp(QWidget):
@@ -44,10 +45,9 @@ class MyApp(QWidget):
 
         # initial value, after connection, it is going to be either 0 or 1.
         self.node_id: int = -1
-        self.positive_value: int = 0
-        self.negative_value: int = 0
-        self.increment_button.clicked.connect(self.increment)
-        self.decrement_button.clicked.connect(self.decrement)
+        self.count_value: int = 0
+        self.increment_button.clicked.connect(partial(self.operation, isAdd=True))
+        self.decrement_button.clicked.connect(partial(self.operation, isAdd=False))
         
         self.start_CRDT: bool = False
         # self.dest_address: Tuple[str,int]
@@ -55,39 +55,39 @@ class MyApp(QWidget):
 
     def request_value(self):
         # user interface function
-        self.count_label.setText(f"Current value: {self._value()}")
-        info: str = f"current state: ({self.positive_value}, {self.negative_value})\n"
+        self.count_label.setText(f"Current value: {self.query()}")
+        info: str = f"current state: ({self.query()})\n"
         self.debug_label.setText(info)
 
-    def increment(self):
-        # user interface function
-        self._update(isIncrement=True)
-        
-        for d in self.dest_address:
-            self.client.sendto("increment: ".encode(self.DATA_FORMAT), d)
-    
-    def decrement(self):
-        # user interface function
-        self._update(isIncrement=False)
-        
-        for d in self.dest_address:
-            self.client.sendto("decrement: ".encode(self.DATA_FORMAT), d)
+    def operation(self, isAdd: bool):
+        message: str = self._prepare(isAdd=isAdd)
+        self._effect(message=message)
 
-    def _update(self, isIncrement: bool):
-        # CRDT implementation -> user interface : increment
-        # increments at vector index corresponding to local node id
-        if self.node_id != -1:
-            if isIncrement:
-                self.positive_value += 1
-            else:
-                self.negative_value += 1
+        # broadcast m to other replicas
+        for each_dest in self.dest_address:
+            self.client.sendto(f"{message}: ".encode(self.DATA_FORMAT), each_dest)
+        
+        # update interface
+        self.request_value()
+
+    def query(self):
+        return self._eval()
+
+    def _prepare(self, isAdd: bool):
+        if isAdd:
+            return "increment"
         else:
-            print("there is only 1 client")
+            return "decrement"
 
-    def _value(self):
-        # CRDT implementation -> user interface : value
-        return self.positive_value - self.negative_value
-     
+    def _effect(self, message: str):
+        if "increment" in message:
+            self.count_value += 1
+        elif "decrement" in message:
+            self.count_value -= 1
+
+    def _eval(self):
+        return self.count_value
+
     def receive(self):
         # receive "state_vector" from another client
         # call merge function
@@ -101,13 +101,12 @@ class MyApp(QWidget):
                     self.node_id = int(str_node_id)
                     self.dest_address.append((connection, int(port)))
                     print("Got another client's information")
-                elif len(message) > 0 and "increment: " in message:
-                    self._update(isIncrement=True)
-                elif len(message) > 0 and "decrement: " in message:
-                    self._update(isIncrement=False)
-                
-                # update count label
-                self.request_value()
+                elif len(message) > 0 and "increment" in message:
+                    self._effect(message)
+                    self.request_value()
+                elif len(message) > 0 and "decrement" in message:
+                    self._effect(message)
+                    self.request_value()
             except Exception as e:
                 self.debug_label.setText(e)
 
@@ -117,20 +116,6 @@ class MyApp(QWidget):
         while not self.start_CRDT:
             if self.node_id != -1:
                 self.start_CRDT = True
-
-        # connect with another client
-        # send the "state_vector" to another client every 10 seconds
-        print("start CRDT")
-        while True:
-            time.sleep(5)
-            # self.client.sendto(f"state_vector: {self.state_vector[0]},{self.state_vector[1]}".encode(self.DATA_FORMAT), self.dest_address)
-            psv: str = ",".join([str(i) for i in self.p_state_vector])
-            nsv: str = ",".join([str(i) for i in self.n_state_vector])
-
-            # send to all others 
-            for each_dest_address in self.dest_address:
-                self.client.sendto(f"p_state_vector: {psv}".encode(self.DATA_FORMAT), each_dest_address)
-                self.client.sendto(f"n_state_vector: {nsv}".encode(self.DATA_FORMAT), each_dest_address)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

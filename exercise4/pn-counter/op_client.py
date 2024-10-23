@@ -44,8 +44,8 @@ class MyApp(QWidget):
 
         # initial value, after connection, it is going to be either 0 or 1.
         self.node_id: int = -1
-        self.p_state_vector: List[int] = [0]
-        self.n_state_vector: List[int] = [0]
+        self.positive_value: int = 0
+        self.negative_value: int = 0
         self.increment_button.clicked.connect(self.increment)
         self.decrement_button.clicked.connect(self.decrement)
         
@@ -56,48 +56,38 @@ class MyApp(QWidget):
     def request_value(self):
         # user interface function
         self.count_label.setText(f"Current value: {self._value()}")
-        #psv: str = ",".join([str(i) for i in self.p_state_vector])
-        #nsv: str = ",".join([str(i) for i in self.n_state_vector])
-        
-        info: str = ""
-        for i in range(len(self.p_state_vector)):
-            info += f"nocde {i}: ({self.p_state_vector[i]}, {self.n_state_vector[i]})\n"
+        info: str = f"current state: ({self.positive_value}, {self.negative_value})\n"
         self.debug_label.setText(info)
 
     def increment(self):
         # user interface function
         self._update(isIncrement=True)
+        
+        for d in self.dest_address:
+            self.client.sendto("increment: ".encode(self.DATA_FORMAT), d)
     
     def decrement(self):
         # user interface function
         self._update(isIncrement=False)
+        
+        for d in self.dest_address:
+            self.client.sendto("decrement: ".encode(self.DATA_FORMAT), d)
 
     def _update(self, isIncrement: bool):
         # CRDT implementation -> user interface : increment
         # increments at vector index corresponding to local node id
         if self.node_id != -1:
             if isIncrement:
-                self.p_state_vector[self.node_id] += 1
+                self.positive_value += 1
             else:
-                self.n_state_vector[self.node_id] += 1
+                self.negative_value += 1
         else:
             print("there is only 1 client")
 
-    def _merge(self, other_state_vector: list, isIncrement: bool):
-        # called asynchronously
-        # coordinatewise max
-        if isIncrement:
-            for i in range(len(self.p_state_vector)):
-                self.p_state_vector[i] = max(self.p_state_vector[i], other_state_vector[i])
-        else:
-            for i in range(len(self.n_state_vector)):    
-                self.n_state_vector[i] = max(self.n_state_vector[i], other_state_vector[i])
-
     def _value(self):
         # CRDT implementation -> user interface : value
-        # sum all Ints in vector
-        return sum(self.p_state_vector) - sum(self.n_state_vector)
-
+        return self.positive_value - self.negative_value
+     
     def receive(self):
         # receive "state_vector" from another client
         # call merge function
@@ -110,20 +100,14 @@ class MyApp(QWidget):
                     str_node_id, connection, port = message.split(":")[1].split(", ")
                     self.node_id = int(str_node_id)
                     self.dest_address.append((connection, int(port)))
-                    self.p_state_vector.append(0)
-                    self.n_state_vector.append(0)
                     print("Got another client's information")
-                elif len(message) > 0 and "p_state_vector: " in message:
-                    list_str_sv: List[str] = message[message.index(":")+1:].split(",")
-                    state_vector_from_another: list = [int(x) for x in list_str_sv]
-                    self._merge(other_state_vector=state_vector_from_another, isIncrement=True)
-                elif len(message) > 0 and "n_state_vector: " in message:
-                    list_str_sv: List[str] = message[message.index(":")+1:].split(",")
-                    state_vector_from_another: list = [int(x) for x in list_str_sv]
-                    self._merge(other_state_vector=state_vector_from_another, isIncrement=False)
+                elif len(message) > 0 and "increment: " in message:
+                    self._update(isIncrement=True)
+                elif len(message) > 0 and "decrement: " in message:
+                    self._update(isIncrement=False)
                 
-                    # update count label
-                    self.request_value()
+                # update count label
+                self.request_value()
             except Exception as e:
                 self.debug_label.setText(e)
 

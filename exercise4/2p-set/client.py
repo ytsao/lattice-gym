@@ -5,6 +5,7 @@ import random
 import socket
 import threading
 import time
+from functools import partial
 
 
 class MyApp(QWidget):
@@ -34,15 +35,15 @@ class MyApp(QWidget):
         self.info_label.setText("Information: ")
 
         self.add_text = QLineEdit()
-        self.add_text.setText("Enter the element to add")
+        self.add_text.setPlaceholderText("Enter the element to add")
         self.add_button = QPushButton()
         self.add_button.setText("Add")
         self.remove_text = QLineEdit()
-        self.remove_text.setText("Enter the element to remove") 
+        self.remove_text.setPlaceholderText("Enter the element to remove") 
         self.remove_button = QPushButton()
         self.remove_button.setText("Remove")
         self.lookup_text = QLineEdit()
-        self.lookup_text.setText("Enter the element to lookup")
+        self.lookup_text.setPlaceholderText("Enter the element to lookup")
         self.lookup_button = QPushButton()
         self.lookup_button.setText("Lookup")
 
@@ -50,15 +51,11 @@ class MyApp(QWidget):
         layout.addWidget(self.info_label)
 
         layout.addWidget(self.add_text)
-        layout.addWidget(self.remove_text)
         layout.addWidget(self.add_button)
+        layout.addWidget(self.remove_text)
         layout.addWidget(self.remove_button)
         layout.addWidget(self.lookup_text)
         layout.addWidget(self.lookup_button)
-
-        self.add_button.clicked.connect(self.add)
-        self.remove_button.clicked.connect(self.remove) 
-        self.lookup_button.clicked.connect(self.lookup)
 
         # initial value, after connection, it is going to be either 0 or 1.
         self.node_id: int = -1
@@ -67,62 +64,90 @@ class MyApp(QWidget):
         
         self.start_CRDT: bool = False
         self.dest_address: List[Tuple[str,int]] = []
+                
+        self.add_button.clicked.connect(partial(self.update, isAdd=True))
+        self.remove_button.clicked.connect(partial(self.update, isAdd=False)) 
+        self.lookup_button.clicked.connect(self.lookup)
+
 
     def request_value(self):
         # user interface function
-        self.state_label.setText(f"Current State: {self._value()}")
-        self.info_label.setText(f"Information: A: {self.A}, R: {self.R}")
+        self.state_label.setText(f"Current State: {self._value()}\n A: {self.A}\n R: {self.R}")
 
-    def add(self):
+    def update(self, isAdd: bool):
         # user interface function
-        add_value: str = self.add_text.text()
-        if add_value != "" or add_value != "Enter the element to add":
-            self.A.add(self.add_text.text())
-
+        if isAdd: 
+            self._add()
+            self.add_text.clear()
+        else: 
+            self._remove()
+            self.remove_text.clear()
+        
+        self.request_value()
+        
     def lookup(self):
         # user interface function
-        lookup_value: str = self.lookup_text.text()
-        return self._lookup(lookup_value)
+        lookup_value: str = self.lookup_text.text().strip()
+        lookup_result: bool = self._lookup(lookup_value)
+        
+        if lookup_result:
+            self.info_label.setText(f"{lookup_value} is in current state.")
+        else:
+            self.info_label.setText(f"{lookup_value} is not in current state.")
 
+    def _add(self):
+        # CRDT implementation
+        add_value: str = self.add_text.text().strip()
+        if add_value != "Enter the element to add":
+            self.A.add(add_value)
+
+    def _remove(self):
+        # CRDT implementation
+        remove_value: str = self.remove_text.text().strip()
+        if remove_value != "Enter the element to remove":
+            if self._lookup(remove_value):
+                self.R.add(remove_value)
+    
     def _lookup(self, lookup_value: str):
-        # CRDT implementation -> user interface : lookup
+        # CRDT implementation
         isAdded: bool = lookup_value in self.A
         isNotRemoved: bool = lookup_value not in self.R
 
         return isAdded and isNotRemoved
 
-    def remove(self):
-        # user interface function
-        remove_value: str = self.remove_text.text()
-        if remove_value != "" or remove_value != "Enter the element to remove":
-            if self._lookup(remove_value):
-                self.R.add(remove_value)
-
-    # def _update(self, isIncrement: bool):
-    #     # CRDT implementation -> user interface : increment
-    #     # increments at vector index corresponding to local node id
-    #     if self.node_id != -1:
-    #         if isIncrement:
-    #             self.p_state_vector[self.node_id] += 1
-    #         else:
-    #             self.n_state_vector[self.node_id] += 1
-    #     else:
-    #         print("there is only 1 client")
-
-    # def _merge(self, other_state_vector: list, isIncrement: bool):
-    #     # called asynchronously
-    #     # coordinatewise max
-    #     if isIncrement:
-    #         for i in range(len(self.p_state_vector)):
-    #             self.state_vector[i] = max(self.p_state_vector[i], other_state_vector[i])
-    #     else:
-    #         for i in range(len(self.n_state_vector)):    
-    #             self.state_vector[i] = max(self.n_state_vector[i], other_state_vector[i])
+    def _merge(self, other_set: set, isAdd: bool):
+        # called asynchronously
+        if isAdd:
+            self.A = self.A.union(other_set)
+        else:
+            self.R = self.R.union(other_set)
 
     def _value(self):
         # CRDT implementation -> user interface : value
-        # sum all Ints in vector
         return self.A - self.R
+   
+    def operation(self):
+        # prepare();
+        # effect();
+        # broadcast message to other replicas;
+        pass
+    
+    def receive(self):
+        pass
+    
+    def query(self):
+        pass
+    
+    def _eval(self):
+        pass
+    
+    def _prepare(self):
+        pass
+    
+    def _effect(self):
+        pass
+    
+    
 
     def receive(self):
         # receive "state_vector" from another client
@@ -131,27 +156,25 @@ class MyApp(QWidget):
             try:
                 message, _ = self.client.recvfrom(1024)
                 message = message.decode(self.DATA_FORMAT)
-                self.debug_label.setText(message)
+                self.info_label.setText(message)
                 if message.startswith("INFO:"):
                     str_node_id, connection, port = message.split(":")[1].split(", ")
                     self.node_id = int(str_node_id)
                     self.dest_address.append((connection, int(port)))
-                    self.p_state_vector.append(0)
-                    self.n_state_vector.append(0)
                     print("Got another client's information")
-                elif len(message) > 0 and "p_state_vector: " in message:
-                    list_str_sv: List[str] = message[message.index(":")+1:].split(",")
-                    state_vector_from_another: list = [int(x) for x in list_str_sv]
-                    self._merge(other_state_vector=state_vector_from_another, isIncrement=True)
-                elif len(message) > 0 and "n_state_vector: " in message:
-                    list_str_sv: List[str] = message[message.index(":")+1:].split(",")
-                    state_vector_from_another: list = [int(x) for x in list_str_sv]
-                    self._merge(other_state_vector=state_vector_from_another, isIncrement=False)
+                elif len(message) > 0 and "Added set:" in message:
+                    str_added_elements: str = message.split(":")[1]
+                    set_added_elements: Set[str] = set(str_added_elements.split(","))
+                    self._merge(other_set=set_added_elements, isAdd=True)
+                elif len(message) > 0 and "Removed set:" in message:
+                    str_removed_elements: str = message.split(":")[1]
+                    set_removed_elements: Set[str] = set(str_removed_elements.split(","))
+                    self._merge(other_set=set_removed_elements, isAdd=False)
                 
-                    # update count label
-                    self.request_value()
+                # update count label
+                self.request_value()
             except Exception as e:
-                self.debug_label.setText(e)
+                self.info_label.setText(e)
 
     def start(self):
         # send message to the server
@@ -165,14 +188,15 @@ class MyApp(QWidget):
         print("start CRDT")
         while True:
             time.sleep(5)
-            # self.client.sendto(f"state_vector: {self.state_vector[0]},{self.state_vector[1]}".encode(self.DATA_FORMAT), self.dest_address)
-            psv: str = ",".join([str(i) for i in self.p_state_vector])
-            nsv: str = ",".join([str(i) for i in self.n_state_vector])
+            str_added_elements: str = ",".join(self.A)
+            str_removed_elements: str = ",".join(self.R)
 
             # send to all others 
             for each_dest_address in self.dest_address:
-                self.client.sendto(f"p_state_vector: {psv}".encode(self.DATA_FORMAT), each_dest_address)
-                self.client.sendto(f"n_state_vector: {nsv}".encode(self.DATA_FORMAT), each_dest_address)
+                if len(str_added_elements) != 0:
+                    self.client.sendto(f"Added set:{str_added_elements}".encode(self.DATA_FORMAT), each_dest_address)
+                if len(str_removed_elements) != 0:
+                    self.client.sendto(f"Removed set:{str_removed_elements}".encode(self.DATA_FORMAT), each_dest_address)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

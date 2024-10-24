@@ -79,17 +79,18 @@ class MyApp(QWidget):
         x: str = ""
         if isAdd:
             x = self.add_text.text()
+            self.add_text.clear()
+            self.operation_idx += 1
         else:
             x = self.remove_text.text()
+            self.remove_text.clear()
         
         message: str = self._prepare(x=x, isAdd=isAdd)
         self._effect(message=message)
 
         # broadcast m to other replicas
         for each_dest in self.dest_address:
-            self.client.sendto(f"{message}: ".encode(self.DATA_FORMAT), each_dest)
-            
-        self.operation_idx += 1
+            self.client.sendto(f"{message}".encode(self.DATA_FORMAT), each_dest)
         
         # update interface
         self.request_value()
@@ -98,22 +99,40 @@ class MyApp(QWidget):
         return self._eval()
     
     def lookup(self):
-        pass
+        # user interface function
+        lookup_value: str = self.lookup_text.text().strip()
+        lookup_result: bool = self._lookup(lookup_value)
+        
+        if lookup_result:
+            self.info_label.setText(f"{lookup_value} is in current state.")
+        else:
+            self.info_label.setText(f"{lookup_value} is not in current state.")
 
     def _prepare(self, x: str, isAdd: bool):
+        message: str = ""
         if isAdd:
-            return f"add:{x}"
+            message = f"add:{self.node_id},{self.operation_idx},{x}"
         else:
-            return f"remove:{x}"
+            message = f"remove:{self.node_id},{self.operation_idx},{x}"
+        
+        self.info_label.setText(message)
+
+        return message
 
     def _effect(self, message: str):
+        node_id, operation_idx, x = message.split(":")[1].split(",")
+        uid = (int(node_id), int(operation_idx))
+        x = (uid, x)
         if "add" in message:
-            x = message.split(":")[1]
             self.A.add(x)
         elif "remove" in message:
-            r = message.split(":")[1]
-            R = set(x for x in self.A if x[1] == r)
+            R = set(a for a in self.A if a[1] == x[1])
+            self.A = self.A - R
             self.T = self.T.union(R)
+        
+    def _lookup(self, lookup_value: str):
+        value = self._eval()
+        return lookup_value in value
 
     def _eval(self):
         return set(a[1] for a in self.A)
@@ -132,37 +151,12 @@ class MyApp(QWidget):
                     self.dest_address.append((connection, int(port)))
                     print("Got another client's information")
                 elif len(message) > 0 and "add:" in message:
-                    #TODO: 
-                    print(message)
-                    set_added_elements: Set[Tuple[Tuple[str,int],str]] = set()
-
-                    str_added_elements: str = message.split("@")[0].split(":")[1].strip()
-
-                    sep_added_elements = str_added_elements.split(";")
-                    for each_element in sep_added_elements:
-                        each_item = each_element.split(",")
-                        uid = (each_item[0], int(each_item[1]))
-                        x = (uid, each_item[2])
-                        set_added_elements.add(x)
-
-                    self._effect(message=str_added_elements)
+                    self._effect(message=message)
                 
                     # update count label
                     self.request_value()
                 elif len(message) > 0 and "remove:" in message:
-                    #TODO:
-                    set_removed_elements: Set[Tuple[Tuple[str,int],str]] = set()
-
-                    str_removed_elements: str = message.split("@")[1].split(":")[1].strip()
-
-                    sep_removed_elements = str_removed_elements.split(";")
-                    for each_element in sep_removed_elements:
-                        each_item = each_element.split(",")
-                        uid = (each_item[0], int(each_item[1]))
-                        x = (uid, each_item[2])
-                        set_removed_elements.add(x)
-
-                    self._effect(message=str_removed_elements)
+                    self._effect(message=message)
                 
                     # update count label
                     self.request_value()

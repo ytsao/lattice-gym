@@ -147,19 +147,21 @@ class MyApp(QWidget):
                     str_added_elements: str = message.split("@")[0].split(":")[1].strip()
                     str_removed_elements: str = message.split("@")[1].split(":")[1].strip()
 
-                    sep_added_elements = str_added_elements.split(";")
-                    for each_element in sep_added_elements:
-                        each_item = each_element.split(",")
-                        uid = (each_item[0], int(each_item[1]))
-                        x = (uid, each_item[2])
-                        set_added_elements.add(x)
+                    if str_added_elements != "":
+                        sep_added_elements = str_added_elements.split(";")
+                        for each_element in sep_added_elements:
+                            each_item = each_element.split(",")
+                            uid = (int(each_item[0]), int(each_item[1]))
+                            x = (uid, each_item[2])
+                            set_added_elements.add(x)
                     
-                    sep_removed_elements = str_removed_elements.split(";")
-                    for each_element in sep_removed_elements:
-                        each_item = each_element.split(",")
-                        uid = (each_item[0], int(each_item[1]))
-                        x = (uid, each_item[2])
-                        set_removed_elements.add(x)
+                    if str_removed_elements != "":
+                        sep_removed_elements = str_removed_elements.split(";")
+                        for each_element in sep_removed_elements:
+                            each_item = each_element.split(",")
+                            uid = (int(each_item[0]), int(each_item[1]))
+                            x = (uid, each_item[2])
+                            set_removed_elements.add(x)
 
                     self._merge(other_A=set_added_elements, other_T=set_removed_elements)
                 

@@ -73,10 +73,16 @@ class MyApp(QWidget):
 
     def request_value(self):
         # user interface function
-        self.state_label.setText(f"Current State: {self._value()}\n A: {self.A}\n T: {self.T}")
+        self.state_label.setText(f"Current State: {self._eval()}\n A: {self.A}\n T: {self.T}")
 
     def operation(self, isAdd: bool):
-        message: str = self._prepare(isAdd=isAdd)
+        x: str = ""
+        if isAdd:
+            x = self.add_text.text()
+        else:
+            x = self.remove_text.text()
+        
+        message: str = self._prepare(x=x, isAdd=isAdd)
         self._effect(message=message)
 
         # broadcast m to other replicas
@@ -90,6 +96,9 @@ class MyApp(QWidget):
 
     def query(self):
         return self._eval()
+    
+    def lookup(self):
+        pass
 
     def _prepare(self, x: str, isAdd: bool):
         if isAdd:
@@ -124,6 +133,7 @@ class MyApp(QWidget):
                     print("Got another client's information")
                 elif len(message) > 0 and "add:" in message:
                     #TODO: 
+                    print(message)
                     set_added_elements: Set[Tuple[Tuple[str,int],str]] = set()
 
                     str_added_elements: str = message.split("@")[0].split(":")[1].strip()
@@ -140,7 +150,7 @@ class MyApp(QWidget):
                     # update count label
                     self.request_value()
                 elif len(message) > 0 and "remove:" in message:
-                    #todo:
+                    #TODO:
                     set_removed_elements: Set[Tuple[Tuple[str,int],str]] = set()
 
                     str_removed_elements: str = message.split("@")[1].split(":")[1].strip()

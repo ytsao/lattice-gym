@@ -61,7 +61,7 @@ class MyApp(QWidget):
         # CRDT implementation -> user interface : increment
         # increments at vector index corresponding to local node id
         if self.node_id != -1:
-            self.state_vector[self.node_id] += 1
+            self.state_vector[self.node_id] -= 1
         else:
             print("there is only 1 client")
 
@@ -69,7 +69,7 @@ class MyApp(QWidget):
         # called asynchronously
         # coordinatewise max
         for i in range(len(self.state_vector)):
-            self.state_vector[i] = max(self.state_vector[i], other_state_vector[i])
+            self.state_vector[i] = min(self.state_vector[i], other_state_vector[i])
 
     def _value(self):
         # CRDT implementation -> user interface : value
@@ -114,9 +114,7 @@ class MyApp(QWidget):
             time.sleep(5)
             # self.client.sendto(f"state_vector: {self.state_vector[0]},{self.state_vector[1]}".encode(self.DATA_FORMAT), self.dest_address)
             sv: str = ",".join([str(i) for i in self.state_vector])
-            # randomly pick the neighbor
-            # todo:
-
+            
             # send to all others 
             for each_dest_address in self.dest_address:
                 self.client.sendto(f"state_vector: {sv}".encode(self.DATA_FORMAT), each_dest_address)

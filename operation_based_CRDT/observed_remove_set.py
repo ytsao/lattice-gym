@@ -59,8 +59,7 @@ class MyApp(QWidget):
 
         # initial value, after connection, it is going to be either 0 or 1.
         self.node_id: int = -1
-        self.A: Set[Tuple[Tuple[str,int],str]] = set()
-        self.T: Set[Tuple[Tuple[str,int],str]] = set()
+        self.AT: Set[Tuple[Tuple[str,int],str]] = set()
         self.operation_idx: int = 0
         
         self.start_CRDT: bool = False
@@ -73,7 +72,7 @@ class MyApp(QWidget):
 
     def request_value(self):
         # user interface function
-        self.state_label.setText(f"Current State: {self._eval()}\n A: {self.A}\n T: {self.T}")
+        self.state_label.setText(f"Current State: {self._eval()}\n AT: {self.AT}")
 
     def operation(self, isAdd: bool):
         x: str = ""
@@ -124,18 +123,17 @@ class MyApp(QWidget):
         uid = (int(node_id), int(operation_idx))
         x = (uid, x)
         if "add" in message:
-            self.A.add(x)
+            self.AT.add(x)
         elif "remove" in message:
-            R = set(a for a in self.A if a[1] == x[1])
-            self.A = self.A - R
-            self.T = self.T.union(R)
+            R = set(a for a in self.AT if a[1] == x[1])
+            self.AT = self.AT - R
         
     def _lookup(self, lookup_value: str):
         value = self._eval()
         return lookup_value in value
 
     def _eval(self):
-        return set(a[1] for a in self.A)
+        return set(a[1] for a in self.AT)
 
     def receive(self):
         # receive "state_vector" from another client

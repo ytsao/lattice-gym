@@ -12,103 +12,170 @@
 
 class AbstractInterpreterParser{
     using SV = peg::SemanticValues;
-    std::map<std::string, int> var_arrays; //TODO: modify the concrete value into interval.
-
+    
 public:
-    void parse(const std::string& input){
+    // ASTNode root;
+
+    ASTNode parse(const std::string& input){
         peg::parser parser(R"(
-            Statements  <- ( DeclareVar / Assignment )+
+            Program     <- Statements*
+            Statements  <- DeclareVar / Assignment / Expression / IfElse / WhileLoop / Block / Comment
             Integer     <- < [+-]? [0-9]+ >
-            TermOp      <- < [+-] >
-            FactOp      <- < [*/] >
-            #ExpoOp      <- < '^' >
             Identifier  <- < [a-zA-Z_][a-zA-Z0-9_]* >
-            DeclareVar   <- 'int' Identifier ('=' Integer / ',' Identifier )* ';'
+            SeqOp       <- '+' / '-'
+            PreOp       <- '*' / '/'
+            LogicOp      <- '<' / '>' / '<=' / '>=' / '==' / '!='
+            DeclareVar  <- 'int' Identifier ('=' Integer / ',' Identifier)* ';'
+            Assignment  <- Identifier '=' Expression ';'
+            Block       <- '{' Statements* '}'
+            IfElse      <- 'if' '(' Expression ')' (Block / Statements) ('else' (Block / Statements))?
+            WhileLoop   <- 'while' '(' Expression ')' (Block / Statements)
 
-            Factor      <-  Identifier / Integer / '(' Expression ')'
-            Term        <-  Factor (FactOp Factor)*
-            Expression  <-  Term (TermOp Term)*
-            Assignment  <-  Identifier '=' Expression ';'
-            
-            #Factor      <- Integer / Identifier / '(' Expression ')'
-            #Exponent    <- Factor (ExpoOp Factor)*
-            #Term        <- Exponent (FactOp Exponent)*
-            #Expression  <- Term (TermOp Term)*
-
-            #LogicOp     <- '==' / '!=' / '<' / '<=' / '>' / '>='
-            #Condition   <- (Identifier / Integer) LogicOp (Identifier / Integer)
+            Expression  <- Term ((SeqOp / LogicOp) Term)*
+            Term        <- Factor (PreOp Factor)*
+            Factor      <- Integer / Identifier / '(' Expression ')'
 
             ~Comment    <- '//' [^\n\r]* [ \n\r\t]*
             %whitespace <- [ \n\r\t]*
         )");
         assert(static_cast<bool>(parser) == true);
 
-        // setup actions
-        parser["Integer"] = [](const SV& sv){return sv.token_to_number<int>();};      
-        parser["TermOp"] = [](const SV& sv){return sv.token_to_string();};
-        parser["FactOp"] = [](const SV& sv){return sv.token_to_string();};
-        parser["Identifier"] = [](const SV& sv){return sv.token_to_string();};
-        parser["Factor"] = [](const SV& sv){return sv.token_to_string();};
-        parser["Term"] = [this](const SV& sv){return make_term(sv);};
-        parser["Expression"] = [this](const SV& sv){return make_expr(sv);};
-        parser["Assignment"] = [this](const SV& sv){return make_assign(sv);};
-        parser["LogicOp"] = [](const SV& sv){return sv.token_to_string();};
-        parser["Condition"] = [](const SV& sv){return sv.token_to_string();};
+        // // setup actions
+        parser["Program"] = [this](const SV& sv){return make_program(sv);};
+        parser["Integer"] = [](const SV& sv){return ASTNode(sv.token_to_number<int>());};
+        parser["Identifier"] = [](const SV& sv){return ASTNode(sv.token_to_string());};
+        parser["SeqOp"] = [this](const SV& sv){return make_seq_op(sv);};
+        parser["PreOp"] = [this](const SV& sv){return make_pre_op(sv);};
+        parser["LogicOp"] = [this](const SV& sv){return make_logic_op(sv);};
         parser["DeclareVar"] = [this](const SV& sv){return make_decl_var(sv);};
-        parser["Statements"] = [](const SV& sv){return sv.token_to_string();};
+        parser["Assignment"] =[this](const SV& sv){return make_assign(sv);};
+        parser["Block"] = [this](const SV& sv){return make_block(sv);};
+        parser["IfElse"] = [this](const SV& sv){return make_ifelse(sv);};
+        parser["WhileLoop"] = [this](const SV& sv){return make_whileloop(sv);};
+        parser["Expression"] = [this](const SV& sv){return make_expr(sv);};
+        parser["Term"] = [this](const SV& sv){return make_term(sv);};
+        parser.set_logger([](size_t line, size_t col, const std::string& msg, const std::string &rule) {
+            std::cerr << line << ":" << col << ": " << msg << "\n";
+        });
 
-        parser.enable_packrat_parsing();
-        parser.parse(input);
-        std::cout << input << std::endl;
+        ASTNode root;
+        if (parser.parse(input.c_str(), root)){
+            std::cout << "Parsing succeeded!" << std::endl;
+        }else{
+            std::cerr << "Parsing failed!" << std::endl;
+        }   
+        return root;
     }
+
 private:
-    void make_decl_var(const SV& sv){
-        for (int i = 0; i < sv.size(); ++i){
-            std::string var = std::any_cast<std::string>(sv[i]);
-            var_arrays[var] = 0;
+    ASTNode make_program(const SV& sv){
+        std::cout << sv.token_to_string() << std::endl;
+        std::cout << sv.size() << std::endl;
+        if (sv.size() == 1){
+            return std::any_cast<ASTNode>(sv[0]);
         }
-        // print all initialized variables
-        for (const auto& [key, value] : var_arrays)std::cout << key << ": " << value << std::endl;
-        return;
+        else{
+            ASTNode root;
+            for (size_t i = 0; i < sv.size(); ++i){
+                root.children.push_back(std::any_cast<ASTNode>(sv[i]));
+            }
+            return root;
+        }
     }
 
-    int make_expr(const SV& sv){
-        int value = 0;
-        std::string oper = "";
-        for (int i = 0; i < sv.size(); ++i){
-            std::string rhs = std::any_cast<std::string>(sv[i]);
-            bool isDigits = std::all_of(rhs.begin(), rhs.end(), ::isdigit);
-            if (isDigits && i == 0) value += std::stoi(rhs);
-            else if (!isDigits && i == 0) value += var_arrays[rhs];
-            else if (rhs == "+") oper = "+";
-            else if (rhs == "-") oper = "-";
-            else if (isDigits && oper == "+") value += std::stoi(rhs);
-            else if (!isDigits && oper == "+") value += var_arrays[rhs];
-            else if (isDigits && oper == "-") value -= std::stoi(rhs);
-            else if (!isDigits && oper == "-") value -= var_arrays[rhs];
+    ASTNode make_decl_var(const SV& sv){
+        ASTNode decl_node(NodeType::DECLARATION);
+        for (size_t i = 0; i < sv.size(); ++i){
+            decl_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
         }
-        std::cout << "value = " << value << std::endl;
-        return value;
+        return decl_node;
     }
 
-    int make_term(const SV& sv){
-        int value = 0;
-        std::string oper = "";
-        for (int i = 0; i < sv.size(); ++i){
-            std::string rhs = std::any_cast<std::string>(sv[i]);
-            std::cout << rhs << std::endl;
-        }
-        std::cout << "value = " << value << std::endl;
-        return value;
+    ASTNode make_seq_op(const SV& sv){
+        ASTNode op_node(NodeType::BINARY_OP);
+        std::string op = sv.token_to_string();
+        if (op == "+") op_node.value = BinOp::ADD;
+        else if (op == "-") op_node.value = BinOp::SUB;
+        return op_node;
     }
 
-    void make_assign(const SV& sv){
-        std::string var = std::any_cast<std::string>(sv[0]);
-        int value = std::any_cast<int>(sv[1]);
-        var_arrays[var] = value;
-        // print all variables
-        for (const auto& [key, value]:var_arrays)std::cout << key << ": " << value << std::endl;
-        return ;
+    ASTNode make_pre_op(const SV& sv){
+        ASTNode op_node(NodeType::BINARY_OP);
+        std::string op = sv.token_to_string();
+        if (op == "*") op_node.value = BinOp::MUL;
+        else if (op == "/") op_node.value = BinOp::DIV;
+        return op_node;
+    }
+
+    ASTNode make_logic_op(const SV& sv){
+        ASTNode lop_node(NodeType::LOGIC_OP);
+        std::string lop = sv.token_to_string();
+        if (lop == "<") lop_node.value = LogicOp::LE;
+        else if (lop == ">") lop_node.value = LogicOp::GE;
+        else if (lop == "<=") lop_node.value = LogicOp::LEQ;
+        else if (lop == ">=") lop_node.value = LogicOp::GEQ;
+        else if (lop == "==") lop_node.value = LogicOp::EQ;
+        else if (lop == "!=") lop_node.value = LogicOp::NEQ;
+        return lop_node;
+    }
+
+    ASTNode make_expr(const SV& sv){
+        ASTNode expr(NodeType::ASSIGNMENT);
+        for (size_t i = 0; i < sv.size(); ++i){
+            ASTNode node = std::any_cast<ASTNode>(sv[i]);
+            expr.children.push_back(node);
+        }
+        return expr;
+    }
+
+    ASTNode make_term(const SV& sv){
+        ASTNode term(NodeType::BINARY_OP);
+        for (size_t i = 0; i < sv.size(); ++i){
+            ASTNode node = std::any_cast<ASTNode>(sv[i]);
+            term.children.push_back(node);
+        }
+        return term;
+    }
+
+    ASTNode make_assign(const SV& sv){
+        ASTNode assign_node(NodeType::ASSIGNMENT);
+        ASTNode var = std::any_cast<ASTNode>(sv[0]);
+        ASTNode expr = std::any_cast<ASTNode>(sv[1]);
+        assign_node.children.push_back(var);
+        assign_node.children.push_back(expr);
+        return assign_node;
+    }
+
+    ASTNode make_block(const SV& sv){
+        if (sv.size() == 1){
+            return std::any_cast<ASTNode>(sv[0]);
+        }
+        else{
+            ASTNode block_node(NodeType::BODY);
+            for (size_t i = 0; i < sv.size(); ++i){
+                block_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
+            }
+            return block_node;
+        }
+    }
+
+    ASTNode make_ifelse(const SV& sv){
+        ASTNode ifelse_node(NodeType::IFELSE);
+        for (size_t i = 0; i < sv.size(); ++i){
+            std::cout << "if-else ...." << std::endl;
+            ASTNode node = std::any_cast<ASTNode>(sv[i]);
+            ifelse_node.children.push_back(node);
+        }
+        return ifelse_node;
+    }
+
+    ASTNode make_whileloop(const SV& sv){
+        ASTNode whileloop_node(NodeType::WHILELOOP);
+        for (size_t i = 0; i < sv.size(); ++i){
+            ASTNode node = std::any_cast<ASTNode>(sv[i]);
+            whileloop_node.children.push_back(node);
+        }
+        return whileloop_node;
     }
 };
 

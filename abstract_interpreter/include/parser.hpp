@@ -35,7 +35,7 @@ public:
             Term        <- Factor (PreOp Factor)*
             Factor      <- Integer / Identifier / '(' Expression ')'
 
-            ~Comment    <- '/*' [^\n\r]* [ \n\r\t]*
+            ~Comment    <- ('/*' / '//') [^\n\r]* [ \n\r\t]*
             %whitespace <- [ \n\r\t]*
         )");
         assert(static_cast<bool>(parser) == true);

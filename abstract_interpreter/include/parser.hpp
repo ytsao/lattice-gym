@@ -19,7 +19,7 @@ public:
     ASTNode parse(const std::string& input){
         peg::parser parser(R"(
             Program     <- Statements*
-            Statements  <- Block / PreCon / DeclareVar / Assignment / Increment / IfElse / WhileLoop / Comment
+            Statements  <- DeclareVar / Assignment / Increment / IfElse / WhileLoop / Block / PreCon / Comment
             Integer     <- < [+-]? [0-9]+ >
             Identifier  <- < [a-zA-Z_][a-zA-Z0-9_]* >
             SeqOp       <- '+' / '-'

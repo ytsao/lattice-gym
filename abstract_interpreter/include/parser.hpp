@@ -19,7 +19,7 @@ public:
     ASTNode parse(const std::string& input){
         peg::parser parser(R"(
             Program     <- Statements*
-            Statements  <- DeclareVar / Assignment / Expression / IfElse / WhileLoop / Block / Comment
+            Statements  <- DeclareVar / Assignment / IfElse / WhileLoop / Block / Comment
             Integer     <- < [+-]? [0-9]+ >
             Identifier  <- < [a-zA-Z_][a-zA-Z0-9_]* >
             SeqOp       <- '+' / '-'
@@ -27,7 +27,7 @@ public:
             LogicOp      <- '<' / '>' / '<=' / '>=' / '==' / '!='
             DeclareVar  <- 'int' Identifier ('=' Integer / ',' Identifier)* ';'
             Assignment  <- Identifier '=' Expression ';'
-            Block       <- '{' Statements* '}'
+            Block       <- ('void' 'main' '(' ')')? '{' Statements* '}'
             IfElse      <- 'if' '(' Expression ')' (Block / Statements) ('else' (Block / Statements))?
             WhileLoop   <- 'while' '(' Expression ')' (Block / Statements)
 
@@ -43,7 +43,9 @@ public:
         // // setup actions
         parser["Program"] = [this](const SV& sv){return make_program(sv);};
         parser["Integer"] = [](const SV& sv){return ASTNode(sv.token_to_number<int>());};
-        parser["Identifier"] = [](const SV& sv){return ASTNode(sv.token_to_string());};
+        parser["Identifier"] = [](const SV& sv){
+            std::cout << sv.token_to_string() << std::endl;
+            return ASTNode(sv.token_to_string());};
         parser["SeqOp"] = [this](const SV& sv){return make_seq_op(sv);};
         parser["PreOp"] = [this](const SV& sv){return make_pre_op(sv);};
         parser["LogicOp"] = [this](const SV& sv){return make_logic_op(sv);};
@@ -69,7 +71,7 @@ public:
 
 private:
     ASTNode make_program(const SV& sv){
-        std::cout << sv.token_to_string() << std::endl;
+        std::cout << "program section" << std::endl;
         std::cout << sv.size() << std::endl;
         if (sv.size() == 1){
             return std::any_cast<ASTNode>(sv[0]);
@@ -84,7 +86,7 @@ private:
     }
 
     ASTNode make_decl_var(const SV& sv){
-        ASTNode decl_node(NodeType::DECLARATION);
+        ASTNode decl_node(NodeType::DECLARATION, std::string("int"));
         for (size_t i = 0; i < sv.size(); ++i){
             decl_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
         }
@@ -120,25 +122,36 @@ private:
     }
 
     ASTNode make_expr(const SV& sv){
-        ASTNode expr(NodeType::ASSIGNMENT);
-        for (size_t i = 0; i < sv.size(); ++i){
-            ASTNode node = std::any_cast<ASTNode>(sv[i]);
-            expr.children.push_back(node);
+        if (sv.size() == 1){
+            return std::any_cast<ASTNode>(sv[0]);
         }
-        return expr;
+        else{
+            assert(sv.size()>=3);
+
+            ASTNode expr(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
+            expr.children.push_back(std::any_cast<ASTNode>(sv[0]));
+            expr.children.push_back(std::any_cast<ASTNode>(sv[2]));
+            return expr;
+        }
     }
 
     ASTNode make_term(const SV& sv){
-        ASTNode term(NodeType::BINARY_OP);
-        for (size_t i = 0; i < sv.size(); ++i){
-            ASTNode node = std::any_cast<ASTNode>(sv[i]);
-            term.children.push_back(node);
+        if (sv.size() == 1){
+            return std::any_cast<ASTNode>(sv[0]);
         }
-        return term;
+        else{
+            assert(sv.size()>=3);
+
+            ASTNode term(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
+            term.children.push_back(std::any_cast<ASTNode>(sv[0]));
+            term.children.push_back(std::any_cast<ASTNode>(sv[2]));
+            return term;
+        }
+        
     }
 
     ASTNode make_assign(const SV& sv){
-        ASTNode assign_node(NodeType::ASSIGNMENT);
+        ASTNode assign_node(NodeType::ASSIGNMENT, std::string("="));
         ASTNode var = std::any_cast<ASTNode>(sv[0]);
         ASTNode expr = std::any_cast<ASTNode>(sv[1]);
         assign_node.children.push_back(var);
@@ -147,11 +160,14 @@ private:
     }
 
     ASTNode make_block(const SV& sv){
+        std::cout << sv.token_to_string() << std::endl;
+        std::cout << "this is block section" << std::endl;
+        std::cout << "size = " << sv.size() << std::endl;
         if (sv.size() == 1){
             return std::any_cast<ASTNode>(sv[0]);
         }
         else{
-            ASTNode block_node(NodeType::BODY);
+            ASTNode block_node(NodeType::BODY, std::string("Block-Body"));
             for (size_t i = 0; i < sv.size(); ++i){
                 block_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
             }
@@ -160,9 +176,8 @@ private:
     }
 
     ASTNode make_ifelse(const SV& sv){
-        ASTNode ifelse_node(NodeType::IFELSE);
+        ASTNode ifelse_node(NodeType::IFELSE, std::string("IfElse"));
         for (size_t i = 0; i < sv.size(); ++i){
-            std::cout << "if-else ...." << std::endl;
             ASTNode node = std::any_cast<ASTNode>(sv[i]);
             ifelse_node.children.push_back(node);
         }
@@ -170,7 +185,7 @@ private:
     }
 
     ASTNode make_whileloop(const SV& sv){
-        ASTNode whileloop_node(NodeType::WHILELOOP);
+        ASTNode whileloop_node(NodeType::WHILELOOP, std::string("WhileLoop"));
         for (size_t i = 0; i < sv.size(); ++i){
             ASTNode node = std::any_cast<ASTNode>(sv[i]);
             whileloop_node.children.push_back(node);

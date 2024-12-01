@@ -35,7 +35,7 @@ public:
             Term        <- Factor (PreOp Factor)*
             Factor      <- Integer / Identifier / '(' Expression ')'
 
-            ~Comment    <- '//' [^\n\r]* [ \n\r\t]*
+            ~Comment    <- '/*' [^\n\r]* [ \n\r\t]*
             %whitespace <- [ \n\r\t]*
         )");
         assert(static_cast<bool>(parser) == true);
@@ -43,9 +43,7 @@ public:
         // // setup actions
         parser["Program"] = [this](const SV& sv){return make_program(sv);};
         parser["Integer"] = [](const SV& sv){return ASTNode(sv.token_to_number<int>());};
-        parser["Identifier"] = [](const SV& sv){
-            std::cout << sv.token_to_string() << std::endl;
-            return ASTNode(sv.token_to_string());};
+        parser["Identifier"] = [](const SV& sv){return ASTNode(sv.token_to_string());};
         parser["SeqOp"] = [this](const SV& sv){return make_seq_op(sv);};
         parser["PreOp"] = [this](const SV& sv){return make_pre_op(sv);};
         parser["LogicOp"] = [this](const SV& sv){return make_logic_op(sv);};
@@ -71,15 +69,21 @@ public:
 
 private:
     ASTNode make_program(const SV& sv){
-        std::cout << "program section" << std::endl;
-        std::cout << sv.size() << std::endl;
         if (sv.size() == 1){
             return std::any_cast<ASTNode>(sv[0]);
         }
         else{
             ASTNode root;
             for (size_t i = 0; i < sv.size(); ++i){
-                root.children.push_back(std::any_cast<ASTNode>(sv[i]));
+                try{
+                    root.children.push_back(std::any_cast<ASTNode>(sv[i]));
+                }
+                catch(std::bad_any_cast){
+                    // for dealing with the comments in the program.
+                    // because I didn't cast the comments as ASTNode, it should be "string".
+                    // then here, I just skip it if there is any comment.
+                    continue;
+                }
             }
             return root;
         }
@@ -128,7 +132,8 @@ private:
         else{
             assert(sv.size()>=3);
 
-            ASTNode expr(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
+            ASTNode op = std::any_cast<ASTNode>(sv[1]);
+            ASTNode expr(op.type, op.value);
             expr.children.push_back(std::any_cast<ASTNode>(sv[0]));
             expr.children.push_back(std::any_cast<ASTNode>(sv[2]));
             return expr;
@@ -160,14 +165,11 @@ private:
     }
 
     ASTNode make_block(const SV& sv){
-        std::cout << sv.token_to_string() << std::endl;
-        std::cout << "this is block section" << std::endl;
-        std::cout << "size = " << sv.size() << std::endl;
         if (sv.size() == 1){
             return std::any_cast<ASTNode>(sv[0]);
         }
         else{
-            ASTNode block_node(NodeType::BODY, std::string("Block-Body"));
+            ASTNode block_node(NodeType::BLOCKCBODY, std::string("BlockBody"));
             for (size_t i = 0; i < sv.size(); ++i){
                 block_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
             }

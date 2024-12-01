@@ -19,23 +19,25 @@ public:
     ASTNode parse(const std::string& input){
         peg::parser parser(R"(
             Program     <- Statements*
-            Statements  <- DeclareVar / Assignment / IfElse / WhileLoop / Block / Comment
+            Statements  <- Block / PreCon / DeclareVar / Assignment / Increment / IfElse / WhileLoop / Comment
             Integer     <- < [+-]? [0-9]+ >
             Identifier  <- < [a-zA-Z_][a-zA-Z0-9_]* >
             SeqOp       <- '+' / '-'
             PreOp       <- '*' / '/'
-            LogicOp      <- '<' / '>' / '<=' / '>=' / '==' / '!='
+            LogicOp     <- '<=' / '>=' / '==' / '!=' / '<' / '>'
             DeclareVar  <- 'int' Identifier ('=' Integer / ',' Identifier)* ';'
+            PreCon      <- '/*!npk' Identifier 'between' Integer 'and' Integer '*/'
             Assignment  <- Identifier '=' Expression ';'
-            Block       <- ('void' 'main' '(' ')')? '{' Statements* '}'
+            Increment   <- Identifier '++' ';'
+            Block       <- ('void main' '(' ')')? '{' Statements* '}'
             IfElse      <- 'if' '(' Expression ')' (Block / Statements) ('else' (Block / Statements))?
             WhileLoop   <- 'while' '(' Expression ')' (Block / Statements)
 
             Expression  <- Term ((SeqOp / LogicOp) Term)*
             Term        <- Factor (PreOp Factor)*
-            Factor      <- Integer / Identifier / '(' Expression ')'
+            Factor      <- '-' Factor / Integer / Identifier / '(' Expression ')'
 
-            ~Comment    <- ('/*' / '//') [^\n\r]* [ \n\r\t]*
+            ~Comment    <- '/*' [^\n\r]* [ \n\r\t]*
             %whitespace <- [ \n\r\t]*
         )");
         assert(static_cast<bool>(parser) == true);
@@ -48,12 +50,15 @@ public:
         parser["PreOp"] = [this](const SV& sv){return make_pre_op(sv);};
         parser["LogicOp"] = [this](const SV& sv){return make_logic_op(sv);};
         parser["DeclareVar"] = [this](const SV& sv){return make_decl_var(sv);};
-        parser["Assignment"] =[this](const SV& sv){return make_assign(sv);};
+        parser["PreCon"] = [this](const SV& sv){return make_pre_con(sv);};
+        parser["Assignment"] = [this](const SV& sv){return make_assign(sv);};
+        parser["Increment"] = [this](const SV& sv){return make_increment(sv);};
         parser["Block"] = [this](const SV& sv){return make_block(sv);};
         parser["IfElse"] = [this](const SV& sv){return make_ifelse(sv);};
         parser["WhileLoop"] = [this](const SV& sv){return make_whileloop(sv);};
         parser["Expression"] = [this](const SV& sv){return make_expr(sv);};
         parser["Term"] = [this](const SV& sv){return make_term(sv);};
+        parser["Factor"] = [this](const SV& sv){return make_factor(sv);};
         parser.set_logger([](size_t line, size_t col, const std::string& msg, const std::string &rule) {
             std::cerr << line << ":" << col << ": " << msg << "\n";
         });
@@ -95,6 +100,25 @@ private:
             decl_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
         }
         return decl_node;
+    }
+
+    ASTNode make_pre_con(const SV& sv){
+        ASTNode pre_con_node(NodeType::PRE_CON, std::string("PreCon"));
+        ASTNode var(std::any_cast<ASTNode>(sv[0]));
+
+        // LB
+        ASTNode lb(NodeType::LOGIC_OP, std::string("<="));
+        lb.children.push_back(std::any_cast<ASTNode>(sv[1]));
+        lb.children.push_back(var);
+
+        // UB 
+        ASTNode ub(NodeType::LOGIC_OP, std::string(">="));
+        ub.children.push_back(std::any_cast<ASTNode>(sv[2]));
+        ub.children.push_back(var);
+
+        pre_con_node.children.push_back(lb);
+        pre_con_node.children.push_back(ub);
+        return pre_con_node;
     }
 
     ASTNode make_seq_op(const SV& sv){
@@ -152,7 +176,20 @@ private:
             term.children.push_back(std::any_cast<ASTNode>(sv[2]));
             return term;
         }
-        
+    }
+
+    ASTNode make_factor(const SV& sv){
+        if (sv.choice() == 0){
+            // for the case: x = -y; 
+            // we're going to transform it into x = 0 - y;
+            ASTNode sign(NodeType::BINARY_OP, std::string("-"));
+            sign.children.push_back(ASTNode(0));
+            sign.children.push_back(std::any_cast<ASTNode>(sv[0]));
+            return sign;
+        }
+        else{
+            return std::any_cast<ASTNode>(sv[0]);
+        }
     }
 
     ASTNode make_assign(const SV& sv){
@@ -163,6 +200,20 @@ private:
         assign_node.children.push_back(expr);
         return assign_node;
     }
+    
+    ASTNode make_increment(const SV& sv){
+        ASTNode increment_node(NodeType::ASSIGNMENT, std::string("="));
+        
+        ASTNode var = std::any_cast<ASTNode>(sv[0]);
+        ASTNode plus_op(NodeType::BINARY_OP, std::string("+"));
+        plus_op.children.push_back(var);
+        plus_op.children.push_back(ASTNode(1));
+
+        increment_node.children.push_back(var);
+        increment_node.children.push_back(plus_op);
+
+        return increment_node;
+    }
 
     ASTNode make_block(const SV& sv){
         if (sv.size() == 1){
@@ -171,7 +222,14 @@ private:
         else{
             ASTNode block_node(NodeType::BLOCKCBODY, std::string("BlockBody"));
             for (size_t i = 0; i < sv.size(); ++i){
-                block_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
+                try{
+                    block_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
+                }
+                catch(std::bad_any_cast){
+                    // pre-condition in this version is comment, still is string;
+                    // so, we cannot cast it as ASTNode;
+                    continue;
+                }
             }
             return block_node;
         }

@@ -31,11 +31,12 @@ std::ostream& operator<<(std::ostream& os, LogicOp lop){
     return os;
 }
 
-enum class NodeType {VARIABLE, NUMBER, BINARY_OP, LOGIC_OP, DECLARATION, ASSIGNMENT, IFELSE, WHILELOOP, BLOCKCBODY};
+enum class NodeType {VARIABLE, NUMBER, PRE_CON, BINARY_OP, LOGIC_OP, DECLARATION, ASSIGNMENT, IFELSE, WHILELOOP, BLOCKCBODY};
 std::ostream& operator<<(std::ostream& os, NodeType type) {
     switch (type) {
         case NodeType::VARIABLE: os << "Variable"; break;
         case NodeType::NUMBER: os << "Number"; break;
+        case NodeType::PRE_CON: os << "Pre-conditions"; break;
         case NodeType::BINARY_OP: os << "Binary Operation"; break;
         case NodeType::LOGIC_OP: os << "Logic Operation"; break;
         case NodeType::DECLARATION: os << "Declaration"; break;
@@ -91,6 +92,7 @@ void printAST(const ASTNode& node, int depth = 0) {
     switch (node.type) {
         case NodeType::VARIABLE: std::cout << "Variable"; break;
         case NodeType::NUMBER: std::cout << "Number"; break;
+        case NodeType::PRE_CON: std::cout << "Pre-condition"; break;
         case NodeType::BINARY_OP: std::cout << "Binary Operator"; break;
         case NodeType::LOGIC_OP: std::cout << "Logic Operator"; break;
         case NodeType::DECLARATION: std::cout << "Declaration"; break;

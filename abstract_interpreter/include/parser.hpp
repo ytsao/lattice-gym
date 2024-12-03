@@ -44,6 +44,7 @@ public:
 
         // // setup actions
         parser["Program"] = [this](const SV& sv){return make_program(sv);};
+        // parser["Statements"] = [this](const SV& sv){return make_program(sv);}; //TODO: bad_any_cast<>
         parser["Integer"] = [](const SV& sv){return ASTNode(sv.token_to_number<int>());};
         parser["Identifier"] = [](const SV& sv){return ASTNode(sv.token_to_string());};
         parser["SeqOp"] = [this](const SV& sv){return make_seq_op(sv);};
@@ -153,13 +154,26 @@ private:
         if (sv.size() == 1){
             return std::any_cast<ASTNode>(sv[0]);
         }
-        else{
-            assert(sv.size()>=3);
-
+        else if (sv.size() == 3){
             ASTNode op = std::any_cast<ASTNode>(sv[1]);
             ASTNode expr(op.type, op.value);
             expr.children.push_back(std::any_cast<ASTNode>(sv[0]));
             expr.children.push_back(std::any_cast<ASTNode>(sv[2]));
+            return expr;
+        }
+        else{
+            ASTNode expr(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
+            expr.children.push_back(std::any_cast<ASTNode>(sv[0]));
+            ASTNode op;
+            size_t i = 3;
+            for (i; i < sv.size(); i+=2){
+                op = std::any_cast<ASTNode>(sv[i]);
+                op.children.push_back(std::any_cast<ASTNode>(sv[i-1]));
+                if (i+2 < sv.size()) 
+                    expr.children.push_back(op);
+            }
+            op.children.push_back(std::any_cast<ASTNode>(sv[i-1]));
+            expr.children.push_back(op);
             return expr;
         }
     }
@@ -168,12 +182,22 @@ private:
         if (sv.size() == 1){
             return std::any_cast<ASTNode>(sv[0]);
         }
-        else{
-            assert(sv.size()>=3);
-
+        else if (sv.size() == 3){
             ASTNode term(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
             term.children.push_back(std::any_cast<ASTNode>(sv[0]));
             term.children.push_back(std::any_cast<ASTNode>(sv[2]));
+            return term;
+        }
+        else{
+            ASTNode term(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
+            term.children.push_back(std::any_cast<ASTNode>(sv[0]));
+            size_t i = 3;
+            for (i; i < sv.size(); i+=2){
+                ASTNode op(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[i]).value);
+                term.children.push_back(op);
+                term.children.push_back(std::any_cast<ASTNode>(sv[i-1]));
+            }
+            term.children.push_back(std::any_cast<ASTNode>(sv[i-1]));
             return term;
         }
     }
@@ -238,8 +262,13 @@ private:
     ASTNode make_ifelse(const SV& sv){
         ASTNode ifelse_node(NodeType::IFELSE, std::string("IfElse"));
         for (size_t i = 0; i < sv.size(); ++i){
+            ASTNode mid_node;
+            if (i == 0) mid_node = ASTNode(NodeType::IFELSE, std::string("Condition")); 
+            else if (i == 1) mid_node = ASTNode(NodeType::IFELSE, std::string("If-Body"));
+            else if (i == 2) mid_node = ASTNode(NodeType::IFELSE, std::string("Else-Body"));
             ASTNode node = std::any_cast<ASTNode>(sv[i]);
-            ifelse_node.children.push_back(node);
+            mid_node.children.push_back(node);
+            ifelse_node.children.push_back(mid_node);
         }
         return ifelse_node;
     }
@@ -247,8 +276,12 @@ private:
     ASTNode make_whileloop(const SV& sv){
         ASTNode whileloop_node(NodeType::WHILELOOP, std::string("WhileLoop"));
         for (size_t i = 0; i < sv.size(); ++i){
+            ASTNode mid_node;
+            if (i == 0) mid_node = ASTNode(NodeType::WHILELOOP, std::string("Condition"));
+            else if (i == 1) mid_node = ASTNode(NodeType::WHILELOOP, std::string("While-Body"));
             ASTNode node = std::any_cast<ASTNode>(sv[i]);
-            whileloop_node.children.push_back(node);
+            mid_node.children.push_back(node);
+            whileloop_node.children.push_back(mid_node);
         }
         return whileloop_node;
     }

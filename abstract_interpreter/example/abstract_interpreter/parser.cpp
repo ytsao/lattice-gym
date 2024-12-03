@@ -5,8 +5,9 @@
 #include "../../include/ast.hpp"
 
 
-int main(){
-    for (int i = 0; i < 20; ++i){
+int main(int argc, char* argv[]){
+    int id = std::stoi(argv[1]);
+    for (int i = id; i < id + 1; ++i){
         std::string filename = (i < 10 ? "0" : "") + std::to_string(i); // Add "0" prefix if i < 10
         std::ifstream f("./tests/" + filename + ".c");
         if (!f.is_open()){
@@ -23,7 +24,7 @@ int main(){
         std::cout << "Program: " << filename << ".c" << std::endl;
         AbstractInterpreterParser AIParser;
         auto ast = AIParser.parse(input);
-        // printAST(ast);
+        printAST(ast);
     }
 
     return 0;

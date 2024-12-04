@@ -6,14 +6,13 @@
 #include <variant>
 #include <math.h>
 
-enum class BinOp {ADD, SUB, MUL, DIV, EXP};
+enum class BinOp {ADD, SUB, MUL, DIV};
 std::ostream& operator<<(std::ostream& os, BinOp op) {
     switch (op) {
         case BinOp::ADD: os << "+"; break;
         case BinOp::SUB: os << "-"; break;
         case BinOp::MUL: os << "*"; break;
         case BinOp::DIV: os << "/"; break;
-        case BinOp::EXP: os << "^"; break;
     }
     return os;
 }
@@ -31,13 +30,13 @@ std::ostream& operator<<(std::ostream& os, LogicOp lop){
     return os;
 }
 
-enum class NodeType {VARIABLE, NUMBER, PRE_CON, BINARY_OP, LOGIC_OP, DECLARATION, ASSIGNMENT, IFELSE, WHILELOOP, SINGLESTATE, BLOCKCBODY};
+enum class NodeType {VARIABLE, INTEGER, PRE_CON, ARITHM_OP, LOGIC_OP, DECLARATION, ASSIGNMENT, IFELSE, WHILELOOP, SINGLESTATE, BLOCKCBODY};
 std::ostream& operator<<(std::ostream& os, NodeType type) {
     switch (type) {
         case NodeType::VARIABLE: os << "Variable"; break;
-        case NodeType::NUMBER: os << "Number"; break;
+        case NodeType::INTEGER: os << "Integer"; break;
         case NodeType::PRE_CON: os << "Pre-conditions"; break;
-        case NodeType::BINARY_OP: os << "Binary Operation"; break;
+        case NodeType::ARITHM_OP: os << "Arithmetic Operation"; break;
         case NodeType::LOGIC_OP: os << "Logic Operation"; break;
         case NodeType::DECLARATION: os << "Declaration"; break;
         case NodeType::ASSIGNMENT: os << "Assignment"; break;
@@ -57,11 +56,11 @@ public:
     VType value;
     ASTNodes children;
 
-    ASTNode(): type(NodeType::NUMBER), value(0) {}
+    ASTNode(): type(NodeType::INTEGER), value(0) {}
     ASTNode(const std::string& name): type(NodeType::VARIABLE), value(name){}
-    ASTNode(const int num): type(NodeType::NUMBER), value(num) {}
+    ASTNode(const int num): type(NodeType::INTEGER), value(num) {}
     ASTNode(BinOp bop, ASTNode left, ASTNode right)
-        : type(NodeType::BINARY_OP), value(bop){
+        : type(NodeType::ARITHM_OP), value(bop){
             children.push_back(left);
             children.push_back(right);
         }
@@ -87,14 +86,13 @@ void printVariant(const std::variant<std::string, int, BinOp, LogicOp>& value) {
 
 // Recursive AST printing
 void printAST(const ASTNode& node, int depth = 0) {
-    // if (!node) return;
     std::string indent(depth * 2, ' ');
     std::cout << indent << "NodeType: ";
     switch (node.type) {
         case NodeType::VARIABLE: std::cout << "Variable"; break;
-        case NodeType::NUMBER: std::cout << "Number"; break;
+        case NodeType::INTEGER: std::cout << "Integer"; break;
         case NodeType::PRE_CON: std::cout << "Pre-condition"; break;
-        case NodeType::BINARY_OP: std::cout << "Binary Operator"; break;
+        case NodeType::ARITHM_OP: std::cout << "Arithmetic Operator"; break;
         case NodeType::LOGIC_OP: std::cout << "Logic Operator"; break;
         case NodeType::DECLARATION: std::cout << "Declaration"; break;
         case NodeType::ASSIGNMENT: std::cout << "Assignment"; break;

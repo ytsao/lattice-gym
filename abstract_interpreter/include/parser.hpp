@@ -44,7 +44,6 @@ public:
 
         // // setup actions
         parser["Program"] = [this](const SV& sv){return make_program(sv);};
-        // parser["Statements"] = [this](const SV& sv){return make_program(sv);}; //TODO: bad_any_cast<>
         parser["Integer"] = [](const SV& sv){return ASTNode(sv.token_to_number<int>());};
         parser["Identifier"] = [](const SV& sv){return ASTNode(sv.token_to_string());};
         parser["SeqOp"] = [this](const SV& sv){return make_seq_op(sv);};
@@ -123,7 +122,7 @@ private:
     }
 
     ASTNode make_seq_op(const SV& sv){
-        ASTNode op_node(NodeType::BINARY_OP);
+        ASTNode op_node(NodeType::ARITHM_OP);
         std::string op = sv.token_to_string();
         if (op == "+") op_node.value = BinOp::ADD;
         else if (op == "-") op_node.value = BinOp::SUB;
@@ -131,7 +130,7 @@ private:
     }
 
     ASTNode make_pre_op(const SV& sv){
-        ASTNode op_node(NodeType::BINARY_OP);
+        ASTNode op_node(NodeType::ARITHM_OP);
         std::string op = sv.token_to_string();
         if (op == "*") op_node.value = BinOp::MUL;
         else if (op == "/") op_node.value = BinOp::DIV;
@@ -162,7 +161,7 @@ private:
             return expr;
         }
         else{
-            ASTNode expr(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
+            ASTNode expr(NodeType::ARITHM_OP, std::any_cast<ASTNode>(sv[1]).value);
             expr.children.push_back(std::any_cast<ASTNode>(sv[0]));
             ASTNode op;
             size_t i = 3;
@@ -183,17 +182,17 @@ private:
             return std::any_cast<ASTNode>(sv[0]);
         }
         else if (sv.size() == 3){
-            ASTNode term(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
+            ASTNode term(NodeType::ARITHM_OP, std::any_cast<ASTNode>(sv[1]).value);
             term.children.push_back(std::any_cast<ASTNode>(sv[0]));
             term.children.push_back(std::any_cast<ASTNode>(sv[2]));
             return term;
         }
         else{
-            ASTNode term(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[1]).value);
+            ASTNode term(NodeType::ARITHM_OP, std::any_cast<ASTNode>(sv[1]).value);
             term.children.push_back(std::any_cast<ASTNode>(sv[0]));
             size_t i = 3;
             for (i; i < sv.size(); i+=2){
-                ASTNode op(NodeType::BINARY_OP, std::any_cast<ASTNode>(sv[i]).value);
+                ASTNode op(NodeType::ARITHM_OP, std::any_cast<ASTNode>(sv[i]).value);
                 term.children.push_back(op);
                 term.children.push_back(std::any_cast<ASTNode>(sv[i-1]));
             }
@@ -206,7 +205,7 @@ private:
         if (sv.choice() == 0){
             // for the case: x = -y; 
             // we're going to transform it into x = 0 - y;
-            ASTNode sign(NodeType::BINARY_OP, std::string("-"));
+            ASTNode sign(NodeType::ARITHM_OP, std::string("-"));
             sign.children.push_back(ASTNode(0));
             sign.children.push_back(std::any_cast<ASTNode>(sv[0]));
             return sign;
@@ -229,7 +228,7 @@ private:
         ASTNode increment_node(NodeType::ASSIGNMENT, std::string("="));
         
         ASTNode var = std::any_cast<ASTNode>(sv[0]);
-        ASTNode plus_op(NodeType::BINARY_OP, std::string("+"));
+        ASTNode plus_op(NodeType::ARITHM_OP, std::string("+"));
         plus_op.children.push_back(var);
         plus_op.children.push_back(ASTNode(1));
 

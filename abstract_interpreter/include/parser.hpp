@@ -19,7 +19,7 @@ public:
     ASTNode parse(const std::string& input){
         peg::parser parser(R"(
             Program     <- Statements*
-            Statements  <- DeclareVar / Assignment / Increment / IfElse / WhileLoop / Block / PreCon / Comment
+            Statements  <- DeclareVar / Assignment / Increment / IfElse / WhileLoop / Block / PreCon / PostCon / Comment
             Integer     <- < [+-]? [0-9]+ >
             Identifier  <- < [a-zA-Z_][a-zA-Z0-9_]* >
             SeqOp       <- '+' / '-'
@@ -27,6 +27,7 @@ public:
             LogicOp     <- '<=' / '>=' / '==' / '!=' / '<' / '>'
             DeclareVar  <- 'int' Identifier ('=' Integer / ',' Identifier)* ';'
             PreCon      <- '/*!npk' Identifier 'between' Integer 'and' Integer '*/'
+            PostCon     <- 'assert' '(' Expression ')' ';'
             Assignment  <- Identifier '=' Expression ';'
             Increment   <- Identifier '++' ';'
             Block       <- ('void main' '(' ')')? '{' Statements* '}'
@@ -51,6 +52,7 @@ public:
         parser["LogicOp"] = [this](const SV& sv){return make_logic_op(sv);};
         parser["DeclareVar"] = [this](const SV& sv){return make_decl_var(sv);};
         parser["PreCon"] = [this](const SV& sv){return make_pre_con(sv);};
+        parser["PostCon"] = [this](const SV& sv){return make_post_con(sv);};
         parser["Assignment"] = [this](const SV& sv){return make_assign(sv);};
         parser["Increment"] = [this](const SV& sv){return make_increment(sv);};
         parser["Block"] = [this](const SV& sv){return make_block(sv);};
@@ -119,6 +121,13 @@ private:
         pre_con_node.children.push_back(lb);
         pre_con_node.children.push_back(ub);
         return pre_con_node;
+    }
+
+    ASTNode make_post_con(const SV& sv){
+        ASTNode post_con_node(NodeType::POST_CON, std::string("PostCon"));
+        ASTNode expr(std::any_cast<ASTNode>(sv[0]));
+        post_con_node.children.push_back(expr);
+        return post_con_node;
     }
 
     ASTNode make_seq_op(const SV& sv){
@@ -243,10 +252,10 @@ private:
             return std::any_cast<ASTNode>(sv[0]);
         }
         else{
-            ASTNode block_node(NodeType::BLOCKCBODY, std::string("BlockBody"));
+            ASTNode seq(NodeType::SEQUENCE, std::string(";"));
             for (size_t i = 0; i < sv.size(); ++i){
                 try{
-                    block_node.children.push_back(std::any_cast<ASTNode>(sv[i]));
+                    seq.children.push_back(std::any_cast<ASTNode>(sv[i]));
                 }
                 catch(std::bad_any_cast){
                     // pre-condition in this version is comment, still is string;
@@ -254,7 +263,7 @@ private:
                     continue;
                 }
             }
-            return block_node;
+            return seq;
         }
     }
 

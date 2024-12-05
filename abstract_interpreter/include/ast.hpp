@@ -4,7 +4,7 @@
 #define ABSTRACT_INTERPRETER_AST_HPP
 
 #include <variant>
-#include <math.h>
+#include <cmath>
 
 enum class BinOp {ADD, SUB, MUL, DIV};
 std::ostream& operator<<(std::ostream& os, BinOp op) {
@@ -30,20 +30,20 @@ std::ostream& operator<<(std::ostream& os, LogicOp lop){
     return os;
 }
 
-enum class NodeType {VARIABLE, INTEGER, PRE_CON, ARITHM_OP, LOGIC_OP, DECLARATION, ASSIGNMENT, IFELSE, WHILELOOP, SINGLESTATE, BLOCKCBODY};
+enum class NodeType {VARIABLE, INTEGER, PRE_CON, POST_CON, ARITHM_OP, LOGIC_OP, DECLARATION, ASSIGNMENT, IFELSE, WHILELOOP, SEQUENCE};
 std::ostream& operator<<(std::ostream& os, NodeType type) {
     switch (type) {
         case NodeType::VARIABLE: os << "Variable"; break;
         case NodeType::INTEGER: os << "Integer"; break;
-        case NodeType::PRE_CON: os << "Pre-conditions"; break;
+        case NodeType::PRE_CON: os << "Pre conditions"; break;
+        case NodeType::POST_CON: os << "Post conditions"; break;
         case NodeType::ARITHM_OP: os << "Arithmetic Operation"; break;
         case NodeType::LOGIC_OP: os << "Logic Operation"; break;
         case NodeType::DECLARATION: os << "Declaration"; break;
         case NodeType::ASSIGNMENT: os << "Assignment"; break;
         case NodeType::IFELSE: os << "If-Else"; break;
         case NodeType::WHILELOOP: os << "While-Loop"; break;
-        case NodeType::SINGLESTATE: os << "Single-State"; break;
-        case NodeType::BLOCKCBODY: os << "BlockBody"; break;
+        case NodeType::SEQUENCE: os << "Sequence"; break;
     }
     return os;
 }
@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& os, NodeType type) {
 struct ASTNode {
     using VType = std::variant<std::string, int, BinOp, LogicOp>;
     using ASTNodes = std::vector<ASTNode>;
-public:
+
     NodeType type;
     VType value;
     ASTNodes children;
@@ -73,41 +73,20 @@ public:
     ASTNode(NodeType t, const std::string& name): type(t), value(name){}
     ASTNode(NodeType t, const VType& value): type(t), value(value) {}
 
-    void evaluate(){
-        return ;
+    static void printVariant(const std::variant<std::string, int, BinOp, LogicOp>& value) {
+        std::visit([](const auto& v) {
+            std::cout << v << std::endl;
+        }, value);
+    }
+
+    void print(int depth = 0) const {
+        std::string indent(depth * 2, ' ');
+        std::cout << indent << "NodeType: " << type << ", Value: ";
+        printVariant(value);
+        for (const auto& child : children) {
+            child.print(depth + 1);
+        }
     }
 };
-
-void printVariant(const std::variant<std::string, int, BinOp, LogicOp>& value) {
-    std::visit([](const auto& v) {
-        std::cout << v << std::endl;
-    }, value);
-}
-
-// Recursive AST printing
-void printAST(const ASTNode& node, int depth = 0) {
-    std::string indent(depth * 2, ' ');
-    std::cout << indent << "NodeType: ";
-    switch (node.type) {
-        case NodeType::VARIABLE: std::cout << "Variable"; break;
-        case NodeType::INTEGER: std::cout << "Integer"; break;
-        case NodeType::PRE_CON: std::cout << "Pre-condition"; break;
-        case NodeType::ARITHM_OP: std::cout << "Arithmetic Operator"; break;
-        case NodeType::LOGIC_OP: std::cout << "Logic Operator"; break;
-        case NodeType::DECLARATION: std::cout << "Declaration"; break;
-        case NodeType::ASSIGNMENT: std::cout << "Assignment"; break;
-        case NodeType::IFELSE: std::cout << "If-Else"; break;
-        case NodeType::WHILELOOP: std::cout << "While-Loop"; break;
-        case NodeType::SINGLESTATE: std::cout << "Single-State"; break;
-        case NodeType::BLOCKCBODY: std::cout << "BlockBody"; break;
-    }
-    std::cout << ", Value: ";
-    printVariant(node.value);
-    std::cout << "\n";
-
-    for (const auto& child : node.children) {
-        printAST(child, depth + 1);
-    }
-}
 
 #endif

@@ -73,7 +73,7 @@ struct ASTNode {
     ASTNode(NodeType t, const std::string& name): type(t), value(name){}
     ASTNode(NodeType t, const VType& value): type(t), value(value) {}
 
-    static void printVariant(const std::variant<std::string, int, BinOp, LogicOp>& value) {
+    static void printVariant(const VType& value) {
         std::visit([](const auto& v) {
             std::cout << v << std::endl;
         }, value);

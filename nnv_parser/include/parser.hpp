@@ -6,6 +6,7 @@
 #include "peglib.h"
 #include <assert.h>
 #include <iostream>
+#include <stdexcept>
 
 #include "ast.hpp"
 #include "network_structure.hpp"
@@ -21,9 +22,12 @@ public:
                             Integer                 <- [+-]? [0-9]+
                             Float                   <- [+-]? [0-9]+ '.' [0-9]+
                             Identifier              <- [a-zA-Z_][a-zA-Z0-9_]*
-                            LogicOp                 <- '<=' / '>='
+                            BinaryOp                <- '<=' / '>='
+                            LogicOp                 <- 'or' / 'and'
                             DeclareVar              <- '(declare-const '  Identifier ' Real' ')'
-                            Assertion               <- '(assert ' '(' LogicOp [ \t]* Identifier [ \t]* Float [ \t]* ')' ')'
+                            Bound                   <- '(' BinaryOp [ \t]* Identifier [ \t]* (Float / Identifier) [ \t]* ')'
+                            Conjunctive             <- '(' LogicOp [ \t]* Bound ')' 
+                            Assertion               <- '(assert ' Bound ')' / '(assert (' LogicOp+ Conjunctive* '))' 
                             ~Comment                <- ';' [^\n\r]* [ \n\r\t]*
                             %whitespace             <- [ \n\r\t]*
                            )");
@@ -42,9 +46,14 @@ public:
     parser["Identifier"] = [](const SV &sv) {
       return ASTNode(sv.token_to_string());
     };
+    parser["BinaryOp"] = [this](const SV &sv) { return make_binary_op(sv); };
     parser["LogicOp"] = [this](const SV &sv) { return make_logic_op(sv); };
     parser["DeclareVar"] = [this](const SV &sv) {
       return make_declare_variable(sv);
+    };
+    parser["Bound"] = [this](const SV &sv) { return make_bound(sv); };
+    parser["Conjunctive"] = [this](const SV &sv) {
+      return make_conjunctive(sv);
     };
     parser["Assertion"] = [this](const SV &sv) { return make_assertion(sv); };
     parser.set_logger([](size_t line, size_t col, const std::string &msg,
@@ -63,6 +72,7 @@ public:
 
     Specification spec;
     ast.make_specifications(spec);
+    ast.print_bounds(spec);
     return spec;
   }
 
@@ -84,13 +94,25 @@ private:
     }
   }
 
+  ASTNode make_binary_op(const SV &sv) {
+    ASTNode bop_node(ASTNodeType::BINARY_OP);
+    std::string bop = sv.token_to_string();
+    if (bop == "<=")
+      bop_node.value = BinaryOp::LessEqual;
+    else if (bop == ">=")
+      bop_node.value = BinaryOp::GreaterEqual;
+    else
+      throw std::runtime_error("Unknown binary operator: " + bop);
+    return bop_node;
+  }
+
   ASTNode make_logic_op(const SV &sv) {
     ASTNode lop_node(ASTNodeType::LOGIC_OP);
     std::string lop = sv.token_to_string();
-    if (lop == "<=")
-      lop_node.value = LogicOp::LessEqual;
-    else if (lop == ">=")
-      lop_node.value = LogicOp::GreaterEqual;
+    if (lop == "and")
+      lop_node.value = LogicOp::And;
+    else if (lop == "or")
+      lop_node.value = LogicOp::Or;
     else
       throw std::runtime_error("Unknown logic operator: " + lop);
     return lop_node;
@@ -104,8 +126,8 @@ private:
     return decl_node;
   }
 
-  ASTNode make_assertion(const SV &sv) {
-    ASTNode bound_node(ASTNodeType::ASSERTION);
+  ASTNode make_bound(const SV &sv) {
+    ASTNode bound_node(ASTNodeType::BOUND);
     ASTNode lop_node = std::any_cast<ASTNode>(sv[0]);
     ASTNode left = std::any_cast<ASTNode>(sv[1]);
     ASTNode right = std::any_cast<ASTNode>(sv[2]);
@@ -115,6 +137,31 @@ private:
     bound_node.children.push_back(lop_node);
 
     return bound_node;
+  }
+
+  ASTNode make_conjunctive(const SV &sv) {
+    ASTNode conj_node(ASTNodeType::LOGIC_OP, LogicOp::And); // sv[0];
+    ASTNode bound_node = std::any_cast<ASTNode>(sv[1]);
+
+    conj_node.children.push_back(bound_node);
+
+    return conj_node;
+  }
+
+  ASTNode make_assertion(const SV &sv) {
+    ASTNode assert_node(ASTNodeType::ASSERTION);
+    if (sv.size() == 1) {
+      ASTNode bound_node = std::any_cast<ASTNode>(sv[0]);
+      assert_node.children.push_back(bound_node);
+    } else {
+      // TODO: modify
+      for (size_t i = 0; i < sv.size(); ++i) {
+        ASTNode node = std::any_cast<ASTNode>(sv[i]);
+        assert_node.children.push_back(node);
+      }
+    }
+
+    return assert_node;
   }
 };
 

@@ -6,21 +6,30 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <vector>
 
 struct Interval {
 public:
-  double ub;
-  double lb;
-
   Interval() : ub(9999.99), lb(-9999.99) {}
 
   void setLb(double _lb) { lb = _lb; }
   void setUb(double _ub) { ub = _ub; }
+  double getLb() { return lb; }
+  double getUb() { return ub; }
+
+private:
+  double ub;
+  double lb;
 };
 
 struct Neuron {
 public:
+  size_t id; // the index in the same layer, it starts from 0.
   Interval bounds;
+
+  Neuron() : id(0), bounds() {}
+
+  void setId(int _id) { id = _id; }
 };
 
 enum class LayerType {
@@ -44,16 +53,15 @@ public:
 };
 
 struct Specification {
-  int numberOfInputs;
-  int numberOfOutputs;
-  std::map<std::string, Interval> variables;
+  size_t numberOfInputs = 0;
+  size_t numberOfOutputs = 0;
+  std::map<std::string, Neuron> variables;
 
   // postconditions: Ay+ b<=0;
-  double **A;
-  double *b;
+  std::vector<std::vector<int>> A;
+  std::vector<double> b;
 
-  Specification()
-      : numberOfInputs(0), numberOfOutputs(0), A(nullptr), b(nullptr) {}
+  Specification() : numberOfInputs(0), numberOfOutputs(0) {}
 };
 
 struct Network {

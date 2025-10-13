@@ -54,9 +54,11 @@ struct ASTNode {
 
         if (name.substr(0, 1) == "X") {
           spec.variables[name].setId(spec.numberOfInputs);
+          spec.variables[name].bounds.push_back(Interval());
           spec.numberOfInputs++;
         } else {
           spec.variables[name].setId(spec.numberOfOutputs);
+          spec.variables[name].bounds.push_back(Interval());
           spec.numberOfOutputs++;
         }
       }
@@ -76,50 +78,77 @@ struct ASTNode {
           double bound_value = std::get<double>(bound.value);
 
           if (bop == BinaryOp::LessEqual)
-            spec.variables[var_name].bounds.setUb(bound_value);
+            spec.variables[var_name].bounds[0].setUb(bound_value);
           else if (bop == BinaryOp::GreaterEqual)
-            spec.variables[var_name].bounds.setLb(bound_value);
+            spec.variables[var_name].bounds[0].setLb(bound_value);
         } else if (bound.type == ASTNodeType::VARIABLE) {
           // In the output layer.
           std::string var2_name = std::get<std::string>(bound.value);
           std::vector<int> postcondition(spec.numberOfOutputs, 0);
+          double bias = 0;
           if (bop == BinaryOp::LessEqual) {
             postcondition[spec.variables[var_name].id] = 1;
-            postcondition[spec.variables[var2_name].id] = 2;
+            postcondition[spec.variables[var2_name].id] = -1;
           } else if (bop == BinaryOp::GreaterEqual) {
-            postcondition[spec.variables[var_name].id] = 1;
-            postcondition[spec.variables[var2_name].id] = 2;
+            postcondition[spec.variables[var_name].id] = -1;
+            postcondition[spec.variables[var2_name].id] = 1;
           }
+          if (spec.A.empty() && spec.b.empty()) {
+            spec.A.push_back(std::vector<std::vector<int>>());
+            spec.b.push_back(std::vector<double>());
+          }
+          spec.A[0].push_back(postcondition);
+          spec.b[0].push_back(bias);
         }
       } else if (child.type == ASTNodeType::LOGIC_OP) {
         LogicOp lop = std::get<LogicOp>(child.value);
         assert(lop == LogicOp::Or);
 
         for (size_t i = 1; i < children.size(); ++i) {
-          std::vector<int> postcondition(spec.numberOfOutputs, 0);
-          double bias = 0;
-
           ASTNode conj_node = children[i];
-          ASTNode bound_node = conj_node.children[0];
-          ASTNode bop_node = bound_node.children[0];
-          BinaryOp bop = std::get<BinaryOp>(bop_node.value);
-          ASTNode variable1 = bop_node.children[0];
-          ASTNode variable2 = bop_node.children[1];
+          std::vector<std::vector<int>> postconditions;
+          std::vector<double> biases;
+          for (size_t j = 0; j < conj_node.children.size(); ++j) {
+            std::vector<int> postcondition(spec.numberOfOutputs, 0);
+            double bias = 0;
 
-          if (bop == BinaryOp::LessEqual) {
-            std::string var1_name = std::get<std::string>(variable1.value);
-            std::string var2_name = std::get<std::string>(variable2.value);
-            postcondition[spec.variables[var1_name].id] = 1;
-            postcondition[spec.variables[var2_name].id] = -1;
-          } else if (bop == BinaryOp::GreaterEqual) {
-            std::string var1_name = std::get<std::string>(variable1.value);
-            std::string var2_name = std::get<std::string>(variable2.value);
-            postcondition[spec.variables[var1_name].id] = -1;
-            postcondition[spec.variables[var2_name].id] = 1;
+            ASTNode bound_node = conj_node.children[j];
+            ASTNode bop_node = bound_node.children[0];
+            BinaryOp bop = std::get<BinaryOp>(bop_node.value);
+            ASTNode variable = bop_node.children[0];
+            std::string var_name = std::get<std::string>(variable.value);
+            ASTNode bound = bop_node.children[1];
+            if (bound.type == ASTNodeType::DOUBLE) {
+              // In the input layer.
+              double bound_value = std::get<double>(bound.value);
+              if (spec.variables[var_name].bounds.size() == i - 1) {
+                spec.variables[var_name].bounds.push_back(Interval());
+              }
+              if (bop == BinaryOp::LessEqual) {
+                spec.variables[var_name].bounds[i - 1].setUb(bound_value);
+              } else if (bop == BinaryOp::GreaterEqual) {
+                spec.variables[var_name].bounds[i - 1].setLb(bound_value);
+              }
+            } else if (bound.type == ASTNodeType::VARIABLE) {
+              // In the output layer.
+              if (bop == BinaryOp::LessEqual) {
+                std::string var_name = std::get<std::string>(variable.value);
+                std::string var2_name = std::get<std::string>(bound.value);
+                postcondition[spec.variables[var_name].id] = 1;
+                postcondition[spec.variables[var2_name].id] = -1;
+              } else if (bop == BinaryOp::GreaterEqual) {
+                std::string var1_name = std::get<std::string>(variable.value);
+                std::string var2_name = std::get<std::string>(bound.value);
+                postcondition[spec.variables[var1_name].id] = -1;
+                postcondition[spec.variables[var2_name].id] = 1;
+              }
+
+              postconditions.push_back(postcondition);
+              biases.push_back(bias);
+            }
           }
-
-          spec.A.push_back(postcondition);
-          spec.b.push_back(bias);
+          spec.A.push_back(postconditions);
+          spec.b.push_back(biases);
         }
       }
     }
@@ -140,9 +169,11 @@ struct ASTNode {
               << std::endl;
     for (auto variable = spec.variables.begin();
          variable != spec.variables.end(); variable++) {
-      std::cout << variable->first << " (id = " << variable->second.id << " )"
-                << " = " << "[ " << variable->second.bounds.getLb() << ", "
-                << variable->second.bounds.getUb() << " ]" << std::endl;
+      std::cout << variable->first << " (id = " << variable->second.id << " )";
+      for (auto bound : variable->second.bounds) {
+        std::cout << " = " << "[ " << bound.getLb() << ", " << bound.getUb()
+                  << " ]" << std::endl;
+      }
     }
     std::cout << "-----------------------------------------------------------"
               << std::endl;
@@ -151,13 +182,17 @@ struct ASTNode {
     std::cout << "A matrix: " << std::endl;
     for (auto i : spec.A) {
       for (auto j : i) {
-        std::cout << j << ", ";
+        for (auto k : j)
+          std::cout << k << ", ";
+        std::cout << std::endl;
       }
       std::cout << std::endl;
     }
     std::cout << "b vector: " << std::endl;
     for (auto i : spec.b) {
-      std::cout << i << std::endl;
+      for (auto j : i)
+        std::cout << j << std::endl;
+      std::cout << std::endl;
     }
     std::cout << "-----------------------------------------------------------"
               << std::endl;

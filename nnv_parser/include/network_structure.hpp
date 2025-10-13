@@ -25,7 +25,7 @@ private:
 struct Neuron {
 public:
   size_t id; // the index in the same layer, it starts from 0.
-  Interval bounds;
+  std::vector<Interval> bounds; // each dimension represents a disjunctive term.
 
   Neuron() : id(0), bounds() {}
 
@@ -58,8 +58,9 @@ struct Specification {
   std::map<std::string, Neuron> variables;
 
   // postconditions: Ay+ b<=0;
-  std::vector<std::vector<int>> A;
-  std::vector<double> b;
+  // first dimension: the index of disjunctive terms;
+  std::vector<std::vector<std::vector<int>>> A;
+  std::vector<std::vector<double>> b;
 
   Specification() : numberOfInputs(0), numberOfOutputs(0) {}
 };

@@ -26,7 +26,7 @@ public:
                             LogicOp                 <- 'or' / 'and'
                             DeclareVar              <- '(declare-const '  Identifier ' Real' ')'
                             Bound                   <- '(' BinaryOp [ \t]* Identifier [ \t]* (Float / Identifier) [ \t]* ')'
-                            Conjunctive             <- '(' LogicOp [ \t]* Bound ')' 
+                            Conjunctive             <- '(' LogicOp [ \t]* Bound* ')' 
                             Assertion               <- '(assert ' Bound ')' / '(assert (' LogicOp+ Conjunctive* '))' 
                             ~Comment                <- ';' [^\n\r]* [ \n\r\t]*
                             %whitespace             <- [ \n\r\t]*
@@ -141,9 +141,10 @@ private:
 
   ASTNode make_conjunctive(const SV &sv) {
     ASTNode conj_node(ASTNodeType::LOGIC_OP, LogicOp::And); // sv[0];
-    ASTNode bound_node = std::any_cast<ASTNode>(sv[1]);
-
-    conj_node.children.push_back(bound_node);
+    for (size_t i = 1; i < sv.size(); ++i) {
+      ASTNode bound_node = std::any_cast<ASTNode>(sv[i]);
+      conj_node.children.push_back(bound_node);
+    }
 
     return conj_node;
   }

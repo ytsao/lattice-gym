@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Parsing vnnlib: " << argv[1] << " ..." << std::endl;
   NeuralNetworkParser parser;
   Specification spec = parser.parse(input);
+  parser.load_network("../networks/ACASXU_run2a_1_1_batch_2000.onnx");
 
   return 0;
 }

@@ -1,0 +1,8 @@
+[
+  {
+    "directory": "/home/ytsao/code/side_projects/lattice-gym/nnv_parser/build",
+    "command": "/usr/bin/c++  -I/home/ytsao/code/side_projects/lattice-gym/nnv_parser/include -isystem /home/ytsao/code/side_projects/lattice-gym/nnv_parser/dep/onnx-1.15.0 -isystem /home/ytsao/code/side_projects/lattice-gym/nnv_parser/dep/protobuf-3.19.2/installed/include  -o CMakeFiles/nnv.dir/dep/onnx-1.15.0/onnx.proto3.pb.cc.o -c /home/ytsao/code/side_projects/lattice-gym/nnv_parser/dep/onnx-1.15.0/onnx.proto3.pb.cc",
+    "file": "/home/ytsao/code/side_projects/lattice-gym/nnv_parser/dep/onnx-1.15.0/onnx.proto3.pb.cc"
+  }
+]
+

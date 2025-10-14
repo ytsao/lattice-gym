@@ -11,10 +11,75 @@
 #include "ast.hpp"
 #include "network_structure.hpp"
 
+#include "../dep/onnx-1.15.0/onnx.proto3.pb.h"
+#include "fstream"
+
 class NeuralNetworkParser {
   using SV = peg::SemanticValues;
 
 public:
+  void load_network(const std::string &input_file_directory) {
+    const std::string model_path = input_file_directory;
+
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    onnx::ModelProto model;
+    std::ifstream input(model_path, std::ios::in | std::ios::binary);
+
+    if (!input) {
+      std::cerr << "Failed to open: " << model_path << std::endl;
+      return;
+    }
+
+    if (!model.ParseFromIstream(&input)) {
+      std::cerr << "Failed to parse ONNX file." << std::endl;
+      return;
+    }
+
+    const onnx::GraphProto &graph = model.graph();
+
+    std::cout << "Model name: " << model.graph().name() << std::endl;
+    std::cout << "Number of initializers (weights/biases): "
+              << graph.initializer_size() << std::endl
+              << std::endl;
+
+    // Iterate through initializers (tensors with weights and biases)
+    for (const auto &initializer : graph.initializer()) {
+      std::cout << "Tensor Name: " << initializer.name() << std::endl;
+      std::cout << " Data Type: " << initializer.data_type() << std::endl;
+
+      std::cout << " Shape: ";
+      for (int i = 0; i < initializer.dims_size(); i++) {
+        std::cout << initializer.dims(i) << " ";
+      }
+      std::cout << std::endl;
+
+      // Access raw data (bytes)
+      std::cout << " RawData size: " << initializer.raw_data().size()
+                << " bytes" << std::endl;
+
+      // Example: Convert raw_data to float (if tensor is float)
+      if (initializer.data_type() == onnx::TensorProto_DataType_FLOAT) {
+        const std::string &raw_data = initializer.raw_data();
+        const float *data_ptr =
+            reinterpret_cast<const float *>(raw_data.data());
+        size_t num_floats = raw_data.size() / sizeof(float);
+
+        std::cout << " First 5 values: ";
+        for (size_t i = 0; i < std::min(num_floats, size_t(5)); i++) {
+          std::cout << data_ptr[i] << " ";
+        }
+        std::cout << std::endl;
+      }
+
+      std::cout << "------------------------------------------------------"
+                << std::endl;
+    }
+    google::protobuf::ShutdownProtobufLibrary();
+
+    return;
+  }
+
   Specification parse(const std::string &input) {
     peg::parser parser(R"(
                             Specifications          <- Statements* 

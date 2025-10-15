@@ -18,8 +18,8 @@ class NeuralNetworkParser {
   using SV = peg::SemanticValues;
 
 public:
-  void load_network(const std::string &input_file_directory) {
-    const std::string model_path = input_file_directory;
+  void load_network(const std::string &network_file_directory) {
+    const std::string model_path = network_file_directory;
 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -37,44 +37,58 @@ public:
     }
 
     const onnx::GraphProto &graph = model.graph();
-
-    std::cout << "Model name: " << model.graph().name() << std::endl;
+    std::cout << "Model name: " << graph.name() << "\n";
+    std::cout << "Number of nodes: " << graph.node_size() << "\n";
     std::cout << "Number of initializers (weights/biases): "
-              << graph.initializer_size() << std::endl
-              << std::endl;
+              << graph.initializer_size() << "\n\n";
 
-    // Iterate through initializers (tensors with weights and biases)
+    // --- Create a map from tensor name to TensorProto for fast lookup ---
+    std::unordered_map<std::string, onnx::TensorProto> tensor_map;
     for (const auto &initializer : graph.initializer()) {
-      std::cout << "Tensor Name: " << initializer.name() << std::endl;
-      std::cout << " Data Type: " << initializer.data_type() << std::endl;
-
-      std::cout << " Shape: ";
-      for (int i = 0; i < initializer.dims_size(); i++) {
-        std::cout << initializer.dims(i) << " ";
-      }
-      std::cout << std::endl;
-
-      // Access raw data (bytes)
-      std::cout << " RawData size: " << initializer.raw_data().size()
-                << " bytes" << std::endl;
-
-      // Example: Convert raw_data to float (if tensor is float)
-      if (initializer.data_type() == onnx::TensorProto_DataType_FLOAT) {
-        const std::string &raw_data = initializer.raw_data();
-        const float *data_ptr =
-            reinterpret_cast<const float *>(raw_data.data());
-        size_t num_floats = raw_data.size() / sizeof(float);
-
-        std::cout << " First 5 values: ";
-        for (size_t i = 0; i < std::min(num_floats, size_t(5)); i++) {
-          std::cout << data_ptr[i] << " ";
-        }
-        std::cout << std::endl;
-      }
-
-      std::cout << "------------------------------------------------------"
-                << std::endl;
+      tensor_map[initializer.name()] = initializer;
     }
+
+    // --- Iterate over nodes (layers) ---
+    for (const auto &node : graph.node()) {
+      std::cout << "Node: " << node.name() << " | OpType: " << node.op_type()
+                << "\n";
+
+      // Print inputs and outputs
+      for (const auto &input_name : node.input()) {
+        std::cout << "  Input: " << input_name << "\n";
+
+        // If the input is a weight tensor
+        if (tensor_map.find(input_name) != tensor_map.end()) {
+          const auto &tensor = tensor_map[input_name];
+          if (tensor.dims().size() == 1) {
+            // TODO: create bias vector; bias layer?
+            std::vector<float> biases = extract1DTensorData(tensor);
+            std::cout << " (bias tensor, size = " << biases.size() << ")\n";
+          } else if (tensor.dims().size() == 2) {
+            // TODO: create weight matrix; weight layer?
+            std::vector<std::vector<float>> weights =
+                extract2DTensorData(tensor);
+            // (output_dimension, input_dimension);
+            std::cout << " (weight tensor, size = (" << weights.size() << ", "
+                      << weights[0].size() << ")" << ")\n";
+          }
+        } else {
+          // it is activation layer.
+          if (input_name.find("relu")) {
+            // create a relu layer
+          }
+          continue;
+        }
+        std::cout << "\n";
+      }
+
+      for (const auto &output_name : node.output()) {
+        std::cout << "  Output: " << output_name << "\n";
+      }
+
+      std::cout << "\n";
+    }
+
     google::protobuf::ShutdownProtobufLibrary();
 
     return;
@@ -228,6 +242,55 @@ private:
     }
 
     return assert_node;
+  }
+
+  std::vector<float> extract1DTensorData(const onnx::TensorProto &tensor) {
+    std::vector<float> data;
+
+    // Case 1: float_data() directly stored
+    if (tensor.float_data_size() > 0) {
+      data.assign(tensor.float_data().begin(), tensor.float_data().end());
+    }
+    // Case 2: raw_data() binary blob
+    else {
+      std::string raw = tensor.raw_data();
+      size_t elem_count = raw.size() / sizeof(float);
+      data.resize(elem_count);
+      std::memcpy(data.data(), raw.data(), raw.size());
+    }
+
+    return data;
+  }
+
+  std::vector<std::vector<float>>
+  extract2DTensorData(const onnx::TensorProto &tensor) {
+    std::vector<std::vector<float>> data;
+
+    std::vector<float> temp_data;
+
+    // Case 1: float_data() directly stored
+    if (tensor.float_data_size() > 0) {
+      temp_data.assign(tensor.float_data().begin(), tensor.float_data().end());
+    }
+    // Case 2: raw_data() binary blob
+    else {
+      std::string raw = tensor.raw_data();
+      size_t elem_count = raw.size() / sizeof(float);
+      temp_data.resize(elem_count);
+      std::memcpy(temp_data.data(), raw.data(), raw.size());
+    }
+
+    // make 1d data vector to 2d data matrix;
+    size_t num_rows = tensor.dims(0);
+    size_t num_cols = tensor.dims(1);
+    data.resize(num_rows, std::vector<float>(num_cols));
+    for (size_t r = 0; r < num_rows; ++r) {
+      for (size_t c = 0; c < num_cols; ++c) {
+        data[r][c] = temp_data[r * num_cols + c];
+      }
+    }
+
+    return data;
   }
 };
 

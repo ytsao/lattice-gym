@@ -46,8 +46,8 @@ enum class LayerType {
 struct Layer {
 public:
   LayerType type;
-  double **weights;
-  double *biases;
+  std::vector<std::vector<float>> weights;
+  std::vector<float> biases;
   Neuron *neurons;
   double layer_size;
 };

@@ -1,7 +1,4 @@
-#include "ast.hpp"
-#include "network_structure.hpp"
-#include "parser.hpp"
-#include "specifications.hpp"
+#include "network.hpp"
 #include <iostream>
 
 int main(int argc, char *argv[]) {
@@ -18,12 +15,21 @@ int main(int argc, char *argv[]) {
   std::string input = buffer.str();
   f.close();
 
-  std::cout << "Parsing vnnlib: " << argv[1] << " ..." << std::endl;
-  NeuralNetworkParser parser;
-  Specification spec = parser.parse(input);
+  //
+  Network nnv;
 
-  // argv[2] := network_file_directory
-  parser.load_network(argv[2]);
+  std::cout << "Parsing vnnlib: " << argv[1] << " ..." << std::endl;
+  if (!nnv.read_vnnlib(argv[1])) {
+    std::cerr << "Error: Could not parse vnnlib file " << argv[1] << std::endl;
+    return 1;
+  }
+  std::cout << "Parsing vnnlib is done." << std::endl;
+  std::cout << "Parsing onnx: " << argv[2] << " ..." << std::endl;
+  if (!nnv.read_onnx(argv[2])) {
+    std::cerr << "Error: Could not parse onnx file " << argv[2] << std::endl;
+    return 1;
+  }
+  std::cout << "Parsing onnx is done." << std::endl;
 
   return 0;
 }

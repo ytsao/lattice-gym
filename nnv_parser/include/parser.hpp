@@ -9,7 +9,8 @@
 #include <stdexcept>
 
 #include "ast.hpp"
-#include "network_structure.hpp"
+#include "layer.hpp"
+#include "specifications.hpp"
 
 #include "../dep/onnx-1.15.0/onnx.proto3.pb.h"
 #include "fstream"
@@ -18,7 +19,8 @@ class NeuralNetworkParser {
   using SV = peg::SemanticValues;
 
 public:
-  void load_network(const std::string &network_file_directory) {
+  bool load_network(const std::string &network_file_directory,
+                    std::vector<Layer> &layers) {
     const std::string model_path = network_file_directory;
 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -28,12 +30,12 @@ public:
 
     if (!input) {
       std::cerr << "Failed to open: " << model_path << std::endl;
-      return;
+      return false;
     }
 
     if (!model.ParseFromIstream(&input)) {
       std::cerr << "Failed to parse ONNX file." << std::endl;
-      return;
+      return false;
     }
 
     const onnx::GraphProto &graph = model.graph();
@@ -53,6 +55,22 @@ public:
       std::cout << "Node: " << node.name() << " | OpType: " << node.op_type()
                 << "\n";
 
+      Layer layer;
+      if (node.op_type() == "Sub") {
+        layer.type = LayerType::Sub;
+      } else if (node.op_type() == "Flatten") {
+        layer.type = LayerType::Flatten;
+      } else if (node.op_type() == "MatMul") {
+        layer.type = LayerType::MatMul;
+      } else if (node.op_type() == "Add") {
+        layer.type = LayerType::Add;
+      } else if (node.op_type() == "Gemm") {
+        layer.type = LayerType::Gemm;
+      } else if (node.op_type() == "Relu") {
+        layer.type = LayerType::Relu;
+      }
+
+      // TODO: modify the rule to identify differnet types of layers.
       // Print inputs and outputs
       for (const auto &input_name : node.input()) {
         std::cout << "  Input: " << input_name << "\n";
@@ -61,37 +79,43 @@ public:
         if (tensor_map.find(input_name) != tensor_map.end()) {
           const auto &tensor = tensor_map[input_name];
           if (tensor.dims().size() == 1) {
-            // TODO: create bias vector; bias layer?
             std::vector<float> biases = extract1DTensorData(tensor);
+            layer.biases = biases;
+            layer.layer_size = biases.size();
             std::cout << " (bias tensor, size = " << biases.size() << ")\n";
           } else if (tensor.dims().size() == 2) {
-            // TODO: create weight matrix; weight layer?
             std::vector<std::vector<float>> weights =
                 extract2DTensorData(tensor);
+            layer.weights = weights;
             // (output_dimension, input_dimension);
+            layer.layer_size = weights[0].size();
             std::cout << " (weight tensor, size = (" << weights.size() << ", "
                       << weights[0].size() << ")" << ")\n";
           }
-        } else {
-          // it is activation layer.
-          if (input_name.find("relu")) {
-            // create a relu layer
-          }
+          layer.neurons = new Neuron[layer.layer_size];
+        } else if (layer.type == LayerType::Sub) {
+          std::cout << "This is a subtraction layer.\n";
+          continue;
+        } else if (layer.type == LayerType::Flatten) {
+          std::cout << "This is a flatten layer.\n";
+          continue;
+        } else if (layer.type == LayerType::Relu) {
+          std::cout << "This is an acitvation layer.\n";
           continue;
         }
-        std::cout << "\n";
       }
 
       for (const auto &output_name : node.output()) {
         std::cout << "  Output: " << output_name << "\n";
       }
 
-      std::cout << "\n";
+      layers.push_back(layer);
+      std::cout << "---------------------------------------\n";
     }
 
     google::protobuf::ShutdownProtobufLibrary();
 
-    return;
+    return true;
   }
 
   Specification parse(const std::string &input) {

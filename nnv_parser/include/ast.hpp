@@ -3,11 +3,12 @@
 
 #include <assert.h>
 #include <cmath>
+#include <iostream>
 #include <string>
 #include <variant>
 #include <vector>
 
-#include "network_structure.hpp"
+#include "specifications.hpp"
 
 enum class BinaryOp { LessEqual, GreaterEqual };
 enum class LogicOp { And, Or };

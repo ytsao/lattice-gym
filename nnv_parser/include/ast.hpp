@@ -55,11 +55,11 @@ struct ASTNode {
 
         if (name.substr(0, 1) == "X") {
           spec.variables[name].setId(spec.numberOfInputs);
-          spec.variables[name].bounds.push_back(Interval());
+          spec.variables[name].bounds = Interval();
           spec.numberOfInputs++;
         } else {
           spec.variables[name].setId(spec.numberOfOutputs);
-          spec.variables[name].bounds.push_back(Interval());
+          spec.variables[name].bounds = Interval();
           spec.numberOfOutputs++;
         }
       }
@@ -79,9 +79,9 @@ struct ASTNode {
           double bound_value = std::get<double>(bound.value);
 
           if (bop == BinaryOp::LessEqual)
-            spec.variables[var_name].bounds[0].setUb(bound_value);
+            spec.variables[var_name].bounds.setUb(bound_value);
           else if (bop == BinaryOp::GreaterEqual)
-            spec.variables[var_name].bounds[0].setLb(bound_value);
+            spec.variables[var_name].bounds.setLb(bound_value);
         } else if (bound.type == ASTNodeType::VARIABLE) {
           // In the output layer.
           std::string var2_name = std::get<std::string>(bound.value);
@@ -120,16 +120,21 @@ struct ASTNode {
             std::string var_name = std::get<std::string>(variable.value);
             ASTNode bound = bop_node.children[1];
             if (bound.type == ASTNodeType::DOUBLE) {
-              // In the input layer.
+              // TODO: temporary skip this part. We don't consider disjunctive
+              // in preconditions. In the input layer.
+              // This is only for prop_6.vnnlib
               double bound_value = std::get<double>(bound.value);
-              if (spec.variables[var_name].bounds.size() == i - 1) {
-                spec.variables[var_name].bounds.push_back(Interval());
-              }
-              if (bop == BinaryOp::LessEqual) {
-                spec.variables[var_name].bounds[i - 1].setUb(bound_value);
-              } else if (bop == BinaryOp::GreaterEqual) {
-                spec.variables[var_name].bounds[i - 1].setLb(bound_value);
-              }
+              std::cout << "******************************\n";
+              std::cout << bound_value << "\n";
+              std::cout << "******************************\n";
+              // if (spec.variables[var_name].bounds.size() == i - 1) {
+              //   spec.variables[var_name].bounds.push_back(Interval());
+              // }
+              // if (bop == BinaryOp::LessEqual) {
+              //   spec.variables[var_name].bounds[i - 1].setUb(bound_value);
+              // } else if (bop == BinaryOp::GreaterEqual) {
+              //   spec.variables[var_name].bounds[i - 1].setLb(bound_value);
+              // }
             } else if (bound.type == ASTNodeType::VARIABLE) {
               // In the output layer.
               if (bop == BinaryOp::LessEqual) {
@@ -161,7 +166,7 @@ struct ASTNode {
     return;
   }
 
-  void print_bounds(Specification &spec) {
+  void print_bounds(Specification &spec) const {
     std::cout << "-----------------------------------------------------------"
               << std::endl;
     std::cout << "number of inputs = " << spec.numberOfInputs << std::endl;
@@ -171,10 +176,12 @@ struct ASTNode {
     for (auto variable = spec.variables.begin();
          variable != spec.variables.end(); variable++) {
       std::cout << variable->first << " (id = " << variable->second.id << " )";
-      for (auto bound : variable->second.bounds) {
-        std::cout << " = " << "[ " << bound.getLb() << ", " << bound.getUb()
-                  << " ]" << std::endl;
-      }
+      // for (auto bound : variable->second.bounds) {
+      //   std::cout << " = " << "[ " << bound.getLb() << ", " << bound.getUb()
+      //             << " ]" << std::endl;
+      // }
+      std::cout << " = " << "[ " << variable->second.bounds.getLb() << ", "
+                << variable->second.bounds.getUb() << " ]" << std::endl;
     }
     std::cout << "-----------------------------------------------------------"
               << std::endl;

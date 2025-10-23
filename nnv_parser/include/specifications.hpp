@@ -7,6 +7,7 @@
 #include <vector>
 
 struct Specification {
+public:
   size_t numberOfInputs = 0;
   size_t numberOfOutputs = 0;
   std::map<std::string, Neuron> variables;
@@ -17,6 +18,9 @@ struct Specification {
   std::vector<std::vector<double>> b;
 
   Specification() : numberOfInputs(0), numberOfOutputs(0) {}
+
+  // TODO: check if the property is satisfied by the overapproximated outputs.
+  bool check() { return false; }
 };
 
 #endif // SPECIFICATIONS_HPP

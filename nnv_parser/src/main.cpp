@@ -1,3 +1,4 @@
+#include "naive_interval_propagation.hpp"
 #include "network.hpp"
 #include <iostream>
 
@@ -15,7 +16,7 @@ int main(int argc, char *argv[]) {
   std::string input = buffer.str();
   f.close();
 
-  //
+  // create network object and parse vnnlib & onnx file.
   Network nnv;
 
   std::cout << "Parsing vnnlib: " << argv[1] << " ..." << std::endl;
@@ -30,6 +31,14 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   std::cout << "Parsing onnx is done." << std::endl;
+
+  // TODO: Execute the propagation method.
+  NaiveIntervalPropagation ibp;
+  if (ibp.execute(nnv)) {
+    std::cout << "The naive_interval_propagation is done." << std::endl;
+  } else {
+    std::cerr << "The naive_interval_propagation is failed." << std::endl;
+  }
 
   return 0;
 }

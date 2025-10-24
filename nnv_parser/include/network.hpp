@@ -33,7 +33,29 @@ public:
   }
 
   bool read_onnx(std::string onnx_filename) {
-    return parser.load_network(onnx_filename, layers);
+    return parser.load_network(onnx_filename, spec, layers);
+  }
+
+  void print_all_bounds() {
+    for (size_t layer_id = 0; layer_id < layers.size(); ++layer_id) {
+      print_bound_at_layer(layer_id);
+    }
+    return;
+  }
+
+  void print_bound_at_layer(size_t layer_id) {
+    if (layer_id >= layers.size()) {
+      std::cerr << "Error: Layer ID " << layer_id << " is out of range."
+                << std::endl;
+      return;
+    }
+    for (size_t neuron_id = 0; neuron_id < layers[layer_id].layer_size;
+         ++neuron_id) {
+      std::cout << "Layer " << layer_id << ", Neuron " << neuron_id << " : ["
+                << layers[layer_id].neurons[neuron_id].bounds.getLb() << ", "
+                << layers[layer_id].neurons[neuron_id].bounds.getUb() << "]\n";
+    }
+    return;
   }
 
 private:

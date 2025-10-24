@@ -5,12 +5,10 @@
 
 class DeepPolyDomain : public AbstractDomain {
 public:
-  void subtraction_layer_transformer(const Layer &from_layer,
-                                     Layer &to_layer) override {
+  void subtraction_layer_transformer(const Layer &current_layer) override {
     return;
   }
-  void flatten_layer_transformer(const Layer &from_layer,
-                                 Layer &to_layer) override {
+  void flatten_layer_transformer(const Layer &current_layer) override {
     return;
   }
   void relu_layer_transformer(const Layer &from_layer,

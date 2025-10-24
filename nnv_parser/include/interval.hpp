@@ -2,10 +2,16 @@
 #define INTERVAL_HPP
 
 #include <iostream>
+#include <limits>
+
+#define MAX_DOUBLE (std::numeric_limits<double>::max())
+#define MIN_DOUBLE (std::numeric_limits<double>::lowest())
 
 struct Interval {
 public:
-  Interval() : lb(-9999.99), ub(9999.99) {}
+  // Interval() : lb(MIN_DOUBLE), ub(MAX_DOUBLE) {}
+  // Interval() : lb(-999999), ub(999999) {}
+  Interval() : lb(0), ub(0) {}
   Interval(double _lb, double _ub) : lb(_lb), ub(_ub) {}
 
   void setLb(double _lb) { lb = _lb; }
@@ -14,14 +20,21 @@ public:
   double getUb() const { return ub; }
 
   Interval operator+(const Interval &other) const {
-    return Interval(lb + other.getLb(), ub + other.getUb());
+    return Interval(lb + other.lb, ub + other.ub);
   }
 
+  // + scalar
+  Interval operator+(double scalar) const {
+    return Interval(lb + scalar, ub + scalar);
+  }
+
+  // - Interval
   Interval operator-(const Interval &other) const {
-    return Interval(lb - other.getUb(), ub - other.getLb());
+    return Interval(lb - other.ub, ub - other.lb);
   }
 
-  Interval operator*(const double scalar) const {
+  // * scalar
+  Interval operator*(double scalar) const {
     if (scalar >= 0) {
       return Interval(lb * scalar, ub * scalar);
     } else {

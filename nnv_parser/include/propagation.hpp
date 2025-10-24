@@ -7,7 +7,7 @@ class Propagation {
 public:
   virtual ~Propagation() = default;
 
-  virtual bool execute(Network nnv) = 0;
+  virtual bool execute(Network &nnv) = 0;
 };
 
 #endif // PROPAGATION_HPP

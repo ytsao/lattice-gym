@@ -20,7 +20,7 @@ class NeuralNetworkParser {
 
 public:
   bool load_network(const std::string &network_file_directory,
-                    std::vector<Layer> &layers) {
+                    const Specification &spec, std::vector<Layer> &layers) {
     const std::string model_path = network_file_directory;
 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -92,16 +92,27 @@ public:
             std::cout << " (weight tensor, size = (" << weights.size() << ", "
                       << weights[0].size() << ")" << ")\n";
           }
-          layer.neurons = new Neuron[layer.layer_size];
+          // layer.neurons = new Neuron[layer.layer_size];
+          layer.neurons = std::vector<Neuron>(layer.layer_size);
         } else if (layer.type == LayerType::Sub) {
           std::cout << "This is a subtraction layer.\n";
           continue;
         } else if (layer.type == LayerType::Flatten) {
           std::cout << "This is a flatten layer.\n";
-          continue;
+          for (const auto &variable : spec.variables) {
+            if (variable.first.substr(0, 1) == "X") {
+              // show the preconditions
+              std::cout << variable.second.id << ": ["
+                        << variable.second.bounds.getLb() << ", "
+                        << variable.second.bounds.getUb() << "]\n";
+              layer.neurons.push_back(variable.second);
+            }
+          }
+          layer.layer_size = layer.neurons.size();
         } else if (layer.type == LayerType::Relu) {
+          layer.layer_size = layers[layers.size() - 1].layer_size;
+          layer.neurons = std::vector<Neuron>(layer.layer_size);
           std::cout << "This is an acitvation layer.\n";
-          continue;
         }
       }
 

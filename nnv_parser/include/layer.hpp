@@ -18,8 +18,9 @@ public:
   LayerType type;
   std::vector<std::vector<float>> weights;
   std::vector<float> biases;
-  Neuron *neurons;
-  size_t layer_size;
+  // Neuron *neurons;
+  std::vector<Neuron> neurons;
+  size_t layer_size = 0;
 };
 
 #endif // LAYER_HPP

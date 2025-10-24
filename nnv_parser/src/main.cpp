@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
   NaiveIntervalPropagation ibp;
   if (ibp.execute(nnv)) {
     std::cout << "The naive_interval_propagation is done." << std::endl;
+    nnv.print_all_bounds();
   } else {
     std::cerr << "The naive_interval_propagation is failed." << std::endl;
   }

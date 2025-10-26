@@ -16,7 +16,7 @@ public:
       if (nnv.layers[layer_idx].type == LayerType::Sub) {
         a.subtraction_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Flatten) {
-        a.flatten_layer_transformer(nnv.layers[layer_idx], nnv.spec);
+        a.flatten_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Relu) {
         a.relu_layer_transformer(nnv.layers[layer_idx],
                                  nnv.layers[layer_idx + 1]);

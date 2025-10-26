@@ -1,9 +1,10 @@
 #include "naive_interval_propagation.hpp"
 #include "network.hpp"
+#include "symbolic_interval_propagation.hpp"
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-  if (argc < 3) {
+  if (argc < 4) {
     std::cout << "usage: " << argv[0] << " <input_file>" << std::endl;
   }
   std::ifstream f(argv[1]);
@@ -33,12 +34,22 @@ int main(int argc, char *argv[]) {
   std::cout << "Parsing onnx is done." << std::endl;
 
   // TODO: Execute the propagation method.
-  NaiveIntervalPropagation ibp;
-  if (ibp.execute(nnv)) {
-    std::cout << "The naive_interval_propagation is done." << std::endl;
-    nnv.print_all_bounds();
-  } else {
-    std::cerr << "The naive_interval_propagation is failed." << std::endl;
+  if (std::strcmp(argv[3], "ibp") == 0) {
+    NaiveIntervalPropagation ibp;
+    if (ibp.execute(nnv)) {
+      std::cout << "The naive_interval_propagation is done." << std::endl;
+      nnv.print_all_bounds();
+    } else {
+      std::cerr << "The naive_interval_propagation is failed." << std::endl;
+    }
+  } else if (std::strcmp(argv[3], "sip") == 0) {
+    SymbolicIntervalPropagation sip;
+    if (sip.execute(nnv)) {
+      std::cout << "The symbolic_interval_propagation is done." << std::endl;
+      nnv.print_all_bounds();
+    } else {
+      std::cerr << "The symbolic_interval_propagation is failed." << std::endl;
+    }
   }
 
   return 0;

@@ -5,12 +5,8 @@
 
 class IntervalDomain : public AbstractDomain {
 public:
-  void subtraction_layer_transformer(const Layer &current_layer) override {
-    return;
-  }
-  void flatten_layer_transformer(const Layer &current_layer) override {
-    return;
-  }
+  void gamma(Network &nnv, size_t layer_idx) override { return; }
+
   void relu_layer_transformer(const Layer &from_layer,
                               Layer &to_layer) override {
     for (size_t i = 0; i < from_layer.layer_size; ++i) {
@@ -24,8 +20,8 @@ public:
   }
   void matmul_layer_transformer(const Layer &from_layer,
                                 Layer &to_layer) override {
-    for (size_t j = 0; j < to_layer.weights[0].size(); ++j) {
-      for (size_t i = 0; i < to_layer.weights.size(); ++i) {
+    for (size_t j = 0; j < to_layer.layer_size; ++j) {
+      for (size_t i = 0; i < from_layer.layer_size; ++i) {
         to_layer.neurons[j].bounds =
             to_layer.neurons[j].bounds +
             from_layer.neurons[i].bounds * to_layer.weights[i][j];
@@ -45,8 +41,8 @@ public:
   }
   void gemm_layer_transformer(const Layer &from_layer,
                               Layer &to_layer) override {
-    for (size_t i = 0; i < to_layer.weights.size(); ++i) {
-      for (size_t j = 0; j < to_layer.weights[i].size(); ++j) {
+    for (size_t i = 0; i < to_layer.layer_size; ++i) {
+      for (size_t j = 0; j < from_layer.layer_size; ++j) {
         to_layer.neurons[i].bounds =
             to_layer.neurons[i].bounds +
             from_layer.neurons[j].bounds * to_layer.weights[i][j];

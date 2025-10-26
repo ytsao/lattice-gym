@@ -81,6 +81,8 @@ public:
           if (tensor.dims().size() == 1) {
             std::vector<float> biases = extract1DTensorData(tensor);
             layer.biases = biases;
+            layer.lower_biases = biases;
+            layer.upper_biases = biases;
             layer.layer_size = biases.size();
             std::cout << " (bias tensor, size = " << biases.size() << ")\n";
           } else if (tensor.dims().size() == 2) {
@@ -105,6 +107,7 @@ public:
               std::cout << variable.second.id << ": ["
                         << variable.second.bounds.getLb() << ", "
                         << variable.second.bounds.getUb() << "]\n";
+
               layer.neurons.push_back(variable.second);
             }
           }
@@ -118,6 +121,12 @@ public:
 
       for (const auto &output_name : node.output()) {
         std::cout << "  Output: " << output_name << "\n";
+      }
+
+      // update neuron index and layer index
+      for (size_t i = 0; i < layer.layer_size; ++i) {
+        layer.neurons[i].setId(i);
+        layer.neurons[i].setLayerId(layers.size());
       }
 
       layers.push_back(layer);

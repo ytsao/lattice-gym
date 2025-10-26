@@ -2,15 +2,9 @@
 #define INTERVAL_HPP
 
 #include <iostream>
-#include <limits>
-
-#define MAX_DOUBLE (std::numeric_limits<double>::max())
-#define MIN_DOUBLE (std::numeric_limits<double>::lowest())
 
 struct Interval {
 public:
-  // Interval() : lb(MIN_DOUBLE), ub(MAX_DOUBLE) {}
-  // Interval() : lb(-999999), ub(999999) {}
   Interval() : lb(0), ub(0) {}
   Interval(double _lb, double _ub) : lb(_lb), ub(_ub) {}
 

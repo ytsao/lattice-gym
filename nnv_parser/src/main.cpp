@@ -1,3 +1,4 @@
+#include "deeppoly_propagation.hpp"
 #include "naive_interval_propagation.hpp"
 #include "network.hpp"
 #include "symbolic_interval_propagation.hpp"
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
   }
   std::cout << "Parsing onnx is done." << std::endl;
 
-  // TODO: Execute the propagation method.
+  // Execute the propagation method.
   if (std::strcmp(argv[3], "ibp") == 0) {
     NaiveIntervalPropagation ibp;
     if (ibp.execute(nnv)) {
@@ -49,6 +50,14 @@ int main(int argc, char *argv[]) {
       nnv.print_all_bounds();
     } else {
       std::cerr << "The symbolic_interval_propagation is failed." << std::endl;
+    }
+  } else if (std::strcmp(argv[3], "deeppoly") == 0) {
+    DeepPolyPropagation deeppoly;
+    if (deeppoly.execute(nnv)) {
+      std::cout << "The deeppoly_propagation is done." << std::endl;
+      nnv.print_all_bounds();
+    } else {
+      std::cerr << "The deeppoly_propagation is failed." << std::endl;
     }
   }
 

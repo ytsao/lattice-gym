@@ -193,11 +193,10 @@ public:
           to_layer.upper_biases[i] +=
               from_layer.neurons[j].bounds.getLb() * weights;
         }
-
-        double bias = to_layer.biases[i];
-        to_layer.lower_biases[i] += bias;
-        to_layer.upper_biases[i] += bias;
       }
+      double bias = to_layer.biases[i];
+      to_layer.lower_biases[i] += bias;
+      to_layer.upper_biases[i] += bias;
     }
 
     return;

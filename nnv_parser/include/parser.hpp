@@ -57,7 +57,10 @@ public:
 
       Layer layer;
       if (node.op_type() == "Sub") {
+        // We're not adding sub layer into layers.
+        // Because in this project, Sub layer contains only zero.
         layer.type = LayerType::Sub;
+        continue;
       } else if (node.op_type() == "Flatten") {
         layer.type = LayerType::Flatten;
       } else if (node.op_type() == "MatMul") {
@@ -100,6 +103,7 @@ public:
           std::cout << "This is a subtraction layer.\n";
           continue;
         } else if (layer.type == LayerType::Flatten) {
+          // This is the input layer.
           std::cout << "This is a flatten layer.\n";
           for (const auto &variable : spec.variables) {
             if (variable.first.substr(0, 1) == "X") {

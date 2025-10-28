@@ -76,27 +76,27 @@ public:
       double lb = from_layer.neurons[i].bounds.getLb();
       double ub = from_layer.neurons[i].bounds.getUb();
 
-      if (lb >= 0) {
+      if (lb >= 0.0) {
         to_layer.neurons[i].symbolic_lower_expression =
-            from_layer.neurons[i].symbolic_lower_expression;
+            std::move(from_layer.neurons[i].symbolic_lower_expression);
         to_layer.neurons[i].symbolic_upper_expression =
-            from_layer.neurons[i].symbolic_upper_expression;
+            std::move(from_layer.neurons[i].symbolic_upper_expression);
 
         to_layer.lower_biases.push_back(from_layer.lower_biases[i]);
         to_layer.upper_biases.push_back(from_layer.upper_biases[i]);
-      } else if (ub <= 0) {
+      } else if (ub <= 0.0) {
         to_layer.neurons[i].symbolic_lower_expression.clear();
         to_layer.neurons[i].symbolic_upper_expression.clear();
         to_layer.neurons[i].isSymbolic = false;
 
-        to_layer.neurons[i].bounds.setLb(0);
-        to_layer.neurons[i].bounds.setUb(0);
-      } else if (lb < 0 && ub > 0) {
+        to_layer.neurons[i].bounds.setLb(0.0);
+        to_layer.neurons[i].bounds.setUb(0.0);
+      } else if (lb < 0.0 && ub > 0.0) {
         to_layer.neurons[i].symbolic_lower_expression.clear();
         to_layer.neurons[i].symbolic_upper_expression.clear();
         to_layer.neurons[i].isSymbolic = false;
 
-        to_layer.neurons[i].bounds.setLb(0);
+        to_layer.neurons[i].bounds.setLb(0.0);
         to_layer.neurons[i].bounds.setUb(ub);
       }
     }
@@ -128,13 +128,13 @@ public:
             to_layer.neurons[j].symbolic_upper_expression[term.first] +=
                 weights * term.second;
           }
-        } else if (weights >= 0) {
+        } else if (weights >= 0.0) {
           // update the biases
           to_layer.lower_biases[j] +=
               from_layer.neurons[i].bounds.getLb() * weights;
           to_layer.upper_biases[j] +=
               from_layer.neurons[i].bounds.getUb() * weights;
-        } else if (weights < 0) {
+        } else if (weights < 0.0) {
           // update the biases
           to_layer.lower_biases[j] +=
               from_layer.neurons[i].bounds.getUb() * weights;
@@ -151,9 +151,9 @@ public:
     for (size_t i = 0; i < from_layer.layer_size; ++i) {
       // copy symbolic expressions
       to_layer.neurons[i].symbolic_lower_expression =
-          from_layer.neurons[i].symbolic_lower_expression;
+          std::move(from_layer.neurons[i].symbolic_lower_expression);
       to_layer.neurons[i].symbolic_upper_expression =
-          from_layer.neurons[i].symbolic_upper_expression;
+          std::move(from_layer.neurons[i].symbolic_upper_expression);
 
       // update the biases
       to_layer.lower_biases[i] += from_layer.lower_biases[i];

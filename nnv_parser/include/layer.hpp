@@ -25,8 +25,8 @@ public:
   size_t layer_size = 0;
 
   // DeepPoly expressions
-  std::vector<double *> deeppoly_lower_expressions;
-  std::vector<double *> deeppoly_upper_expressions;
+  std::vector<std::vector<double>> deeppoly_lower_expressions;
+  std::vector<std::vector<double>> deeppoly_upper_expressions;
 };
 
 #endif // LAYER_HPP

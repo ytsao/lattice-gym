@@ -13,6 +13,8 @@ struct Network {
 public:
   std::vector<Layer> layers;
   Specification spec;
+  size_t input_size;
+  size_t output_size;
 
   bool read_vnnlib(std::string vnnlib_filename) {
     std::fstream vnnlib_file(vnnlib_filename);
@@ -28,6 +30,8 @@ public:
     vnnlib_file.close();
 
     spec = parser.parse(specifications);
+    input_size = spec.numberOfInputs;
+    output_size = spec.numberOfOutputs;
 
     return true;
   }

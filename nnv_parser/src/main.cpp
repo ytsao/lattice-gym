@@ -38,28 +38,36 @@ int main(int argc, char *argv[]) {
   if (std::strcmp(argv[3], "ibp") == 0) {
     NaiveIntervalPropagation ibp;
     if (ibp.execute(nnv)) {
-      std::cout << "The naive_interval_propagation is done." << std::endl;
-      nnv.print_all_bounds();
+      std::cout << "The naive_interval_propagation result is UNSAT."
+                << std::endl;
     } else {
-      std::cerr << "The naive_interval_propagation is failed." << std::endl;
+      std::cerr << "The naive_interval_propagation is not able to have "
+                   "a conclusive verification result."
+                << std::endl;
     }
   } else if (std::strcmp(argv[3], "sip") == 0) {
     SymbolicIntervalPropagation sip;
     if (sip.execute(nnv)) {
-      std::cout << "The symbolic_interval_propagation is done." << std::endl;
-      nnv.print_all_bounds();
+      std::cout << "The symbolic_interval_propagation result is UNSAT."
+                << std::endl;
     } else {
-      std::cerr << "The symbolic_interval_propagation is failed." << std::endl;
+      std::cerr << "The symbolic_interval_propagation is not able to have a "
+                   "conclusive verification result."
+                << std::endl;
     }
   } else if (std::strcmp(argv[3], "deeppoly") == 0) {
     DeepPolyPropagation deeppoly;
     if (deeppoly.execute(nnv)) {
-      std::cout << "The deeppoly_propagation is done." << std::endl;
-      nnv.print_all_bounds();
+      std::cout << "The deeppoly_propagation result is UNSAT." << std::endl;
     } else {
-      std::cerr << "The deeppoly_propagation is failed." << std::endl;
+      std::cerr << "The deeppoly_propagation is not able to have a conlcusive "
+                   "verification result."
+                << std::endl;
     }
   }
+  nnv.print_all_bounds();
+  // nnv.print_bound_at_layer(nnv.layers.size() - 2);
+  // nnv.print_bound_at_layer(nnv.layers.size() - 1);
 
   return 0;
 }

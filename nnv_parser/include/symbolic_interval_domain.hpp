@@ -49,8 +49,10 @@ public:
           }
         }
 
-        nnv.layers[layer_idx].neurons[i].bounds.setLb(lb);
-        nnv.layers[layer_idx].neurons[i].bounds.setUb(ub);
+        nnv.layers[layer_idx].neurons[i].bounds.setLb(
+            lb + nnv.layers[layer_idx].lower_biases[i]);
+        nnv.layers[layer_idx].neurons[i].bounds.setUb(
+            ub + nnv.layers[layer_idx].upper_biases[i]);
       }
     }
 
@@ -77,10 +79,11 @@ public:
       double ub = from_layer.neurons[i].bounds.getUb();
 
       if (lb >= 0.0) {
+        to_layer.neurons[i].isSymbolic = true;
         to_layer.neurons[i].symbolic_lower_expression =
-            std::move(from_layer.neurons[i].symbolic_lower_expression);
+            from_layer.neurons[i].symbolic_lower_expression;
         to_layer.neurons[i].symbolic_upper_expression =
-            std::move(from_layer.neurons[i].symbolic_upper_expression);
+            from_layer.neurons[i].symbolic_upper_expression;
 
         to_layer.lower_biases.push_back(from_layer.lower_biases[i]);
         to_layer.upper_biases.push_back(from_layer.upper_biases[i]);
@@ -91,6 +94,9 @@ public:
 
         to_layer.neurons[i].bounds.setLb(0.0);
         to_layer.neurons[i].bounds.setUb(0.0);
+
+        to_layer.lower_biases.push_back(0.0);
+        to_layer.upper_biases.push_back(0.0);
       } else if (lb < 0.0 && ub > 0.0) {
         to_layer.neurons[i].symbolic_lower_expression.clear();
         to_layer.neurons[i].symbolic_upper_expression.clear();
@@ -98,6 +104,9 @@ public:
 
         to_layer.neurons[i].bounds.setLb(0.0);
         to_layer.neurons[i].bounds.setUb(ub);
+
+        to_layer.lower_biases.push_back(0.0);
+        to_layer.upper_biases.push_back(0.0);
       }
     }
 
@@ -151,9 +160,9 @@ public:
     for (size_t i = 0; i < from_layer.layer_size; ++i) {
       // copy symbolic expressions
       to_layer.neurons[i].symbolic_lower_expression =
-          std::move(from_layer.neurons[i].symbolic_lower_expression);
+          from_layer.neurons[i].symbolic_lower_expression;
       to_layer.neurons[i].symbolic_upper_expression =
-          std::move(from_layer.neurons[i].symbolic_upper_expression);
+          from_layer.neurons[i].symbolic_upper_expression;
 
       // update the biases
       to_layer.lower_biases[i] += from_layer.lower_biases[i];
@@ -180,13 +189,13 @@ public:
             to_layer.neurons[i].symbolic_upper_expression[term.first] +=
                 weights * term.second;
           }
-        } else if (weights >= 0) {
+        } else if (weights >= 0.0) {
           // update the biase
           to_layer.lower_biases[i] +=
               from_layer.neurons[j].bounds.getLb() * weights;
           to_layer.upper_biases[i] +=
               from_layer.neurons[j].bounds.getUb() * weights;
-        } else if (weights < 0) {
+        } else if (weights < 0.0) {
           // update the biases
           to_layer.lower_biases[i] +=
               from_layer.neurons[j].bounds.getUb() * weights;

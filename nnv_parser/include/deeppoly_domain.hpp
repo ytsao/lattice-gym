@@ -46,17 +46,17 @@ public:
       double lb = from_layer.neurons[i].bounds.getLb();
       double ub = from_layer.neurons[i].bounds.getUb();
 
-      if (lb >= 0) {
+      if (lb >= 0.0) {
         to_layer.neurons[i].bounds.setLb(lb);
         to_layer.neurons[i].bounds.setUb(ub);
 
         // x_i = x_j;
         to_layer.deeppoly_lower_expressions[i][i] = 1;
         to_layer.deeppoly_upper_expressions[i][i] = 1;
-      } else if (ub <= 0) {
-        to_layer.neurons[i].bounds.setLb(0);
-        to_layer.neurons[i].bounds.setUb(0);
-      } else if (lb < 0 && ub > 0) {
+      } else if (ub <= 0.0) {
+        to_layer.neurons[i].bounds.setLb(0.0);
+        to_layer.neurons[i].bounds.setUb(0.0);
+      } else if (lb < 0.0 && ub > 0.0) {
         to_layer.neurons[i].lambda = std::abs(lb) <= ub ? true : false;
 
         to_layer.deeppoly_lower_expressions[i][i] = to_layer.neurons[i].lambda;
@@ -181,6 +181,9 @@ private:
       for (size_t i = 0; i < nnv.layers[start_layer_idx].layer_size; ++i) {
         for (size_t j = 0; j < nnv.layers[layer_idx - 1].layer_size; ++j) {
           for (size_t k = 0; k < sizeOfExpression; ++k) {
+            // TODO: we might need to consider the sign of each coefficient such
+            // that to substitute with corresponding lower or upper expressions.
+
             // Update lower expression
             resulting_lower_expressions[i][k] +=
                 tmp_lower_expressions[i][j] *

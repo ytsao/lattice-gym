@@ -86,20 +86,31 @@ struct ASTNode {
           // In the output layer.
           std::string var2_name = std::get<std::string>(bound.value);
           std::vector<int> postcondition(spec.numberOfOutputs, 0);
+          char relation;
           double bias = 0;
+
           if (bop == BinaryOp::LessEqual) {
             postcondition[spec.variables[var_name].id] = 1;
             postcondition[spec.variables[var2_name].id] = -1;
+
+            relation = 'L';
           } else if (bop == BinaryOp::GreaterEqual) {
             postcondition[spec.variables[var_name].id] = -1;
             postcondition[spec.variables[var2_name].id] = 1;
+
+            relation = 'G';
           }
+
           if (spec.A.empty() && spec.b.empty()) {
             spec.A.push_back(std::vector<std::vector<int>>());
             spec.b.push_back(std::vector<double>());
+
+            spec.relations.push_back(std::vector<char>());
           }
           spec.A[0].push_back(postcondition);
           spec.b[0].push_back(bias);
+
+          spec.relations[0].push_back(relation);
         }
       } else if (child.type == ASTNodeType::LOGIC_OP) {
         LogicOp lop = std::get<LogicOp>(child.value);
@@ -109,6 +120,8 @@ struct ASTNode {
           ASTNode conj_node = children[i];
           std::vector<std::vector<int>> postconditions;
           std::vector<double> biases;
+          std::vector<char> relation;
+
           for (size_t j = 0; j < conj_node.children.size(); ++j) {
             std::vector<int> postcondition(spec.numberOfOutputs, 0);
             double bias = 0;
@@ -142,11 +155,15 @@ struct ASTNode {
                 std::string var2_name = std::get<std::string>(bound.value);
                 postcondition[spec.variables[var_name].id] = 1;
                 postcondition[spec.variables[var2_name].id] = -1;
+
+                relation.push_back('L');
               } else if (bop == BinaryOp::GreaterEqual) {
                 std::string var1_name = std::get<std::string>(variable.value);
                 std::string var2_name = std::get<std::string>(bound.value);
                 postcondition[spec.variables[var1_name].id] = -1;
                 postcondition[spec.variables[var2_name].id] = 1;
+
+                relation.push_back('G');
               }
 
               postconditions.push_back(postcondition);
@@ -155,6 +172,8 @@ struct ASTNode {
           }
           spec.A.push_back(postconditions);
           spec.b.push_back(biases);
+
+          spec.relations.push_back(relation);
         }
       }
     }
@@ -200,6 +219,12 @@ struct ASTNode {
     for (auto i : spec.b) {
       for (auto j : i)
         std::cout << j << std::endl;
+      std::cout << std::endl;
+    }
+    std::cout << "relaiton of each postcondition: " << std::endl;
+    for (auto i : spec.relations) {
+      for (auto j : i)
+        std::cout << j;
       std::cout << std::endl;
     }
     std::cout << "-----------------------------------------------------------"

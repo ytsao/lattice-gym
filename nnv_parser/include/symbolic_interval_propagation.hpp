@@ -12,6 +12,8 @@ public:
   bool execute(Network &nnv) override {
     std::cout << "Executing Symbolic Interval Propagation..." << std::endl;
 
+    create_auxiliary_layer(nnv);
+
     for (size_t layer_idx = 0; layer_idx < nnv.layers.size(); ++layer_idx) {
       std::cout << "Processing Layer " << layer_idx << " ... " << std::endl;
       if (nnv.layers[layer_idx].type == LayerType::Sub) {
@@ -37,7 +39,7 @@ public:
       }
     }
 
-    return true;
+    return nnv.spec.check(nnv.layers.back());
   }
 };
 

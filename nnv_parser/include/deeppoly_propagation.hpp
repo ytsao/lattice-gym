@@ -12,8 +12,6 @@ public:
   bool execute(Network &nnv) override {
     std::cout << "Executing Symbolic DeepPoly Propagation..." << std::endl;
 
-    // TODO: create an additional layer to express the postconditions.
-    // Ref: the implementation I did in Marabou.
     create_auxiliary_layer(nnv);
 
     for (size_t layer_idx = 0; layer_idx < nnv.layers.size(); ++layer_idx) {

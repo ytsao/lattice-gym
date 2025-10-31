@@ -97,7 +97,6 @@ public:
             std::cout << " (weight tensor, size = (" << weights.size() << ", "
                       << weights[0].size() << ")" << ")\n";
           }
-          // layer.neurons = new Neuron[layer.layer_size];
           layer.neurons = std::vector<Neuron>(layer.layer_size);
         } else if (layer.type == LayerType::Sub) {
           std::cout << "This is a subtraction layer.\n";
@@ -116,6 +115,12 @@ public:
             }
           }
           layer.layer_size = layer.neurons.size();
+          // initialize lower & upper biases space
+          for (size_t i = 0; i < layer.layer_size; ++i) {
+            layer.biases.push_back(0.0);
+            layer.lower_biases.push_back(0.0);
+            layer.upper_biases.push_back(0.0);
+          }
         } else if (layer.type == LayerType::Relu) {
           layer.layer_size = layers[layers.size() - 1].layer_size;
           layer.neurons = std::vector<Neuron>(layer.layer_size);
@@ -200,6 +205,7 @@ public:
     Specification spec;
     ast.make_specifications(spec);
     ast.print_bounds(spec);
+
     return spec;
   }
 

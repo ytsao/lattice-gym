@@ -22,12 +22,11 @@ public:
 
   // These two objects are used in symbolic_interval_domain & deeppoly_domain.
   bool lambda = true;
-  // double *deeppoly_lower_expression;
-  // double *deeppoly_upper_expression;
 
+  bool isSymbolic = true; // It is used to identify if we need to compute the
+                          // concrete bounds in gamma function.
   // extract weights from symbolic expression by <layer_id, id>.
   // PS both ids start from 0.
-  bool isSymbolic = true;
   std::unordered_map<std::tuple<size_t, size_t>, double, TupleHash>
       symbolic_lower_expression;
   std::unordered_map<std::tuple<size_t, size_t>, double, TupleHash>

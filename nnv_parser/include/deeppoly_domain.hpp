@@ -9,11 +9,7 @@ public:
   void gamma(Network &nnv, size_t layer_idx) override {
     // Applying back-substitution to compute concrete bounds from DeepPoly
     // expressions with respect to the input layer.
-    std::cout << "  Applying back-substitution for Layer " << layer_idx
-              << " ..." << std::endl;
     back_substitution(nnv, layer_idx);
-    std::cout << " Finished back-substitution for Layer " << layer_idx << "."
-              << std::endl;
 
     return;
   }
@@ -212,8 +208,8 @@ private:
         }
       }
 
-      tmp_lower_expressions = resulting_lower_expressions;
-      tmp_upper_expressions = resulting_upper_expressions;
+      tmp_lower_expressions = std::move(resulting_lower_expressions);
+      tmp_upper_expressions = std::move(resulting_upper_expressions);
 
       resulting_lower_expressions.clear();
       resulting_upper_expressions.clear();

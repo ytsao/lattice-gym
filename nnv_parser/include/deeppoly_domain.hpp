@@ -2,6 +2,7 @@
 #define DEEPPOLY_DOMAIN_HPP
 
 #include "abstract_domain.hpp"
+#include <cassert>
 
 class DeepPolyDomain : public AbstractDomain {
 public:
@@ -24,8 +25,8 @@ public:
       current_layer.deeppoly_upper_expressions.push_back(zero_expression);
 
       // x_i = x_j;
-      current_layer.deeppoly_lower_expressions[i][i] = 1;
-      current_layer.deeppoly_upper_expressions[i][i] = 1;
+      current_layer.deeppoly_lower_expressions[i][i] = 1.0;
+      current_layer.deeppoly_upper_expressions[i][i] = 1.0;
     }
 
     return;
@@ -33,7 +34,6 @@ public:
 
   void relu_layer_transformer(const Layer &from_layer,
                               Layer &to_layer) override {
-    std::cout << "We're in relu_layer_transformer()" << std::endl;
     create_deeppoly_expressions(from_layer, to_layer);
 
     // initialize biases
@@ -42,20 +42,26 @@ public:
       to_layer.upper_biases.push_back(0.0);
     }
 
+    assert(to_layer.layer_size == from_layer.layer_size);
+
     for (size_t i = 0; i < from_layer.layer_size; ++i) {
       double lb = from_layer.neurons[i].bounds.getLb();
       double ub = from_layer.neurons[i].bounds.getUb();
 
-      if (lb >= 0.0) {
+      if (lb > 0.0) {
         to_layer.neurons[i].bounds.setLb(lb);
         to_layer.neurons[i].bounds.setUb(ub);
 
         // x_i = x_j;
-        to_layer.deeppoly_lower_expressions[i][i] = 1;
-        to_layer.deeppoly_upper_expressions[i][i] = 1;
+        to_layer.deeppoly_lower_expressions[i][i] = 1.0;
+        to_layer.deeppoly_upper_expressions[i][i] = 1.0;
       } else if (ub <= 0.0) {
         to_layer.neurons[i].bounds.setLb(0.0);
         to_layer.neurons[i].bounds.setUb(0.0);
+
+        // x_i = x_j;
+        to_layer.deeppoly_lower_expressions[i][i] = 0.0;
+        to_layer.deeppoly_upper_expressions[i][i] = 0.0;
       } else if (lb < 0.0 && ub > 0.0) {
         to_layer.neurons[i].lambda = std::abs(lb) <= ub ? true : false;
 
@@ -65,13 +71,10 @@ public:
       }
     }
 
-    std::cout << "Finished relu_layer_transformer()" << std::endl;
-
     return;
   }
   void matmul_layer_transformer(const Layer &from_layer,
                                 Layer &to_layer) override {
-    std::cout << "We're in matmul_layer_transformer()" << std::endl;
     create_deeppoly_expressions(from_layer, to_layer);
 
     if (to_layer.lower_biases.empty() && to_layer.upper_biases.empty()) {
@@ -90,8 +93,6 @@ public:
       }
     }
 
-    std::cout << "Finished matmul_layer_transformer()" << std::endl;
-
     return;
   }
   void add_layer_transformer(const Layer &from_layer,
@@ -99,19 +100,14 @@ public:
     create_deeppoly_expressions(from_layer, to_layer);
 
     for (size_t i = 0; i < from_layer.layer_size; ++i) {
-      to_layer.deeppoly_lower_expressions[i][i] = 1;
-      to_layer.deeppoly_upper_expressions[i][i] = 1;
-
-      // update the biases
-      to_layer.lower_biases[i] += from_layer.lower_biases[i];
-      to_layer.upper_biases[i] += from_layer.upper_biases[i];
+      to_layer.deeppoly_lower_expressions[i][i] = 1.0;
+      to_layer.deeppoly_upper_expressions[i][i] = 1.0;
     }
 
     return;
   }
   void gemm_layer_transformer(const Layer &from_layer,
                               Layer &to_layer) override {
-    std::cout << "We're in gemm_layer_transformer()" << std::endl;
     create_deeppoly_expressions(from_layer, to_layer);
 
     for (size_t i = 0; i < to_layer.layer_size; ++i) {
@@ -121,13 +117,7 @@ public:
         to_layer.deeppoly_lower_expressions[i][j] += weights;
         to_layer.deeppoly_upper_expressions[i][j] += weights;
       }
-
-      double bias = to_layer.biases[i];
-      to_layer.lower_biases[i] += bias;
-      to_layer.upper_biases[i] += bias;
     }
-
-    std::cout << "Finished gemm_layer_transformer()" << std::endl;
 
     return;
   }
@@ -136,10 +126,11 @@ private:
   void create_deeppoly_expressions(const Layer &from_layer, Layer &to_layer) {
     // Initialize deeppoly expressions for each neuron in the to_layer
     // The size of expressions in to_layer depends on the size of from_layer.
-    std::vector<double> zero_expression(from_layer.layer_size, 0.0);
     for (size_t i = 0; i < to_layer.layer_size; ++i) {
-      to_layer.deeppoly_lower_expressions.push_back(zero_expression);
-      to_layer.deeppoly_upper_expressions.push_back(zero_expression);
+      std::vector<double> zero_expression1(from_layer.layer_size, 0.0);
+      to_layer.deeppoly_lower_expressions.push_back(zero_expression1);
+      std::vector<double> zero_expression2(from_layer.layer_size, 0.0);
+      to_layer.deeppoly_upper_expressions.push_back(zero_expression2);
     }
 
     return;
@@ -171,7 +162,6 @@ private:
       // Initialize the size of resulting expressions
       size_t sizeOfExpression =
           nnv.layers[layer_idx - 1].deeppoly_lower_expressions[0].size();
-      std::cout << "sizeOfExpression = " << sizeOfExpression << std::endl;
       std::vector<double> zero_expression(sizeOfExpression, 0.0);
       for (size_t i = 0; i < nnv.layers[start_layer_idx].layer_size; ++i) {
         resulting_lower_expressions.push_back(zero_expression);
@@ -181,33 +171,53 @@ private:
       for (size_t i = 0; i < nnv.layers[start_layer_idx].layer_size; ++i) {
         for (size_t j = 0; j < nnv.layers[layer_idx - 1].layer_size; ++j) {
           for (size_t k = 0; k < sizeOfExpression; ++k) {
-            // TODO: we might need to consider the sign of each coefficient such
-            // that to substitute with corresponding lower or upper expressions.
-
             // Update lower expression
-            resulting_lower_expressions[i][k] +=
-                tmp_lower_expressions[i][j] *
-                nnv.layers[layer_idx - 1].deeppoly_lower_expressions[j][k];
+            if (tmp_lower_expressions[i][j] >= 0.0) {
+              resulting_lower_expressions[i][k] +=
+                  tmp_lower_expressions[i][j] *
+                  nnv.layers[layer_idx - 1].deeppoly_lower_expressions[j][k];
+            } else if (tmp_lower_expressions[i][j] < 0.0) {
+              resulting_lower_expressions[i][k] +=
+                  tmp_lower_expressions[i][j] *
+                  nnv.layers[layer_idx - 1].deeppoly_upper_expressions[j][k];
+            }
 
             // Update upper expression
-            resulting_upper_expressions[i][k] +=
-                tmp_upper_expressions[i][j] *
-                nnv.layers[layer_idx - 1].deeppoly_upper_expressions[j][k];
+            if (tmp_upper_expressions[i][j] >= 0.0) {
+              resulting_upper_expressions[i][k] +=
+                  tmp_upper_expressions[i][j] *
+                  nnv.layers[layer_idx - 1].deeppoly_upper_expressions[j][k];
+            } else if (tmp_upper_expressions[i][j] < 0.0) {
+              resulting_upper_expressions[i][k] +=
+                  tmp_upper_expressions[i][j] *
+                  nnv.layers[layer_idx - 1].deeppoly_lower_expressions[j][k];
+            }
           }
+
+          // Update lower biases;
+          if (tmp_lower_expressions[i][j] >= 0.0)
+            lower_biases[i] += tmp_lower_expressions[i][j] *
+                               nnv.layers[layer_idx - 1].lower_biases[j];
+          else if (tmp_lower_expressions[i][j] < 0.0)
+            lower_biases[i] += tmp_lower_expressions[i][j] *
+                               nnv.layers[layer_idx - 1].upper_biases[j];
+
+          // Update upper biases;
+          if (tmp_upper_expressions[i][j] >= 0.0)
+            upper_biases[i] += tmp_upper_expressions[i][j] *
+                               nnv.layers[layer_idx - 1].upper_biases[j];
+          else if (tmp_upper_expressions[i][j] < 0.0)
+            upper_biases[i] += tmp_upper_expressions[i][j] *
+                               nnv.layers[layer_idx - 1].lower_biases[j];
         }
-        lower_biases[i] += nnv.layers[layer_idx].lower_biases[i];
-        upper_biases[i] += nnv.layers[layer_idx].upper_biases[i];
       }
 
-      tmp_lower_expressions = std::move(resulting_lower_expressions);
-      tmp_upper_expressions = std::move(resulting_upper_expressions);
+      tmp_lower_expressions = resulting_lower_expressions;
+      tmp_upper_expressions = resulting_upper_expressions;
 
       resulting_lower_expressions.clear();
       resulting_upper_expressions.clear();
     }
-
-    std::cout << "After substitution, computing concrete bounds..."
-              << std::endl;
 
     for (size_t i = 0; i < nnv.layers[start_layer_idx].layer_size; ++i) {
       // compute concrete bounds;
@@ -235,8 +245,10 @@ private:
       lb += lower_biases[i];
       ub += upper_biases[i];
 
-      nnv.layers[start_layer_idx].neurons[i].bounds.setLb(lb);
-      nnv.layers[start_layer_idx].neurons[i].bounds.setUb(ub);
+      nnv.layers[start_layer_idx].neurons[i].bounds.setLb(
+          lb + nnv.layers[start_layer_idx].lower_biases[i]);
+      nnv.layers[start_layer_idx].neurons[i].bounds.setUb(
+          ub + nnv.layers[start_layer_idx].upper_biases[i]);
     }
 
     return;

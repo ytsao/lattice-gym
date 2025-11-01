@@ -1,61 +1,63 @@
 #include "deeppoly_propagation.hpp"
+#include "log.hpp"
 #include "naive_interval_propagation.hpp"
 #include "network.hpp"
 #include "symbolic_interval_propagation.hpp"
 #include "utility.hpp"
-#include <iostream>
 
 void verify(const std::string &vnnlib_path, const std::string &onnx_path,
             const std::string &propagation_method, size_t &num_verified) {
   // create network object and parse vnnlib & onnx file.
   Network nnv;
 
-  std::cout << "Parsing vnnlib: " << vnnlib_path << " ..." << std::endl;
+  Logger::log(Logger::Level::INFO, "Parsing vnnlib: " + vnnlib_path + " ...");
   if (!nnv.read_vnnlib(vnnlib_path)) {
-    std::cerr << "Error: Could not parse vnnlib file " << vnnlib_path
-              << std::endl;
+    Logger::log(Logger::Level::ERROR,
+                "Could not parse vnnlib file " + vnnlib_path);
     return;
   }
-  std::cout << "Parsing vnnlib is done." << std::endl;
-  std::cout << "Parsing onnx: " << onnx_path << " ..." << std::endl;
+  Logger::log(Logger::Level::INFO, "Parsing vnnlib is done.");
+  Logger::log(Logger::Level::INFO, "Parsing onnx: " + onnx_path + " ...");
   if (!nnv.read_onnx(onnx_path)) {
-    std::cerr << "Error: Could not parse onnx file " << onnx_path << std::endl;
+    Logger::log(Logger::Level::ERROR, "Could not parse onnx file " + onnx_path);
     return;
   }
-  std::cout << "Parsing onnx is done." << std::endl;
+  Logger::log(Logger::Level::INFO, "Pasring onnx is done.");
 
   // Execute the propagation method.
   if (std::strcmp(propagation_method.c_str(), "ibp") == 0) {
     NaiveIntervalPropagation ibp;
     if (ibp.execute(nnv)) {
-      std::cout << "The naive_interval_propagation result is UNSAT."
-                << std::endl;
+      Logger::log(Logger::Level::INFO,
+                  "The naive interval propagation result is UNSAT");
       num_verified++;
     } else {
-      std::cerr << "The naive_interval_propagation is not able to have "
-                   "a conclusive verification result."
-                << std::endl;
+      Logger::log(Logger::Level::WARN,
+                  "The naive interval propagation result is not able to have a "
+                  "conclusive verification result.");
     }
   } else if (std::strcmp(propagation_method.c_str(), "sip") == 0) {
     SymbolicIntervalPropagation sip;
     if (sip.execute(nnv)) {
-      std::cout << "The symbolic_interval_propagation result is UNSAT."
-                << std::endl;
+      Logger::log(Logger::Level::INFO,
+                  "The symbolic interval propagation result is UNSAT");
       num_verified++;
     } else {
-      std::cerr << "The symbolic_interval_propagation is not able to have a "
-                   "conclusive verification result."
-                << std::endl;
+      Logger::log(
+          Logger::Level::WARN,
+          "The symbolic interval propagation result is not able to have a "
+          "conclusive verification result.");
     }
   } else if (std::strcmp(propagation_method.c_str(), "deeppoly") == 0) {
     DeepPolyPropagation deeppoly;
     if (deeppoly.execute(nnv)) {
-      std::cout << "The deeppoly_propagation result is UNSAT." << std::endl;
+      Logger::log(Logger::Level::INFO,
+                  "The deeppoly propagation result is UNSAT");
       num_verified++;
     } else {
-      std::cerr << "The deeppoly_propagation is not able to have a conlcusive "
-                   "verification result."
-                << std::endl;
+      Logger::log(Logger::Level::WARN,
+                  "The deeppoly propagation result is not able to have a "
+                  "conclusive verification result.");
     }
   }
   // nnv.dump_all_bounds();
@@ -74,13 +76,14 @@ int main(int argc, char *argv[]) {
     for (Utility::TaskEntry task : tasks) {
       verify(task.vnnlib_path, task.onnx_path, task.propagation_method,
              num_verified);
-      std::cout << "Number of verified: " << num_verified << std::endl;
     }
   } else if (argc == 4) {
     verify(argv[1], argv[2], argv[3], num_verified);
   } else {
-    std::cerr << "Error: unknown configuration." << std::endl;
+    Logger::log(Logger::Level::ERROR, "Unknown configuration.");
   }
+  Logger::log(Logger::Level::INFO,
+              "Number of verified: " + std::to_string(num_verified));
 
   return 0;
 }

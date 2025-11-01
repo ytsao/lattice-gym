@@ -104,14 +104,15 @@ public:
         } else if (layer.type == LayerType::Flatten) {
           // This is the input layer.
           std::cout << "This is a flatten layer.\n";
+          layer.neurons = std::vector<Neuron>(spec.numberOfInputs);
           for (const auto &variable : spec.variables) {
             if (variable.first.substr(0, 1) == "X") {
-              // show the preconditions
-              std::cout << variable.second.id << ": ["
-                        << variable.second.bounds.getLb() << ", "
-                        << variable.second.bounds.getUb() << "]\n";
+              // // show the preconditions
+              // std::cout << variable.second.id << ": ["
+              //           << variable.second.bounds.getLb() << ", "
+              //           << variable.second.bounds.getUb() << "]\n";
 
-              layer.neurons.push_back(variable.second);
+              layer.neurons[variable.second.id] = variable.second;
             }
           }
           layer.layer_size = layer.neurons.size();
@@ -194,7 +195,7 @@ public:
                 << " in rule " << rule << std::endl;
     });
 
-    std::cout << input.c_str() << std::endl;
+    // std::cout << input.c_str() << std::endl;
     ASTNode ast;
     if (parser.parse(input.c_str(), ast)) {
       std::cout << "Parsing succeeded!" << std::endl;

@@ -21,27 +21,29 @@ public:
       } else if (nnv.layers[layer_idx].type == LayerType::Flatten) {
         a.flatten_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Relu) {
+        a.gamma(nnv, layer_idx - 1);
         a.relu_layer_transformer(nnv.layers[layer_idx - 1],
                                  nnv.layers[layer_idx]);
-        a.gamma(nnv, layer_idx);
+        // a.gamma(nnv, layer_idx);
       } else if (nnv.layers[layer_idx].type == LayerType::MatMul) {
         a.matmul_layer_transformer(nnv.layers[layer_idx - 1],
                                    nnv.layers[layer_idx]);
-        a.gamma(nnv, layer_idx);
+        // a.gamma(nnv, layer_idx);
       } else if (nnv.layers[layer_idx].type == LayerType::Add) {
         a.add_layer_transformer(nnv.layers[layer_idx - 1],
                                 nnv.layers[layer_idx]);
-        a.gamma(nnv, layer_idx);
+        // a.gamma(nnv, layer_idx);
       } else if (nnv.layers[layer_idx].type == LayerType::Gemm) {
         a.gemm_layer_transformer(nnv.layers[layer_idx - 1],
                                  nnv.layers[layer_idx]);
-        a.gamma(nnv, layer_idx);
+        // a.gamma(nnv, layer_idx);
       } else {
         Logger::log(Logger::ERROR, "Unknown layer type!");
         return false;
       }
     }
 
+    a.gamma(nnv, nnv.layers.size() - 1);
     return nnv.spec.check(nnv.layers.back());
   }
 };

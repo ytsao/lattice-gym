@@ -17,9 +17,31 @@ protected:
 
     if (nnv.spec.A.empty()) {
       // For prop_1.vnnlib
-      // TODO: we could still to create an auxiliary layer.
-      Logger::log(Logger::Level::WARN,
-                  " No postconditions specified. Skipping auxiliary layer.");
+      for (const auto &output_var : nnv.spec.variables) {
+        if (output_var.first.substr(0, 1) == "Y") {
+          double spec_lb = output_var.second.bounds.getLb();
+          double spec_ub = output_var.second.bounds.getUb();
+          if (spec_lb != 0) {
+            auxiliary_layer.layer_size++;
+            Neuron neuron;
+            neuron.setId(output_var.second.id);
+            auxiliary_layer.neurons.push_back(neuron);
+            auxiliary_layer.biases.push_back(spec_lb);
+            auxiliary_layer.lower_biases.push_back(spec_lb);
+            auxiliary_layer.upper_biases.push_back(spec_lb);
+          }
+        }
+      }
+
+      // create weights link
+      std::vector<float> zero_weights(nnv.output_size, 0.0f);
+      for (size_t i = 0; i < auxiliary_layer.layer_size; ++i) {
+        auxiliary_layer.weights.push_back(zero_weights);
+        auxiliary_layer.weights[i][i] = -1.0;
+      }
+
+      nnv.layers.push_back(auxiliary_layer);
+
       return;
     }
 

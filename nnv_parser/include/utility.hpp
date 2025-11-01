@@ -2,10 +2,11 @@
 #define UTILITY_HPP
 
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "log.hpp"
 
 namespace Utility {
 
@@ -20,7 +21,7 @@ inline std::vector<TaskEntry> read_csv(const std::string &filename) {
   std::ifstream file(filename);
 
   if (!file.is_open()) {
-    std::cerr << "[Error] Cannot open file: " << filename << "\n";
+    Logger::log(Logger::Level::ERROR, "Cannot open file: " + filename);
     return entries;
   }
 
@@ -42,9 +43,9 @@ inline std::vector<TaskEntry> read_csv(const std::string &filename) {
 
 inline void print_tasks(const std::vector<TaskEntry> &tasks) {
   for (const auto &t : tasks) {
-    std::cout << "VNNLIB: " << t.vnnlib_path << "\nONNX: " << t.onnx_path
-              << "\nPropagation method: " << t.propagation_method
-              << "\n--------------------\n";
+    Logger::log(Logger::Level::INFO,
+                "\nVNNLIB: " + t.vnnlib_path + "\nONNX: " + t.onnx_path +
+                    "\nPropagation method: " + t.propagation_method);
   }
 }
 

@@ -1,6 +1,7 @@
 #ifndef PROPAGATION_HPP
 #define PROPAGATION_HPP
 
+#include "log.hpp"
 #include "network.hpp"
 
 class Propagation {
@@ -16,8 +17,9 @@ protected:
 
     if (nnv.spec.A.empty()) {
       // For prop_1.vnnlib
-      std::cout << "  No postconditions specified. Skipping auxiliary layer."
-                << std::endl;
+      // TODO: we could still to create an auxiliary layer.
+      Logger::log(Logger::Level::WARN,
+                  " No postconditions specified. Skipping auxiliary layer.");
       return;
     }
 
@@ -69,16 +71,7 @@ protected:
         }
       }
     }
-
     nnv.layers.push_back(auxiliary_layer);
-
-    // // print weights of the auxiliary layer
-    // for (auto weights_row : auxiliary_layer.weights) {
-    //   for (auto weight : weights_row) {
-    //     std::cout << weight << ", ";
-    //   }
-    //   std::cout << std::endl;
-    // }
 
     return;
   }

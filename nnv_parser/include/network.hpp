@@ -2,10 +2,10 @@
 #define NETWORK_STRUCTURE_HPP
 
 #include "layer.hpp"
+#include "log.hpp"
 #include "parser.hpp"
 #include "specifications.hpp"
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -19,8 +19,8 @@ public:
   bool read_vnnlib(std::string vnnlib_filename) {
     std::fstream vnnlib_file(vnnlib_filename);
     if (!vnnlib_file.is_open()) {
-      std::cerr << "Error: Could not open file " << vnnlib_filename
-                << std::endl;
+      Logger::log(Logger::Level::ERROR,
+                  "Could not open file " + vnnlib_filename);
       return false;
     }
 
@@ -49,17 +49,26 @@ public:
 
   void dump_bounds_at_layer(size_t layer_id) {
     if (layer_id >= layers.size()) {
-      std::cerr << "Error: Layer ID " << layer_id << " is out of range."
-                << std::endl;
+      Logger::log(Logger::Level::ERROR,
+                  "Layer id " + std::to_string(layer_id) + " is out of range.");
       return;
     }
     for (size_t neuron_id = 0; neuron_id < layers[layer_id].layer_size;
          ++neuron_id) {
-      std::cout << "Layer " << layer_id << ", Neuron " << neuron_id << " : ["
-                << layers[layer_id].neurons[neuron_id].bounds.getLb() << ", "
-                << layers[layer_id].neurons[neuron_id].bounds.getUb() << "]\n";
-      std::cout << "Bias: [" << layers[layer_id].lower_biases[neuron_id] << ", "
-                << layers[layer_id].upper_biases[neuron_id] << "] \n";
+      Logger::log(Logger::Level::INFO,
+                  "Layer " + std::to_string(layer_id) + ", Neuron " +
+                      std::to_string(neuron_id) + " : [" +
+                      std::to_string(
+                          layers[layer_id].neurons[neuron_id].bounds.getLb()) +
+                      ", " +
+                      std::to_string(
+                          layers[layer_id].neurons[neuron_id].bounds.getUb()) +
+                      "]");
+      Logger::log(
+          Logger::Level::INFO,
+          "Bias: [" + std::to_string(layers[layer_id].lower_biases[neuron_id]) +
+              ", " + std::to_string(layers[layer_id].upper_biases[neuron_id]) +
+              "]");
     }
     return;
   }

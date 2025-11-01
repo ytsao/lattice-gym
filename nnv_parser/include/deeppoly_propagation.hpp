@@ -2,15 +2,16 @@
 #define DEEPPOLY_PROPAGATION_HPP
 
 #include "deeppoly_domain.hpp"
+#include "log.hpp"
 #include "propagation.hpp"
-#include <iostream>
 
 class DeepPolyPropagation : public Propagation {
 public:
   DeepPolyDomain a;
 
   bool execute(Network &nnv) override {
-    std::cout << "Executing Symbolic DeepPoly Propagation..." << std::endl;
+    Logger::log(Logger::Level::INFO,
+                "Executing symbolic deepPoly propagation ...");
 
     create_auxiliary_layer(nnv);
 
@@ -35,6 +36,9 @@ public:
         a.gemm_layer_transformer(nnv.layers[layer_idx - 1],
                                  nnv.layers[layer_idx]);
         a.gamma(nnv, layer_idx);
+      } else {
+        Logger::log(Logger::ERROR, "Unknown layer type!");
+        return false;
       }
     }
 

@@ -1,7 +1,7 @@
 #ifndef INTERVAL_HPP
 #define INTERVAL_HPP
 
-#include <iostream>
+#include "log.hpp"
 
 struct Interval {
 public:
@@ -36,8 +36,9 @@ public:
     }
   }
 
-  void print() const {
-    std::cout << "[" << lb << ", " << ub << "]" << std::endl;
+  void dump() const {
+    Logger::log(Logger::Level::INFO,
+                "[" + std::to_string(lb) + ", " + std::to_string(ub) + "]");
   }
 
 private:

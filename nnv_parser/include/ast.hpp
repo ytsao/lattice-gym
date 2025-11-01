@@ -3,11 +3,11 @@
 
 #include <assert.h>
 #include <cmath>
-#include <iostream>
 #include <string>
 #include <variant>
 #include <vector>
 
+#include "log.hpp"
 #include "specifications.hpp"
 
 enum class BinaryOp { LessEqual, GreaterEqual };
@@ -185,28 +185,14 @@ struct ASTNode {
     return;
   }
 
-  void print_bounds(Specification &spec) const {
-    std::cout << "-----------------------------------------------------------"
-              << std::endl;
-    std::cout << "number of inputs = " << spec.numberOfInputs << std::endl;
-    std::cout << "number of outputs = " << spec.numberOfOutputs << std::endl;
-    std::cout << "-----------------------------------------------------------"
-              << std::endl;
-    for (auto variable = spec.variables.begin();
-         variable != spec.variables.end(); variable++) {
-      std::cout << variable->first << " (id = " << variable->second.id << " )";
-      // for (auto bound : variable->second.bounds) {
-      //   std::cout << " = " << "[ " << bound.getLb() << ", " << bound.getUb()
-      //             << " ]" << std::endl;
-      // }
-      std::cout << " = " << "[ " << variable->second.bounds.getLb() << ", "
-                << variable->second.bounds.getUb() << " ]" << std::endl;
-    }
-    std::cout << "-----------------------------------------------------------"
-              << std::endl;
-    std::cout << std::endl;
-    std::cout << "Postconditions matrix and bias: " << std::endl;
-    std::cout << "A matrix: " << std::endl;
+  void dump_spec_bounds(Specification &spec) const {
+    Logger::log(Logger::Level::INFO,
+                "number of inputs = " + std::to_string(spec.numberOfInputs));
+    Logger::log(Logger::Level::INFO,
+                "number of outputs = " + std::to_string(spec.numberOfOutputs));
+
+    Logger::log(Logger::Level::INFO, "Postconditions matrix and bias: ");
+    Logger::log(Logger::Level::INFO, "A matrix: ");
     for (auto i : spec.A) {
       for (auto j : i) {
         for (auto k : j)
@@ -215,20 +201,21 @@ struct ASTNode {
       }
       std::cout << std::endl;
     }
-    std::cout << "b vector: " << std::endl;
+
+    Logger::log(Logger::Level::INFO, "b vector: ");
     for (auto i : spec.b) {
       for (auto j : i)
         std::cout << j << std::endl;
       std::cout << std::endl;
     }
-    std::cout << "relaiton of each postcondition: " << std::endl;
+
+    Logger::log(Logger::Level::INFO, "relation of each postcondition: ");
     for (auto i : spec.relations) {
       for (auto j : i)
         std::cout << j;
       std::cout << std::endl;
     }
-    std::cout << "-----------------------------------------------------------"
-              << std::endl;
+
     return;
   }
 };

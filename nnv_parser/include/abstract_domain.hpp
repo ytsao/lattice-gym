@@ -1,7 +1,6 @@
 #ifndef ABSTRACT_DOMAIN_HPP
 #define ABSTRACT_DOMAIN_HPP
 
-// #include "layer.hpp"
 #include "network.hpp"
 
 class AbstractDomain {

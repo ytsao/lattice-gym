@@ -1,16 +1,17 @@
 #ifndef SYMBOLIC_INTERVAL_PROPAGATION_HPP
 #define SYMBOLIC_INTERVAL_PROPAGATION_HPP
 
+#include "log.hpp"
 #include "propagation.hpp"
 #include "symbolic_interval_domain.hpp"
-#include <iostream>
 
 class SymbolicIntervalPropagation : public Propagation {
 public:
   SymbolicIntervalDomain a;
 
   bool execute(Network &nnv) override {
-    std::cout << "Executing Symbolic Interval Propagation..." << std::endl;
+    Logger::log(Logger::Level::INFO,
+                "Executing symbolic interval propagation ...");
 
     create_auxiliary_layer(nnv);
 
@@ -35,6 +36,9 @@ public:
         a.gemm_layer_transformer(nnv.layers[layer_idx - 1],
                                  nnv.layers[layer_idx]);
         a.gamma(nnv, layer_idx);
+      } else {
+        Logger::log(Logger::ERROR, "Unknown layer type!");
+        return false;
       }
     }
 

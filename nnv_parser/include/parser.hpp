@@ -5,11 +5,11 @@
 
 #include "peglib.h"
 #include <assert.h>
-#include <iostream>
 #include <stdexcept>
 
 #include "ast.hpp"
 #include "layer.hpp"
+#include "log.hpp"
 #include "specifications.hpp"
 
 #include "../dep/onnx-1.15.0/onnx.proto3.pb.h"
@@ -29,20 +29,22 @@ public:
     std::ifstream input(model_path, std::ios::in | std::ios::binary);
 
     if (!input) {
-      std::cerr << "Failed to open: " << model_path << std::endl;
+      Logger::log(Logger::Level::ERROR, "Failed to open: " + model_path);
       return false;
     }
 
     if (!model.ParseFromIstream(&input)) {
-      std::cerr << "Failed to parse ONNX file." << std::endl;
+      Logger::log(Logger::Level::ERROR, "Failed to parse ONNX file.");
       return false;
     }
 
     const onnx::GraphProto &graph = model.graph();
-    std::cout << "Model name: " << graph.name() << "\n";
-    std::cout << "Number of nodes: " << graph.node_size() << "\n";
-    std::cout << "Number of initializers (weights/biases): "
-              << graph.initializer_size() << "\n\n";
+    Logger::log(Logger::Level::INFO, "Model name: " + graph.name());
+    Logger::log(Logger::Level::INFO,
+                "Number of nodes: " + std::to_string(graph.node_size()));
+    Logger::log(Logger::Level::INFO,
+                "Number of initializers (weights/biases): " +
+                    std::to_string(graph.initializer_size()));
 
     // --- Create a map from tensor name to TensorProto for fast lookup ---
     std::unordered_map<std::string, onnx::TensorProto> tensor_map;
@@ -52,8 +54,8 @@ public:
 
     // --- Iterate over nodes (layers) ---
     for (const auto &node : graph.node()) {
-      std::cout << "Node: " << node.name() << " | OpType: " << node.op_type()
-                << "\n";
+      Logger::log(Logger::Level::INFO,
+                  "Node: " + node.name() + "| OpType: " + node.op_type());
 
       Layer layer;
       if (node.op_type() == "Sub") {
@@ -76,7 +78,7 @@ public:
       // TODO: modify the rule to identify differnet types of layers.
       // Print inputs and outputs
       for (const auto &input_name : node.input()) {
-        std::cout << "  Input: " << input_name << "\n";
+        Logger::log(Logger::Level::INFO, "Input: " + input_name);
 
         // If the input is a weight tensor
         if (tensor_map.find(input_name) != tensor_map.end()) {
@@ -87,31 +89,27 @@ public:
             layer.lower_biases = biases;
             layer.upper_biases = biases;
             layer.layer_size = biases.size();
-            std::cout << " (bias tensor, size = " << biases.size() << ")\n";
+            Logger::log(
+                Logger::Level::INFO,
+                " (bias tensor, size = " + std::to_string(biases.size()) + ")");
           } else if (tensor.dims().size() == 2) {
             std::vector<std::vector<float>> weights =
                 extract2DTensorData(tensor);
             layer.weights = weights;
             // (output_dimension, input_dimension);
             layer.layer_size = weights[0].size();
-            std::cout << " (weight tensor, size = (" << weights.size() << ", "
-                      << weights[0].size() << ")" << ")\n";
+            Logger::log(Logger::Level::INFO,
+                        " (weight tensor, size = <" +
+                            std::to_string(weights.size()) + ", " +
+                            std::to_string(weights[0].size()) + ">)");
           }
           layer.neurons = std::vector<Neuron>(layer.layer_size);
         } else if (layer.type == LayerType::Sub) {
-          std::cout << "This is a subtraction layer.\n";
           continue;
         } else if (layer.type == LayerType::Flatten) {
-          // This is the input layer.
-          std::cout << "This is a flatten layer.\n";
           layer.neurons = std::vector<Neuron>(spec.numberOfInputs);
           for (const auto &variable : spec.variables) {
             if (variable.first.substr(0, 1) == "X") {
-              // // show the preconditions
-              // std::cout << variable.second.id << ": ["
-              //           << variable.second.bounds.getLb() << ", "
-              //           << variable.second.bounds.getUb() << "]\n";
-
               layer.neurons[variable.second.id] = variable.second;
             }
           }
@@ -125,12 +123,11 @@ public:
         } else if (layer.type == LayerType::Relu) {
           layer.layer_size = layers[layers.size() - 1].layer_size;
           layer.neurons = std::vector<Neuron>(layer.layer_size);
-          std::cout << "This is an acitvation layer.\n";
         }
       }
 
       for (const auto &output_name : node.output()) {
-        std::cout << "  Output: " << output_name << "\n";
+        Logger::log(Logger::Level::INFO, "  Output: " + output_name);
       }
 
       // update neuron index and layer index
@@ -140,7 +137,6 @@ public:
       }
 
       layers.push_back(layer);
-      std::cout << "---------------------------------------\n";
     }
 
     google::protobuf::ShutdownProtobufLibrary();
@@ -191,21 +187,21 @@ public:
     parser["Assertion"] = [this](const SV &sv) { return make_assertion(sv); };
     parser.set_logger([](size_t line, size_t col, const std::string &msg,
                          const std::string &rule) {
-      std::cerr << "Error at line " << line << ", column " << col << ": " << msg
-                << " in rule " << rule << std::endl;
+      Logger::log(Logger::Level::ERROR, "at line " + std::to_string(line) +
+                                            ", column " + std::to_string(col) +
+                                            ": " + msg + " in rule " + rule);
     });
 
     // std::cout << input.c_str() << std::endl;
     ASTNode ast;
-    if (parser.parse(input.c_str(), ast)) {
-      std::cout << "Parsing succeeded!" << std::endl;
-    } else {
-      std::cerr << "Parsing failed!" << std::endl;
-    }
-
     Specification spec;
-    ast.make_specifications(spec);
-    ast.print_bounds(spec);
+    if (parser.parse(input.c_str(), ast)) {
+      Logger::log(Logger::Level::INFO, "Parsing succeeded!");
+      ast.make_specifications(spec);
+      ast.dump_spec_bounds(spec);
+    } else {
+      Logger::log(Logger::Level::WARN, "Parsing failed!");
+    }
 
     return spec;
   }

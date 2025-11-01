@@ -6,9 +6,11 @@
 
 enum class LayerType {
   Sub,
+  Div,
   MatMul,
   Add,
   Gemm,
+  Conv,
   Flatten,
   Relu,
 };

@@ -30,6 +30,15 @@ protected:
             auxiliary_layer.lower_biases.push_back(spec_lb);
             auxiliary_layer.upper_biases.push_back(spec_lb);
           }
+          if (spec_ub != 0) {
+            auxiliary_layer.layer_size++;
+            Neuron neuron;
+            neuron.setId(output_var.second.id);
+            auxiliary_layer.neurons.push_back(neuron);
+            auxiliary_layer.biases.push_back(-spec_ub);
+            auxiliary_layer.lower_biases.push_back(-spec_ub);
+            auxiliary_layer.upper_biases.push_back(-spec_ub);
+          }
         }
       }
 
@@ -37,7 +46,10 @@ protected:
       std::vector<float> zero_weights(nnv.output_size, 0.0f);
       for (size_t i = 0; i < auxiliary_layer.layer_size; ++i) {
         auxiliary_layer.weights.push_back(zero_weights);
-        auxiliary_layer.weights[i][i] = -1.0;
+        if (auxiliary_layer.lower_biases[i] > 0)
+          auxiliary_layer.weights[i][i] = -1.0;
+        else if (auxiliary_layer.lower_biases[i] < 0)
+          auxiliary_layer.weights[i][i] = 1.0;
       }
 
       nnv.layers.push_back(auxiliary_layer);

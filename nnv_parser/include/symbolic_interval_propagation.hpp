@@ -18,6 +18,8 @@ public:
     for (size_t layer_idx = 0; layer_idx < nnv.layers.size(); ++layer_idx) {
       if (nnv.layers[layer_idx].type == LayerType::Sub) {
         a.subtraction_layer_transformer(nnv.layers[layer_idx]);
+      } else if (nnv.layers[layer_idx].type == LayerType::Div) {
+        a.division_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Flatten) {
         a.flatten_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Relu) {
@@ -36,6 +38,9 @@ public:
         a.gemm_layer_transformer(nnv.layers[layer_idx - 1],
                                  nnv.layers[layer_idx]);
         a.gamma(nnv, layer_idx);
+      } else if (nnv.layers[layer_idx].type == LayerType::Conv) {
+        a.convolutional_layer_transformer(nnv.layers[layer_idx - 1],
+                                          nnv.layers[layer_idx]);
       } else {
         Logger::log(Logger::ERROR, "Unknown layer type!");
         return false;

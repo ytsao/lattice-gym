@@ -63,6 +63,10 @@ public:
         // Because in this project, Sub layer contains only zero.
         layer.type = LayerType::Sub;
         continue;
+      } else if (node.op_type() == "Div") {
+        layer.type = LayerType::Div;
+      } else if (node.op_type() == "Constant") {
+        layer.type = LayerType::Constant;
       } else if (node.op_type() == "Flatten") {
         layer.type = LayerType::Flatten;
       } else if (node.op_type() == "MatMul") {
@@ -71,6 +75,8 @@ public:
         layer.type = LayerType::Add;
       } else if (node.op_type() == "Gemm") {
         layer.type = LayerType::Gemm;
+      } else if (node.op_type() == "Conv") {
+        layer.type = LayerType::Conv;
       } else if (node.op_type() == "Relu") {
         layer.type = LayerType::Relu;
       }
@@ -106,6 +112,10 @@ public:
           layer.neurons = std::vector<Neuron>(layer.layer_size);
         } else if (layer.type == LayerType::Sub) {
           continue;
+        } else if (layer.type == LayerType::Div) {
+          continue;
+        } else if (layer.type == LayerType::Constant) {
+          continue;
         } else if (layer.type == LayerType::Flatten) {
           layer.neurons = std::vector<Neuron>(spec.numberOfInputs);
           for (const auto &variable : spec.variables) {
@@ -120,6 +130,8 @@ public:
             layer.lower_biases.push_back(0.0);
             layer.upper_biases.push_back(0.0);
           }
+        } else if (layer.type == LayerType::Conv) {
+          continue;
         } else if (layer.type == LayerType::Relu) {
           layer.layer_size = layers[layers.size() - 1].layer_size;
           layer.neurons = std::vector<Neuron>(layer.layer_size);

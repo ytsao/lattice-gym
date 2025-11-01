@@ -7,6 +7,7 @@
 enum class LayerType {
   Sub,
   Div,
+  Constant,
   MatMul,
   Add,
   Gemm,

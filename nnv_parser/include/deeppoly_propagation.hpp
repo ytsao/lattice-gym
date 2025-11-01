@@ -20,6 +20,8 @@ public:
         a.subtraction_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Div) {
         a.division_layer_transformer(nnv.layers[layer_idx]);
+      } else if (nnv.layers[layer_idx].type == LayerType::Constant) {
+        a.constant_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Flatten) {
         a.flatten_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Relu) {

@@ -19,6 +19,9 @@ public:
   virtual void division_layer_transformer(const Layer &current_layer) {
     return;
   }
+  virtual void constant_layer_transformer(const Layer &current_layer) {
+    return;
+  }
   virtual void flatten_layer_transformer(const Layer &current_layer) {
     return;
   };

@@ -151,7 +151,8 @@ private:
                                     0.0);
     std::vector<float> upper_biases(nnv.layers[start_layer_idx].layer_size,
                                     0.0);
-    for (size_t layer_idx = start_layer_idx; layer_idx > 0; --layer_idx) {
+    for (size_t layer_idx = start_layer_idx; layer_idx > nnv.input_layer_id;
+         --layer_idx) {
       // We do matrix multiplication from the start_layer_idx down to the input
       // layer.
 
@@ -223,19 +224,19 @@ private:
         // lb
         if (tmp_lower_expressions[i][j] >= 0) {
           lb += tmp_lower_expressions[i][j] *
-                nnv.layers[0].neurons[j].bounds.getLb();
+                nnv.layers[nnv.input_layer_id].neurons[j].bounds.getLb();
         } else {
           lb += tmp_lower_expressions[i][j] *
-                nnv.layers[0].neurons[j].bounds.getUb();
+                nnv.layers[nnv.input_layer_id].neurons[j].bounds.getUb();
         }
 
         // ub
         if (tmp_upper_expressions[i][j] >= 0) {
           ub += tmp_upper_expressions[i][j] *
-                nnv.layers[0].neurons[j].bounds.getUb();
+                nnv.layers[nnv.input_layer_id].neurons[j].bounds.getUb();
         } else {
           ub += tmp_upper_expressions[i][j] *
-                nnv.layers[0].neurons[j].bounds.getLb();
+                nnv.layers[nnv.input_layer_id].neurons[j].bounds.getLb();
         }
       }
       lb += lower_biases[i];

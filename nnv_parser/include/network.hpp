@@ -15,6 +15,7 @@ public:
   Specification spec;
   size_t input_size;
   size_t output_size;
+  size_t input_layer_id;
 
   bool read_vnnlib(std::string vnnlib_filename) {
     std::fstream vnnlib_file(vnnlib_filename);
@@ -37,7 +38,16 @@ public:
   }
 
   bool read_onnx(std::string onnx_filename) {
-    return parser.load_network(onnx_filename, spec, layers);
+    bool bresult = parser.load_network(onnx_filename, spec, layers);
+    if (bresult) {
+      for (size_t i = 0; i < layers.size(); ++i) {
+        if (layers[i].type == LayerType::Flatten) {
+          input_layer_id = i;
+          break;
+        }
+      }
+    }
+    return bresult;
   }
 
   void dump_all_bounds() {

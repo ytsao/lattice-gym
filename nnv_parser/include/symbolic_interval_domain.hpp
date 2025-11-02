@@ -57,8 +57,32 @@ public:
     return;
   }
 
+  void subtraction_layer_transformer(const Layer &from_layer,
+                                     Layer &to_layer) override {
+    for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
+      to_layer.sub_values.push_back(from_layer.sub_values[i]);
+    }
+  }
+
+  void division_layer_transformer(const Layer &from_layer,
+                                  Layer &to_layer) override {
+    for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
+      to_layer.sub_values.push_back(from_layer.sub_values[i]);
+      to_layer.div_values.push_back(from_layer.div_values[i]);
+    }
+  }
+
   void flatten_layer_transformer(Layer &current_layer) override {
-    // Add symbolic expression in the input layer
+    // Normalization
+    for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
+      for (size_t i = 0; i < current_layer.layer_size; ++i) {
+        current_layer.neurons[i].bounds =
+            (current_layer.neurons[i].bounds - current_layer.sub_values[dim]) /
+            current_layer.div_values[i];
+      }
+    }
+
+    // Add symbolic expression in the input layer.
     for (size_t i = 0; i < current_layer.layer_size; ++i) {
       current_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
           current_layer.neurons[i].layer_id, current_layer.neurons[i].id)] =

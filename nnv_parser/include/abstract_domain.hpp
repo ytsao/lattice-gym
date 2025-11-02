@@ -13,16 +13,19 @@ public:
    * */
   virtual void gamma(Network &nnv, const size_t layer_idx) { return; }
 
-  virtual void subtraction_layer_transformer(const Layer &current_layer) {
+  virtual void subtraction_layer_transformer(const Layer &from_layer,
+                                             Layer &to_layer) {
     return;
   };
-  virtual void division_layer_transformer(const Layer &current_layer) {
+  virtual void division_layer_transformer(const Layer &from_layer,
+                                          Layer &to_layer) {
     return;
   }
   virtual void constant_layer_transformer(const Layer &current_layer) {
     return;
   }
-  virtual void flatten_layer_transformer(const Layer &current_layer) {
+  virtual void flatten_layer_transformer(const Layer &from_layer,
+                                         Layer &to_layer) {
     return;
   };
   virtual void flatten_layer_transformer(Layer &current_layer) { return; };

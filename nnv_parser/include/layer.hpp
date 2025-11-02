@@ -19,6 +19,11 @@ enum class LayerType {
 struct Layer {
 public:
   LayerType type;
+
+  // for colorful images, we have 3 values
+  std::vector<float> sub_values;
+  std::vector<float> div_values;
+
   std::vector<std::vector<float>> weights;
   std::vector<float> biases;
   std::vector<float> lower_biases;

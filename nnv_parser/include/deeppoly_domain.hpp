@@ -14,7 +14,32 @@ public:
     return;
   }
 
+  void subtraction_layer_transformer(const Layer &from_layer,
+                                     Layer &to_layer) override {
+    for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
+      to_layer.sub_values.push_back(from_layer.sub_values[i]);
+    }
+  }
+
+  void division_layer_transformer(const Layer &from_layer,
+                                  Layer &to_layer) override {
+    for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
+      to_layer.sub_values.push_back(from_layer.sub_values[i]);
+      to_layer.div_values.push_back(from_layer.div_values[i]);
+    }
+  }
+
   void flatten_layer_transformer(Layer &current_layer) override {
+    // Normalization
+    for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
+      for (size_t i = 0; i < current_layer.layer_size; ++i) {
+        current_layer.neurons[i].bounds =
+            (current_layer.neurons[i].bounds - current_layer.sub_values[dim]) /
+            current_layer.div_values[i];
+      }
+    }
+
+    // Add deeppoly symbolic expressions into the input layer.
     std::vector<double> zero_expression(current_layer.layer_size, 0.0);
     for (size_t i = 0; i < current_layer.layer_size; ++i) {
       current_layer.deeppoly_lower_expressions.push_back(zero_expression);

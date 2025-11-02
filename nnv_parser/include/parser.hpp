@@ -52,6 +52,14 @@ public:
       tensor_map[initializer.name()] = initializer;
     }
 
+    // --- Build a map from tensor name → node that produces it
+    // This is for linking sub/div node and its input nodes.
+    std::unordered_map<std::string, const onnx::NodeProto *> producer_map;
+    for (const auto &node : graph.node()) {
+      if (node.output_size() > 0)
+        producer_map[node.output(0)] = &node;
+    }
+
     // --- Iterate over nodes (layers) ---
     for (const auto &node : graph.node()) {
       Logger::log(Logger::Level::INFO,
@@ -59,14 +67,14 @@ public:
 
       Layer layer;
       if (node.op_type() == "Sub") {
-        // We're not adding sub layer into layers.
-        // Because in this project, Sub layer contains only zero.
         layer.type = LayerType::Sub;
-        continue;
       } else if (node.op_type() == "Div") {
         layer.type = LayerType::Div;
       } else if (node.op_type() == "Constant") {
-        layer.type = LayerType::Constant;
+        // We are not adding Constant layer into layers.
+        // Instead, we merge constant layer and its corresponding sub/div layer.
+        // Such that, we can use sub/div layer to access its constant values.
+        continue;
       } else if (node.op_type() == "Flatten") {
         layer.type = LayerType::Flatten;
       } else if (node.op_type() == "MatMul") {
@@ -110,10 +118,39 @@ public:
                             std::to_string(weights[0].size()) + ">)");
           }
           layer.neurons = std::vector<Neuron>(layer.layer_size);
-        } else if (layer.type == LayerType::Sub) {
-          continue;
-        } else if (layer.type == LayerType::Div) {
-          continue;
+        } else if (layer.type == LayerType::Sub ||
+                   layer.type == LayerType::Div) {
+          if (producer_map.find(input_name) != producer_map.end()) {
+            const onnx::NodeProto *producer = producer_map[input_name];
+            for (const auto &attr : producer->attribute()) {
+              if (attr.has_t()) {
+                // Attribute contains a tensor
+                const onnx::TensorProto &tensor = attr.t();
+
+                if (tensor.data_type() == onnx::TensorProto::FLOAT) {
+                  if (!tensor.raw_data().empty()) {
+                    const std::string &raw = tensor.raw_data();
+                    const float *data =
+                        reinterpret_cast<const float *>(raw.data());
+                    size_t numel = raw.size() / sizeof(float);
+                    for (size_t i = 0; i < numel; i++) {
+                      if (layer.type == LayerType::Sub)
+                        layer.sub_values.push_back(data[i]);
+                      else if (layer.type == LayerType::Div)
+                        layer.div_values.push_back(data[i]);
+                    }
+                  }
+                }
+              } else if (attr.floats_size() > 0) {
+                for (auto f : attr.floats()) {
+                  if (layer.type == LayerType::Sub)
+                    layer.sub_values.push_back(f);
+                  else if (layer.type == LayerType::Div)
+                    layer.div_values.push_back(f);
+                }
+              }
+            }
+          }
         } else if (layer.type == LayerType::Constant) {
           continue;
         } else if (layer.type == LayerType::Flatten) {

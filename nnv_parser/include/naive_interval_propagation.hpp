@@ -18,11 +18,11 @@ public:
 
     for (size_t layer_idx = 0; layer_idx < nnv.layers.size(); ++layer_idx) {
       if (nnv.layers[layer_idx].type == LayerType::Sub) {
-        a.subtraction_layer_transformer(nnv.layers[layer_idx]);
+        a.subtraction_layer_transformer(nnv.layers[layer_idx],
+                                        nnv.layers[layer_idx + 1]);
       } else if (nnv.layers[layer_idx].type == LayerType::Div) {
-        a.division_layer_transformer(nnv.layers[layer_idx]);
-      } else if (nnv.layers[layer_idx].type == LayerType::Constant) {
-        a.constant_layer_transformer(nnv.layers[layer_idx]);
+        a.division_layer_transformer(nnv.layers[layer_idx],
+                                     nnv.layers[layer_idx + 1]);
       } else if (nnv.layers[layer_idx].type == LayerType::Flatten) {
         a.flatten_layer_transformer(nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Relu) {

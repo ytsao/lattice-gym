@@ -27,6 +27,11 @@ public:
     return Interval(lb - other.ub, ub - other.lb);
   }
 
+  // - scalar
+  Interval operator-(double scalar) const {
+    return Interval(lb, ub) - Interval(scalar, scalar);
+  }
+
   // * scalar
   Interval operator*(double scalar) const {
     if (scalar >= 0) {
@@ -34,6 +39,15 @@ public:
     } else {
       return Interval(ub * scalar, lb * scalar);
     }
+  }
+
+  // / scalar
+  Interval operator/(double scalar) const {
+    if (scalar == 0)
+      return Interval(lb, ub);
+    double a = lb / scalar;
+    double b = ub / scalar;
+    return Interval(std::min(a, b), std::max(a, b));
   }
 
   void dump() const {

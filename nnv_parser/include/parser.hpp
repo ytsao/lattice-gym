@@ -18,6 +18,11 @@
 class NeuralNetworkParser {
   using SV = peg::SemanticValues;
 
+  using tensor1d = std::vector<float>;
+  using tensor2d = std::vector<tensor1d>;
+  using tensor3d = std::vector<tensor2d>;
+  using tensor4d = std::vector<tensor3d>;
+
 public:
   bool load_network(const std::string &network_file_directory,
                     const Specification &spec, std::vector<Layer> &layers) {
@@ -50,7 +55,22 @@ public:
     std::unordered_map<std::string, onnx::TensorProto> tensor_map;
     for (const auto &initializer : graph.initializer()) {
       tensor_map[initializer.name()] = initializer;
+      Logger::log(Logger::Level::DEBUG, initializer.name());
     }
+
+    // shape of input.
+    const onnx::ValueInfoProto &graph_input = graph.input(0);
+    const auto &input_shape =
+        graph_input.type()
+            .tensor_type()
+            .shape(); // <batch_size, num_channels, input_H, input-W);
+    size_t batch_size = input_shape.dim(0).dim_value();
+    size_t input_channels = input_shape.dim(1).dim_value();
+    size_t input_height = input_shape.dim(2).dim_value();
+    size_t input_width = input_shape.dim(3).dim_value();
+    size_t input_dimension =
+        batch_size * input_channels * input_height * input_width;
+    assert(input_dimension == spec.numberOfInputs);
 
     // --- Build a map from tensor name → node that produces it
     // This is for linking sub/div node and its input nodes.
@@ -71,7 +91,7 @@ public:
       } else if (node.op_type() == "Div") {
         layer.type = LayerType::Div;
       } else if (node.op_type() == "Constant") {
-        // We are not adding Constant layer into layers.
+        // NOTE: We are not adding Constant layer into layers.
         // Instead, we merge constant layer and its corresponding sub/div layer.
         // Such that, we can use sub/div layer to access its constant values.
         continue;
@@ -85,6 +105,28 @@ public:
         layer.type = LayerType::Gemm;
       } else if (node.op_type() == "Conv") {
         layer.type = LayerType::Conv;
+
+        // Attributes
+        for (const auto &attr : node.attribute()) {
+          if (attr.ints_size() > 0) {
+            const std::string &attr_name = attr.name();
+            if (attr_name == "dilations") {
+              layer.dilation = attr.ints()[0];
+            } else if (attr_name == "group") {
+              layer.group = attr.ints()[0];
+            } else if (attr_name == "kernel_shape") {
+              // NOTE: we're assumming the kernel is a square.
+              layer.kernel_height = attr.ints()[0];
+              layer.kernel_width = attr.ints()[0];
+            } else if (attr_name == "pads") {
+              // NOTE: assume that pads are the same for all directions.
+              layer.pads = attr.ints()[0];
+            } else if (attr_name == "strides") {
+              // NOTE: assume strides are the same for all direstions.
+              layer.strides = attr.ints()[0];
+            }
+          }
+        }
       } else if (node.op_type() == "Relu") {
         layer.type = LayerType::Relu;
       }
@@ -96,30 +138,65 @@ public:
 
         // If the input is a weight tensor
         if (tensor_map.find(input_name) != tensor_map.end()) {
+          // Here,
+          // we consider differnet node types such as Gemm, MatMul, Add, Conv
           const auto &tensor = tensor_map[input_name];
           if (tensor.dims().size() == 1) {
-            std::vector<float> biases = extract1DTensorData(tensor);
-            layer.biases = biases;
-            layer.lower_biases = biases;
-            layer.upper_biases = biases;
-            layer.layer_size = biases.size();
-            Logger::log(
-                Logger::Level::INFO,
-                " (bias tensor, size = " + std::to_string(biases.size()) + ")");
+            layer.biases = extract1DTensorData(tensor);
+            layer.lower_biases = layer.biases;
+            layer.upper_biases = layer.biases;
+            layer.layer_size = layer.biases.size();
+            Logger::log(Logger::Level::DEBUG,
+                        " (bias tensor, size = " +
+                            std::to_string(layer.biases.size()) + ")");
           } else if (tensor.dims().size() == 2) {
-            std::vector<std::vector<float>> weights =
-                extract2DTensorData(tensor);
-            layer.weights = weights;
-            // (output_dimension, input_dimension);
-            layer.layer_size = weights[0].size();
-            Logger::log(Logger::Level::INFO,
+            layer.weights = extract2DTensorData(tensor);
+            Logger::log(Logger::Level::DEBUG,
                         " (weight tensor, size = <" +
-                            std::to_string(weights.size()) + ", " +
-                            std::to_string(weights[0].size()) + ">)");
+                            std::to_string(layer.weights.size()) + ", " +
+                            std::to_string(layer.weights[0].size()) + ">)");
+
+            // (output_dimension, input_dimension);
+            layer.layer_size = layer.weights[0].size();
+          } else if (tensor.dims().size() == 4) {
+            layer.convolution_weights = extract4DTensorData(tensor);
+            // <output_dim, input_dim, kernel_height, kernel_weight>
+            size_t output_dim = layer.convolution_weights.size();
+            size_t input_dim = layer.convolution_weights[0].size();
+            size_t kernel_height = layer.convolution_weights[0][0].size();
+            size_t kernel_weight = layer.convolution_weights[0][0][0].size();
+            Logger::log(
+                Logger::Level::DEBUG,
+                " (weight tensor, size = <" +
+                    std::to_string(layer.convolution_weights.size()) + ", " +
+                    std::to_string(layer.convolution_weights[0].size()) + ", " +
+                    std::to_string(layer.convolution_weights[0][0].size()) +
+                    ", " +
+                    std::to_string(layer.convolution_weights[0][0][0].size()) +
+                    ">)");
+            // convert 4d tensor to 2d tensor
+            layer.weights =
+                convert4Dto2Dtensor(layer.convolution_weights, input_height,
+                                    input_width, layer.strides, layer.pads);
+
+            layer.layer_size =
+                output_dim * input_dim * kernel_height * kernel_weight;
+
+            input_height =
+                std::floor((input_height + 2 * layer.pads -
+                            layer.dilation * (layer.kernel_height - 1) - 1) /
+                               layer.strides +
+                           1);
+            input_width =
+                std::floor((input_width + 2 * layer.pads -
+                            layer.dilation * (layer.kernel_width - 1) - 1) /
+                               layer.strides +
+                           1);
           }
           layer.neurons = std::vector<Neuron>(layer.layer_size);
         } else if (layer.type == LayerType::Sub ||
                    layer.type == LayerType::Div) {
+          // Finding the constant in Sub/Div node
           if (producer_map.find(input_name) != producer_map.end()) {
             const onnx::NodeProto *producer = producer_map[input_name];
             for (const auto &attr : producer->attribute()) {
@@ -151,6 +228,21 @@ public:
               }
             }
           }
+
+          // Create neurons in the layer.
+          layer.neurons = std::vector<Neuron>(spec.numberOfInputs);
+          for (const auto &variable : spec.variables) {
+            if (variable.first.substr(0, 1) == "X") {
+              layer.neurons[variable.second.id] = variable.second;
+            }
+          }
+          layer.layer_size = layer.neurons.size();
+          // initialize lower & upper biases space
+          for (size_t i = 0; i < layer.layer_size; ++i) {
+            layer.biases.push_back(0.0);
+            layer.lower_biases.push_back(0.0);
+            layer.upper_biases.push_back(0.0);
+          }
         } else if (layer.type == LayerType::Constant) {
           continue;
         } else if (layer.type == LayerType::Flatten) {
@@ -167,8 +259,6 @@ public:
             layer.lower_biases.push_back(0.0);
             layer.upper_biases.push_back(0.0);
           }
-        } else if (layer.type == LayerType::Conv) {
-          continue;
         } else if (layer.type == LayerType::Relu) {
           layer.layer_size = layers[layers.size() - 1].layer_size;
           layer.neurons = std::vector<Neuron>(layer.layer_size);
@@ -265,7 +355,6 @@ private:
         try {
           root.children.push_back(std::any_cast<ASTNode>(sv[i]));
         } catch (const std::bad_any_cast &e) {
-          // std::cerr << "Bad any cast: " << e.what() << std::endl;
           continue;
         }
       }
@@ -344,8 +433,8 @@ private:
     return assert_node;
   }
 
-  std::vector<float> extract1DTensorData(const onnx::TensorProto &tensor) {
-    std::vector<float> data;
+  tensor1d extract1DTensorData(const onnx::TensorProto &tensor) {
+    tensor1d data;
 
     // Case 1: float_data() directly stored
     if (tensor.float_data_size() > 0) {
@@ -364,9 +453,9 @@ private:
 
   std::vector<std::vector<float>>
   extract2DTensorData(const onnx::TensorProto &tensor) {
-    std::vector<std::vector<float>> data;
+    tensor2d data;
 
-    std::vector<float> temp_data;
+    tensor1d temp_data;
 
     // Case 1: float_data() directly stored
     if (tensor.float_data_size() > 0) {
@@ -383,7 +472,7 @@ private:
     // make 1d data vector to 2d data matrix;
     size_t num_rows = tensor.dims(0);
     size_t num_cols = tensor.dims(1);
-    data.resize(num_rows, std::vector<float>(num_cols));
+    data.resize(num_rows, tensor1d(num_cols));
     for (size_t r = 0; r < num_rows; ++r) {
       for (size_t c = 0; c < num_cols; ++c) {
         data[r][c] = temp_data[r * num_cols + c];
@@ -391,6 +480,126 @@ private:
     }
 
     return data;
+  }
+
+  tensor4d extract4DTensorData(const onnx::TensorProto &tensor) {
+
+    tensor1d flat_data;
+
+    // Case 1: float_data() directly stored
+    if (tensor.float_data_size() > 0) {
+      flat_data.assign(tensor.float_data().begin(), tensor.float_data().end());
+    }
+    // Case 2: raw_data() binary blob
+    else {
+      std::string raw = tensor.raw_data();
+      size_t elem_count = raw.size() / sizeof(float);
+      flat_data.resize(elem_count);
+      std::memcpy(flat_data.data(), raw.data(), raw.size());
+    }
+
+    // Read dims
+    if (tensor.dims_size() != 4)
+      throw std::runtime_error("Tensor is not 4D");
+
+    size_t C_out = tensor.dims(0);
+    size_t C_in = tensor.dims(1);
+    size_t kH = tensor.dims(2);
+    size_t kW = tensor.dims(3);
+
+    // Allocate 4D vector
+    tensor4d data(C_out, tensor3d(C_in, tensor2d(kH, tensor1d(kW))));
+
+    // Fill data
+    size_t idx = 0;
+    for (size_t oc = 0; oc < C_out; ++oc) {
+      for (size_t ic = 0; ic < C_in; ++ic) {
+        for (size_t h = 0; h < kH; ++h) {
+          for (size_t w = 0; w < kW; ++w) {
+            data[oc][ic][h][w] = flat_data[idx++];
+          }
+        }
+      }
+    }
+
+    return data;
+  }
+
+  void make_sub_layer() { return; }
+
+  void make_div_layer() { return; }
+
+  void make_flatten_layer() { return; }
+
+  void make_relu_layer() { return; }
+
+  void make_weights_biases_layer() { return; }
+
+  tensor2d convert4Dto2Dtensor(const tensor4d &weights, size_t input_H,
+                               size_t input_W, size_t stride, size_t pad) {
+    const size_t output_channels = weights.size();
+    const size_t input_channels = weights[0].size();
+    const size_t kernel_H = weights[0][0].size();
+    const size_t kernel_W = weights[0][0][0].size();
+
+    const size_t output_H = (input_H + 2 * pad - kernel_H) / stride + 1;
+    const size_t output_W = (input_W + 2 * pad - kernel_W) / stride + 1;
+
+    const size_t input_size = input_channels * input_H * input_W;
+    const size_t output_size = output_channels * output_H * output_W;
+
+    tensor2d result_weights(output_size, tensor1d(input_size, 0.0f));
+    size_t row = 0;
+    for (size_t oc = 0; oc < output_channels; ++oc) {
+      for (size_t oh = 0; oh < output_H; ++oh) {
+        for (size_t ow = 0; ow < output_W; ++ow) {
+
+          // bounds check for row (defensive)
+          if (row >= output_size) {
+            std::cerr << "ERROR: row >= output_size: row=" << row
+                      << " output_size=" << output_size << std::endl;
+            assert(false);
+          }
+
+          for (size_t ic = 0; ic < input_channels; ++ic) {
+            for (size_t kh = 0; kh < kernel_H; ++kh) {
+              for (size_t kw = 0; kw < kernel_W; ++kw) {
+                // use signed integers for intermediate coordinates
+                int ih = static_cast<int>(oh * stride) + static_cast<int>(kh) -
+                         static_cast<int>(pad);
+                int iw = static_cast<int>(ow * stride) + static_cast<int>(kw) -
+                         static_cast<int>(pad);
+
+                // only write when ih/iw inside input bounds
+                if (ih >= 0 && ih < static_cast<int>(input_H) && iw >= 0 &&
+                    iw < static_cast<int>(input_W)) {
+
+                  size_t col = ic * (input_H * input_W) +
+                               static_cast<size_t>(ih) * input_W +
+                               static_cast<size_t>(iw);
+
+                  // defensive check for col bounds
+                  if (col >= input_size) {
+                    std::cerr << "ERROR: computed col out of range: col=" << col
+                              << " input_size=" << input_size
+                              << " (oc,ic,oh,ow,kh,kw)=(" << oc << "," << ic
+                              << "," << oh << "," << ow << "," << kh << ","
+                              << kw << ")\n";
+                    assert(false);
+                  }
+
+                  // write weight value
+                  result_weights[row][col] = weights[oc][ic][kh][kw];
+                }
+              }
+            }
+          }
+          ++row;
+        }
+      }
+    }
+
+    return result_weights;
   }
 };
 

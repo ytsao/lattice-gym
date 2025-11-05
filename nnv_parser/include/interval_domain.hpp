@@ -12,6 +12,8 @@ public:
     for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
       to_layer.sub_values.push_back(from_layer.sub_values[i]);
     }
+
+    return;
   }
 
   void division_layer_transformer(const Layer &from_layer,
@@ -20,17 +22,21 @@ public:
       to_layer.sub_values.push_back(from_layer.sub_values[i]);
       to_layer.div_values.push_back(from_layer.div_values[i]);
     }
+
+    return;
   }
 
   void flatten_layer_transformer(Layer &current_layer) override {
-    // Normalization
-    for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
-      for (size_t i = 0; i < current_layer.layer_size; ++i) {
-        current_layer.neurons[i].bounds =
-            (current_layer.neurons[i].bounds - current_layer.sub_values[dim]) /
-            current_layer.div_values[i];
-      }
-    }
+    // // Normalization
+    // for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
+    //   for (size_t i = 0; i < current_layer.layer_size; ++i) {
+    //     current_layer.neurons[i].bounds =
+    //         (current_layer.neurons[i].bounds - current_layer.sub_values[dim])
+    //         / current_layer.div_values[i];
+    //   }
+    // }
+
+    return;
   }
 
   void relu_layer_transformer(const Layer &from_layer,
@@ -67,6 +73,21 @@ public:
   }
   void gemm_layer_transformer(const Layer &from_layer,
                               Layer &to_layer) override {
+    for (size_t i = 0; i < to_layer.layer_size; ++i) {
+      for (size_t j = 0; j < from_layer.layer_size; ++j) {
+        to_layer.neurons[i].bounds =
+            to_layer.neurons[i].bounds +
+            from_layer.neurons[j].bounds * to_layer.weights[i][j];
+      }
+      double bias = to_layer.biases[i];
+      to_layer.neurons[i].bounds = to_layer.neurons[i].bounds + bias;
+    }
+
+    return;
+  }
+
+  void convolutional_layer_transformer(const Layer &from_layer,
+                                       Layer &to_layer) override {
     for (size_t i = 0; i < to_layer.layer_size; ++i) {
       for (size_t j = 0; j < from_layer.layer_size; ++j) {
         to_layer.neurons[i].bounds =

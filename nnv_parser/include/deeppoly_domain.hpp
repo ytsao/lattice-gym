@@ -19,6 +19,8 @@ public:
     for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
       to_layer.sub_values.push_back(from_layer.sub_values[i]);
     }
+
+    return;
   }
 
   void division_layer_transformer(const Layer &from_layer,
@@ -27,17 +29,19 @@ public:
       to_layer.sub_values.push_back(from_layer.sub_values[i]);
       to_layer.div_values.push_back(from_layer.div_values[i]);
     }
+
+    return;
   }
 
   void flatten_layer_transformer(Layer &current_layer) override {
-    // Normalization
-    for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
-      for (size_t i = 0; i < current_layer.layer_size; ++i) {
-        current_layer.neurons[i].bounds =
-            (current_layer.neurons[i].bounds - current_layer.sub_values[dim]) /
-            current_layer.div_values[i];
-      }
-    }
+    // // Normalization
+    // for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
+    //   for (size_t i = 0; i < current_layer.layer_size; ++i) {
+    //     current_layer.neurons[i].bounds =
+    //         (current_layer.neurons[i].bounds - current_layer.sub_values[dim])
+    //         / current_layer.div_values[i];
+    //   }
+    // }
 
     // Add deeppoly symbolic expressions into the input layer.
     std::vector<double> zero_expression(current_layer.layer_size, 0.0);
@@ -129,6 +133,22 @@ public:
   }
   void gemm_layer_transformer(const Layer &from_layer,
                               Layer &to_layer) override {
+    create_deeppoly_expressions(from_layer, to_layer);
+
+    for (size_t i = 0; i < to_layer.layer_size; ++i) {
+      for (size_t j = 0; j < from_layer.layer_size; ++j) {
+        double weights = to_layer.weights[i][j];
+
+        to_layer.deeppoly_lower_expressions[i][j] += weights;
+        to_layer.deeppoly_upper_expressions[i][j] += weights;
+      }
+    }
+
+    return;
+  }
+
+  void convolutional_layer_transformer(const Layer &from_layer,
+                                       Layer &to_layer) override {
     create_deeppoly_expressions(from_layer, to_layer);
 
     for (size_t i = 0; i < to_layer.layer_size; ++i) {

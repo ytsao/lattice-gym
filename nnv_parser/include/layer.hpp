@@ -28,12 +28,16 @@ public:
   std::vector<float> div_values;
 
   // for convolutional layer
+  size_t input_channels;
+  size_t output_channels;
   size_t pads;
   size_t strides;
   size_t dilation;
   size_t group;
   size_t kernel_width;
   size_t kernel_height;
+  size_t conv_input_width;
+  size_t conv_input_height;
   size_t conv_output_width;
   size_t conv_output_height;
 

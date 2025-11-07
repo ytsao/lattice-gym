@@ -57,35 +57,7 @@ public:
     return;
   }
 
-  void subtraction_layer_transformer(const Layer &from_layer,
-                                     Layer &to_layer) override {
-    for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
-      to_layer.sub_values.push_back(from_layer.sub_values[i]);
-    }
-
-    return;
-  }
-
-  void division_layer_transformer(const Layer &from_layer,
-                                  Layer &to_layer) override {
-    for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
-      to_layer.sub_values.push_back(from_layer.sub_values[i]);
-      to_layer.div_values.push_back(from_layer.div_values[i]);
-    }
-
-    return;
-  }
-
-  void flatten_layer_transformer(Layer &current_layer) override {
-    // // Normalization
-    // for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
-    //   for (size_t i = 0; i < current_layer.layer_size; ++i) {
-    //     current_layer.neurons[i].bounds =
-    //         (current_layer.neurons[i].bounds - current_layer.sub_values[dim])
-    //         / current_layer.div_values[i];
-    //   }
-    // }
-
+  void first_layer_transformer(Layer &current_layer) override {
     // Add symbolic expression in the input layer.
     for (size_t i = 0; i < current_layer.layer_size; ++i) {
       current_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
@@ -94,6 +66,61 @@ public:
       current_layer.neurons[i].symbolic_upper_expression[std::make_tuple(
           current_layer.neurons[i].layer_id, current_layer.neurons[i].id)] =
           1.0;
+    }
+
+    return;
+  }
+
+  void subtraction_layer_transformer(const Layer &from_layer,
+                                     Layer &to_layer) override {
+    // Add symbolic expression in the input layer.
+    for (size_t i = 0; i < from_layer.layer_size; ++i) {
+      to_layer.neurons[i].bounds.setLb(from_layer.neurons[i].bounds.getLb());
+      to_layer.neurons[i].bounds.setUb(from_layer.neurons[i].bounds.getUb());
+
+      to_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
+          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+      to_layer.neurons[i].symbolic_upper_expression[std::make_tuple(
+          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+    }
+    return;
+  }
+
+  void division_layer_transformer(const Layer &from_layer,
+                                  Layer &to_layer) override {
+    // Add symbolic expression in the input layer.
+    for (size_t i = 0; i < from_layer.layer_size; ++i) {
+      to_layer.neurons[i].bounds.setLb(from_layer.neurons[i].bounds.getLb());
+      to_layer.neurons[i].bounds.setUb(from_layer.neurons[i].bounds.getUb());
+
+      to_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
+          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+      to_layer.neurons[i].symbolic_upper_expression[std::make_tuple(
+          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+    }
+    return;
+  }
+
+  void flatten_layer_transformer(const Layer &from_layer,
+                                 Layer &to_layer) override {
+    // // Normalization
+    // for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
+    //   for (size_t i = 0; i < current_layer.layer_size; ++i) {
+    //     current_layer.neurons[i].bounds =
+    //         (current_layer.neurons[i].bounds -
+    //         current_layer.sub_values[dim]) / current_layer.div_values[i];
+    //   }
+    // }
+
+    // Add symbolic expression in the input layer.
+    for (size_t i = 0; i < from_layer.layer_size; ++i) {
+      to_layer.neurons[i].bounds.setLb(from_layer.neurons[i].bounds.getLb());
+      to_layer.neurons[i].bounds.setUb(from_layer.neurons[i].bounds.getUb());
+
+      to_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
+          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+      to_layer.neurons[i].symbolic_upper_expression[std::make_tuple(
+          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
     }
 
     return;

@@ -7,32 +7,52 @@ class IntervalDomain : public AbstractDomain {
 public:
   void gamma(Network &nnv, size_t layer_idx) override { return; }
 
+  void first_layer_transformer(Layer &current_layer) override { return; }
+
   void subtraction_layer_transformer(const Layer &from_layer,
                                      Layer &to_layer) override {
-    for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
-      to_layer.sub_values.push_back(from_layer.sub_values[i]);
-    }
+    // for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
+    //   to_layer.sub_values.push_back(from_layer.sub_values[i]);
+    // }
+
+    to_layer.neurons = from_layer.neurons;
+    to_layer.layer_size = from_layer.layer_size;
+    to_layer.biases = from_layer.biases;
+    to_layer.lower_biases = from_layer.lower_biases;
+    to_layer.upper_biases = from_layer.upper_biases;
 
     return;
   }
 
   void division_layer_transformer(const Layer &from_layer,
                                   Layer &to_layer) override {
-    for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
-      to_layer.sub_values.push_back(from_layer.sub_values[i]);
-      to_layer.div_values.push_back(from_layer.div_values[i]);
-    }
+    // for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
+    //   to_layer.sub_values.push_back(from_layer.sub_values[i]);
+    // }
+
+    to_layer.neurons = from_layer.neurons;
+    to_layer.layer_size = from_layer.layer_size;
+    to_layer.biases = from_layer.biases;
+    to_layer.lower_biases = from_layer.lower_biases;
+    to_layer.upper_biases = from_layer.upper_biases;
 
     return;
   }
 
-  void flatten_layer_transformer(Layer &current_layer) override {
+  void flatten_layer_transformer(const Layer &from_layer,
+                                 Layer &to_layer) override {
+    to_layer.neurons = from_layer.neurons;
+    to_layer.layer_size = from_layer.layer_size;
+    to_layer.biases = from_layer.biases;
+    to_layer.lower_biases = from_layer.lower_biases;
+    to_layer.upper_biases = from_layer.upper_biases;
+
     // // Normalization
-    // for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
-    //   for (size_t i = 0; i < current_layer.layer_size; ++i) {
-    //     current_layer.neurons[i].bounds =
-    //         (current_layer.neurons[i].bounds - current_layer.sub_values[dim])
-    //         / current_layer.div_values[i];
+    // for (size_t dim = 0; dim < from_layer.sub_values.size(); ++dim) {
+    //   for (size_t i = 0; i < to_layer.layer_size; ++i) {
+    //     to_layer.neurons[i].bounds =
+    //         (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
+    //         from_layer.div_values[i];
     //   }
     // }
 

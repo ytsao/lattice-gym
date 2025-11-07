@@ -40,12 +40,7 @@ public:
   bool read_onnx(std::string onnx_filename) {
     bool bresult = parser.load_network(onnx_filename, spec, layers);
     if (bresult) {
-      for (size_t i = 0; i < layers.size(); ++i) {
-        if (layers[i].type == LayerType::Flatten) {
-          input_layer_id = i;
-          break;
-        }
-      }
+      input_layer_id = 0;
     }
     return bresult;
   }

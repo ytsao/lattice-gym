@@ -16,16 +16,19 @@ public:
     create_auxiliary_layer(nnv);
 
     for (size_t layer_idx = 0; layer_idx < nnv.layers.size(); ++layer_idx) {
-      if (nnv.layers[layer_idx].type == LayerType::Sub) {
-        a.subtraction_layer_transformer(nnv.layers[layer_idx],
-                                        nnv.layers[layer_idx + 1]);
+      Logger::log(Logger::Level::DEBUG,
+                  "Processing at layer " + std::to_string(layer_idx));
+      if (nnv.layers[layer_idx].type == LayerType::First) {
+        a.first_layer_transformer(nnv.layers[layer_idx]);
+      } else if (nnv.layers[layer_idx].type == LayerType::Sub) {
+        a.subtraction_layer_transformer(nnv.layers[layer_idx - 1],
+                                        nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Div) {
-        a.division_layer_transformer(nnv.layers[layer_idx],
-                                     nnv.layers[layer_idx + 1]);
+        a.division_layer_transformer(nnv.layers[layer_idx - 1],
+                                     nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Flatten) {
-        // FIX: if flatten is not the first layer, we should change the
-        // implementation of its transformer.
-        a.flatten_layer_transformer(nnv.layers[layer_idx]);
+        a.flatten_layer_transformer(nnv.layers[layer_idx - 1],
+                                    nnv.layers[layer_idx]);
       } else if (nnv.layers[layer_idx].type == LayerType::Relu) {
         a.relu_layer_transformer(nnv.layers[layer_idx - 1],
                                  nnv.layers[layer_idx]);
@@ -43,8 +46,6 @@ public:
                                  nnv.layers[layer_idx]);
         a.gamma(nnv, layer_idx);
       } else if (nnv.layers[layer_idx].type == LayerType::Conv) {
-        // FIX: in some cases, convolutional layer could be the first layer in
-        // the network. So that, we will not have layer_idx - 1.
         a.convolutional_layer_transformer(nnv.layers[layer_idx - 1],
                                           nnv.layers[layer_idx]);
         a.gamma(nnv, layer_idx);

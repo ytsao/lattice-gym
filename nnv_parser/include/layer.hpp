@@ -5,6 +5,7 @@
 #include <vector>
 
 enum class LayerType {
+  First,
   Sub,
   Div,
   Constant,
@@ -33,6 +34,8 @@ public:
   size_t group;
   size_t kernel_width;
   size_t kernel_height;
+  size_t conv_output_width;
+  size_t conv_output_height;
 
   std::vector<std::vector<float>> weights;
   tensor4d convolution_weights;

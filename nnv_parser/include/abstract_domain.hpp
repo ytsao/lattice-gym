@@ -13,6 +13,7 @@ public:
    * */
   virtual void gamma(Network &nnv, const size_t layer_idx) { return; }
 
+  virtual void first_layer_transformer(Layer &current_layer) { return; }
   virtual void subtraction_layer_transformer(const Layer &from_layer,
                                              Layer &to_layer) {
     return;

@@ -26,6 +26,7 @@ public:
       } else if (nnv.layers[layer_idx].type == LayerType::Div) {
         a.division_layer_transformer(nnv.layers[layer_idx - 1],
                                      nnv.layers[layer_idx]);
+        nnv.input_layer_id = layer_idx;
       } else if (nnv.layers[layer_idx].type == LayerType::Flatten) {
         a.flatten_layer_transformer(nnv.layers[layer_idx - 1],
                                     nnv.layers[layer_idx]);

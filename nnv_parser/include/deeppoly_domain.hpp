@@ -16,7 +16,7 @@ public:
 
   void first_layer_transformer(Layer &current_layer) override {
     // Add deeppoly symbolic expressions into the input layer.
-    std::vector<double> zero_expression(current_layer.layer_size, 0.0);
+    std::vector<double> zero_expression(current_layer.layer_size, 0.0f);
     for (size_t i = 0; i < current_layer.layer_size; ++i) {
       current_layer.deeppoly_lower_expressions.push_back(zero_expression);
       current_layer.deeppoly_upper_expressions.push_back(zero_expression);
@@ -31,90 +31,47 @@ public:
 
   void subtraction_layer_transformer(const Layer &from_layer,
                                      Layer &to_layer) override {
-    // for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
-    //   to_layer.sub_values.push_back(from_layer.sub_values[i]);
-    // }
-
-    // for (size_t dim = 0; dim < to_layer.sub_values.size(); ++dim) {
-    //   for (size_t i = 0; i < to_layer.layer_size; ++i) {
-    //     to_layer.neurons[i].bounds =
-    //         from_layer.neurons[i].bounds - to_layer.sub_values[dim];
-    //   }
-    // }
-
-    // Add deeppoly symbolic expressions into the input layer.
-    for (size_t i = 0; i < from_layer.layer_size; ++i) {
-      to_layer.neurons[i].bounds = from_layer.neurons[i].bounds;
-
-      // x_i = x_j;
-      to_layer.deeppoly_lower_expressions =
-          from_layer.deeppoly_lower_expressions;
-      to_layer.deeppoly_upper_expressions =
-          from_layer.deeppoly_upper_expressions;
-
-      to_layer.biases = from_layer.biases;
-      to_layer.lower_biases = from_layer.lower_biases;
-      to_layer.upper_biases = from_layer.upper_biases;
-    }
+    to_layer.neurons = from_layer.neurons;
+    to_layer.layer_size = from_layer.layer_size;
+    to_layer.biases = from_layer.biases;
+    to_layer.lower_biases = from_layer.lower_biases;
+    to_layer.upper_biases = from_layer.upper_biases;
+    to_layer.deeppoly_lower_expressions = from_layer.deeppoly_lower_expressions;
+    to_layer.deeppoly_upper_expressions = from_layer.deeppoly_upper_expressions;
 
     return;
   }
 
   void division_layer_transformer(const Layer &from_layer,
                                   Layer &to_layer) override {
-    // for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
-    //   to_layer.sub_values.push_back(from_layer.sub_values[i]);
-    //   to_layer.div_values.push_back(from_layer.div_values[i]);
-    // }
-
-    // for (size_t dim = 0; dim < to_layer.div_values.size(); ++dim) {
-    //   for (size_t i = 0; i < to_layer.layer_size; ++i) {
-    //     to_layer.neurons[i].bounds =
-    //         from_layer.neurons[i].bounds / to_layer.div_values[dim];
-    //   }
-    // }
-
-    // Add deeppoly symbolic expressions into the input layer.
-    for (size_t i = 0; i < from_layer.layer_size; ++i) {
-      to_layer.neurons[i].bounds = from_layer.neurons[i].bounds;
-
-      // x_i = x_j;
-      to_layer.deeppoly_lower_expressions =
-          from_layer.deeppoly_lower_expressions;
-      to_layer.deeppoly_upper_expressions =
-          from_layer.deeppoly_upper_expressions;
-    }
+    to_layer.neurons = from_layer.neurons;
+    to_layer.layer_size = from_layer.layer_size;
     to_layer.biases = from_layer.biases;
     to_layer.lower_biases = from_layer.lower_biases;
     to_layer.upper_biases = from_layer.upper_biases;
+    to_layer.deeppoly_lower_expressions = from_layer.deeppoly_lower_expressions;
+    to_layer.deeppoly_upper_expressions = from_layer.deeppoly_upper_expressions;
+
+    for (size_t dim = 0; dim < to_layer.div_values.size(); ++dim) {
+      for (size_t i = 0; i < to_layer.layer_size; ++i) {
+        to_layer.neurons[i].bounds =
+            (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
+            to_layer.div_values[dim];
+      }
+    }
 
     return;
   }
 
   void flatten_layer_transformer(const Layer &from_layer,
                                  Layer &to_layer) override {
-    // // Normalization
-    // for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
-    //   for (size_t i = 0; i < current_layer.layer_size; ++i) {
-    //     current_layer.neurons[i].bounds =
-    //         (current_layer.neurons[i].bounds - current_layer.sub_values[dim])
-    //         / current_layer.div_values[i];
-    //   }
-    // }
-
-    // Add deeppoly symbolic expressions into the input layer.
-    for (size_t i = 0; i < from_layer.layer_size; ++i) {
-      to_layer.neurons[i].bounds = from_layer.neurons[i].bounds;
-
-      // x_i = x_j;
-      to_layer.deeppoly_lower_expressions =
-          from_layer.deeppoly_lower_expressions;
-      to_layer.deeppoly_upper_expressions =
-          from_layer.deeppoly_upper_expressions;
-    }
+    to_layer.neurons = from_layer.neurons;
+    to_layer.layer_size = from_layer.layer_size;
     to_layer.biases = from_layer.biases;
     to_layer.lower_biases = from_layer.lower_biases;
     to_layer.upper_biases = from_layer.upper_biases;
+    to_layer.deeppoly_lower_expressions = from_layer.deeppoly_lower_expressions;
+    to_layer.deeppoly_upper_expressions = from_layer.deeppoly_upper_expressions;
 
     return;
   }

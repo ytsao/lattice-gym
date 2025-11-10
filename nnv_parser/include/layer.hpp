@@ -19,13 +19,15 @@ enum class LayerType {
 
 struct Layer {
 public:
+  using tensor1d = std::vector<float>;
+  using tensor2d = std::vector<std::vector<float>>;
   using tensor4d = std::vector<std::vector<std::vector<std::vector<float>>>>;
 
   LayerType type;
 
   // for colorful images, we have 3 values
-  std::vector<float> sub_values;
-  std::vector<float> div_values;
+  tensor1d sub_values;
+  tensor1d div_values;
 
   // for convolutional layer
   size_t input_channels;
@@ -41,12 +43,12 @@ public:
   size_t conv_output_width;
   size_t conv_output_height;
 
-  std::vector<std::vector<float>> weights;
+  tensor2d weights;
   tensor4d convolution_weights;
 
-  std::vector<float> biases;
-  std::vector<float> lower_biases;
-  std::vector<float> upper_biases;
+  tensor1d biases;
+  tensor1d lower_biases;
+  tensor1d upper_biases;
 
   std::vector<Neuron> neurons;
   size_t layer_size = 0;

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ## Protobuf ##
 ##############
 # Protobuf is needed to compile ONNX
-set(TOOLS_DIR /home/ytsao/code/side_projects/lattice-gym/nnv_parser/dep/)
+set(TOOLS_DIR ${CMAKE_CURRENT_LIST_DIR}/dep/)
 set(PROTOBUF_VERSION 3.19.2)
 set(PROTOBUF_DEFAULT_DIR "${TOOLS_DIR}/protobuf-${PROTOBUF_VERSION}")
 if (NOT PROTOBUF_DIR)

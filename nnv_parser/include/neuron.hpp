@@ -38,6 +38,14 @@ public:
 
   void setLayerId(int _layer_id) { layer_id = _layer_id; }
 
+  void dump() {
+    Logger::log(Logger::Level::DEBUG,
+                "Neuron " + std::to_string(id) + " at layer " +
+                    std::to_string(layer_id) + " = [" +
+                    std::to_string(bounds.getLb()) + ", " +
+                    std::to_string(bounds.getUb()) + "]");
+  }
+
   bool operator==(const Neuron &other) const {
     return (id == other.id) && (layer_id == other.layer_id);
   }

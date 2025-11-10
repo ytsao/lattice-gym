@@ -26,15 +26,20 @@ public:
 
   void division_layer_transformer(const Layer &from_layer,
                                   Layer &to_layer) override {
-    // for (size_t i = 0; i < from_layer.sub_values.size(); ++i) {
-    //   to_layer.sub_values.push_back(from_layer.sub_values[i]);
-    // }
-
     to_layer.neurons = from_layer.neurons;
     to_layer.layer_size = from_layer.layer_size;
     to_layer.biases = from_layer.biases;
     to_layer.lower_biases = from_layer.lower_biases;
     to_layer.upper_biases = from_layer.upper_biases;
+
+    // Normalization
+    for (size_t dim = 0; dim < from_layer.sub_values.size(); ++dim) {
+      for (size_t i = 0; i < to_layer.layer_size; ++i) {
+        to_layer.neurons[i].bounds =
+            (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
+            to_layer.div_values[dim];
+      }
+    }
 
     return;
   }
@@ -46,15 +51,6 @@ public:
     to_layer.biases = from_layer.biases;
     to_layer.lower_biases = from_layer.lower_biases;
     to_layer.upper_biases = from_layer.upper_biases;
-
-    // // Normalization
-    // for (size_t dim = 0; dim < from_layer.sub_values.size(); ++dim) {
-    //   for (size_t i = 0; i < to_layer.layer_size; ++i) {
-    //     to_layer.neurons[i].bounds =
-    //         (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
-    //         from_layer.div_values[i];
-    //   }
-    // }
 
     return;
   }

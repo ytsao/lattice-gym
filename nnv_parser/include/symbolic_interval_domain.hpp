@@ -49,9 +49,9 @@ public:
       }
 
       nnv.layers[layer_idx].neurons[i].bounds.setLb(
-          lb + nnv.layers[layer_idx].biases[i]);
+          lb + nnv.layers[layer_idx].lower_biases[i]);
       nnv.layers[layer_idx].neurons[i].bounds.setUb(
-          ub + nnv.layers[layer_idx].biases[i]);
+          ub + nnv.layers[layer_idx].upper_biases[i]);
     }
 
     return;
@@ -73,54 +73,65 @@ public:
 
   void subtraction_layer_transformer(const Layer &from_layer,
                                      Layer &to_layer) override {
-    // Add symbolic expression in the input layer.
-    for (size_t i = 0; i < from_layer.layer_size; ++i) {
-      to_layer.neurons[i].bounds.setLb(from_layer.neurons[i].bounds.getLb());
-      to_layer.neurons[i].bounds.setUb(from_layer.neurons[i].bounds.getUb());
+    // to_layer.neurons = from_layer.neurons;
+    to_layer.layer_size = from_layer.layer_size;
+    to_layer.biases = from_layer.biases;
+    to_layer.lower_biases = from_layer.lower_biases;
+    to_layer.upper_biases = from_layer.upper_biases;
 
+    // Add symbolic expression in the input layer.
+    for (size_t i = 0; i < to_layer.layer_size; ++i) {
+      to_layer.neurons[i].bounds = from_layer.neurons[i].bounds;
       to_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
-          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+          to_layer.neurons[i].layer_id, to_layer.neurons[i].id)] = 1.0;
       to_layer.neurons[i].symbolic_upper_expression[std::make_tuple(
-          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+          to_layer.neurons[i].layer_id, to_layer.neurons[i].id)] = 1.0;
     }
+
     return;
   }
 
   void division_layer_transformer(const Layer &from_layer,
                                   Layer &to_layer) override {
-    // Add symbolic expression in the input layer.
-    for (size_t i = 0; i < from_layer.layer_size; ++i) {
-      to_layer.neurons[i].bounds.setLb(from_layer.neurons[i].bounds.getLb());
-      to_layer.neurons[i].bounds.setUb(from_layer.neurons[i].bounds.getUb());
+    // to_layer.neurons = from_layer.neurons;
+    to_layer.layer_size = from_layer.layer_size;
+    to_layer.biases = from_layer.biases;
+    to_layer.lower_biases = from_layer.lower_biases;
+    to_layer.upper_biases = from_layer.upper_biases;
 
-      to_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
-          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
-      to_layer.neurons[i].symbolic_upper_expression[std::make_tuple(
-          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+    for (size_t dim = 0; dim < from_layer.sub_values.size(); ++dim) {
+      for (size_t i = 0; i < to_layer.layer_size; ++i) {
+        to_layer.neurons[i].bounds =
+            (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
+            to_layer.div_values[dim];
+      }
     }
+
+    // Add symbolic expression in the input layer.
+    for (size_t i = 0; i < to_layer.layer_size; ++i) {
+      to_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
+          to_layer.neurons[i].layer_id, to_layer.neurons[i].id)] = 1.0;
+      to_layer.neurons[i].symbolic_upper_expression[std::make_tuple(
+          to_layer.neurons[i].layer_id, to_layer.neurons[i].id)] = 1.0;
+    }
+
     return;
   }
 
   void flatten_layer_transformer(const Layer &from_layer,
                                  Layer &to_layer) override {
-    // // Normalization
-    // for (size_t dim = 0; dim < current_layer.sub_values.size(); ++dim) {
-    //   for (size_t i = 0; i < current_layer.layer_size; ++i) {
-    //     current_layer.neurons[i].bounds =
-    //         (current_layer.neurons[i].bounds -
-    //         current_layer.sub_values[dim]) / current_layer.div_values[i];
-    //   }
-    // }
+    to_layer.layer_size = from_layer.layer_size;
+    to_layer.biases = from_layer.biases;
+    to_layer.lower_biases = from_layer.lower_biases;
+    to_layer.upper_biases = from_layer.upper_biases;
 
     // Add symbolic expression in the input layer.
     for (size_t i = 0; i < from_layer.layer_size; ++i) {
-      to_layer.neurons[i].bounds.setLb(from_layer.neurons[i].bounds.getLb());
-      to_layer.neurons[i].bounds.setUb(from_layer.neurons[i].bounds.getUb());
-
-      to_layer.neurons[i].symbolic_lower_expression[std::make_tuple(
-          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
-      to_layer.neurons[i].symbolic_upper_expression[std::make_tuple(
-          from_layer.neurons[i].layer_id, from_layer.neurons[i].id)] = 1.0;
+      to_layer.neurons[i].bounds = from_layer.neurons[i].bounds;
+      to_layer.neurons[i].symbolic_lower_expression =
+          from_layer.neurons[i].symbolic_lower_expression;
+      to_layer.neurons[i].symbolic_upper_expression =
+          from_layer.neurons[i].symbolic_upper_expression;
     }
 
     return;
@@ -139,6 +150,7 @@ public:
         to_layer.neurons[i].symbolic_upper_expression =
             from_layer.neurons[i].symbolic_upper_expression;
 
+        to_layer.biases.push_back(from_layer.biases[i]);
         to_layer.lower_biases.push_back(from_layer.lower_biases[i]);
         to_layer.upper_biases.push_back(from_layer.upper_biases[i]);
       } else if (ub <= 0.0) {
@@ -156,6 +168,8 @@ public:
         to_layer.neurons[i].bounds.setUb(0.0);
 
         to_layer.biases.push_back(0.0);
+        to_layer.lower_biases.push_back(0.0);
+        to_layer.upper_biases.push_back(0.0);
       } else if (lb < 0.0 && ub > 0.0) {
         to_layer.neurons[i].symbolic_lower_expression.clear();
         to_layer.neurons[i].symbolic_upper_expression.clear();
@@ -171,6 +185,8 @@ public:
         to_layer.neurons[i].bounds.setUb(ub);
 
         to_layer.biases.push_back(0.0);
+        to_layer.lower_biases.push_back(0.0);
+        to_layer.upper_biases.push_back(0.0);
       }
     }
 
@@ -179,8 +195,12 @@ public:
   void matmul_layer_transformer(const Layer &from_layer,
                                 Layer &to_layer) override {
     // Initialize symbolic expressions for each neuron in the to_layer
-    for (size_t i = 0; i < to_layer.layer_size; ++i) {
-      to_layer.biases.push_back(0.0);
+    if (to_layer.lower_biases.empty() && to_layer.upper_biases.empty()) {
+      for (size_t i = 0; i < to_layer.layer_size; ++i) {
+        to_layer.biases.push_back(0.0);
+        to_layer.lower_biases.push_back(0.0);
+        to_layer.upper_biases.push_back(0.0);
+      }
     }
 
     // Start the computation
@@ -225,7 +245,7 @@ public:
       to_layer.neurons[i].symbolic_upper_expression =
           from_layer.neurons[i].symbolic_upper_expression;
 
-      // The biases will be considered in gamma function.
+      // NOTE: The biases will be considered in gamma function.
     }
 
     return;
@@ -269,7 +289,7 @@ public:
                                        Layer &to_layer) override {
     for (size_t i = 0; i < to_layer.layer_size; ++i) {
       for (size_t j = 0; j < from_layer.layer_size; ++j) {
-        double weights = to_layer.weights[i][j];
+        float weights = to_layer.weights[i][j];
 
         if (weights >= 0.0) {
           for (const auto &term :

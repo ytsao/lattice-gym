@@ -109,10 +109,10 @@ public:
       Layer layer;
       if (node.op_type() == "Sub") {
         layer.type = LayerType::Sub;
-        continue;
+        // continue;
       } else if (node.op_type() == "Div") {
         layer.type = LayerType::Div;
-        continue;
+        // continue;
       } else if (node.op_type() == "Constant") {
         // NOTE: We are not adding Constant layer into layers.
         // Instead, we merge constant layer and its corresponding sub/div layer.
@@ -120,7 +120,6 @@ public:
         continue;
       } else if (node.op_type() == "Flatten") {
         layer.type = LayerType::Flatten;
-        continue;
       } else if (node.op_type() == "MatMul") {
         layer.type = LayerType::MatMul;
       } else if (node.op_type() == "Add") {
@@ -155,8 +154,6 @@ public:
         layer.type = LayerType::Relu;
       }
 
-      // TODO: modify the rule to identify differnet types of layers.
-      // Print inputs and outputs
       for (const auto &input_name : node.input()) {
         Logger::log(Logger::Level::INFO, "Input: " + input_name);
 
@@ -169,25 +166,23 @@ public:
             layer.biases = extract1DTensorData(tensor);
             layer.lower_biases = layer.biases;
             layer.upper_biases = layer.biases;
-            if (layer.type == LayerType::Conv) {
-              // TODO: expand bias vector
-              tensor1d expanded_biases;
-              expanded_biases.reserve(layer.biases.size() *
-                                      layer.conv_output_height *
-                                      layer.conv_output_width);
-              for (float b : layer.biases) {
-                expanded_biases.insert(
-                    expanded_biases.end(),
-                    layer.conv_output_height * layer.conv_output_width, b);
+            if (layer.type != LayerType::Conv) {
+              layer.layer_size = layer.biases.size();
+            } else {
+              tensor1d expanded_biases(layer.layer_size);
+              size_t spatial_size =
+                  layer.conv_output_height * layer.conv_output_width;
+              Logger::log(Logger::Level::DEBUG,
+                          "Spatial size is " + std::to_string(spatial_size) +
+                              "Layer size is " +
+                              std::to_string(layer.layer_size));
+              for (const auto &bias : layer.biases) {
+                expanded_biases.insert(expanded_biases.end(), spatial_size,
+                                       bias);
               }
               layer.biases = expanded_biases;
               layer.lower_biases = expanded_biases;
               layer.upper_biases = expanded_biases;
-              Logger::log(Logger::Level::WARN,
-                          "The size of expanded biases is " +
-                              std::to_string(layer.biases.size()));
-            } else {
-              layer.layer_size = layer.biases.size();
             }
             Logger::log(Logger::Level::DEBUG,
                         " (bias tensor, size = " +
@@ -208,9 +203,9 @@ public:
             size_t output_dim = layer.convolution_weights.size();
             size_t input_dim = layer.convolution_weights[0].size();
             size_t kernel_height = layer.convolution_weights[0][0].size();
-            size_t kernel_weight = layer.convolution_weights[0][0][0].size();
+            size_t kernel_width = layer.convolution_weights[0][0][0].size();
             Logger::log(
-                Logger::Level::DEBUG,
+                Logger::Level::INFO,
                 " (convolution weight tensor, size = <" +
                     std::to_string(layer.convolution_weights.size()) + ", " +
                     std::to_string(layer.convolution_weights[0].size()) + ", " +
@@ -219,6 +214,12 @@ public:
                     std::to_string(layer.convolution_weights[0][0][0].size()) +
                     ">)");
             // convert 4d tensor to 2d tensor
+            layer.input_channels = input_dim;
+            layer.output_channels = output_dim;
+            layer.conv_input_height = input_height;
+            layer.conv_input_width = input_width;
+            layer.kernel_height = kernel_height;
+            layer.kernel_width = kernel_width;
             layer.conv_output_height =
                 (input_height + 2 * layer.pads - layer.kernel_height) /
                     layer.strides +
@@ -232,10 +233,6 @@ public:
                                     input_width, layer.strides, layer.pads);
 
             layer.layer_size = layer.weights.size();
-            Logger::log(Logger::Level::DEBUG,
-                        "The layer size is " +
-                            std::to_string(layer.layer_size));
-
             input_height =
                 std::floor((input_height + 2 * layer.pads -
                             layer.dilation * (layer.kernel_height - 1) - 1) /
@@ -300,20 +297,6 @@ public:
         } else if (layer.type == LayerType::Constant) {
           continue;
         } else if (layer.type == LayerType::Flatten) {
-          // layer.neurons = std::vector<Neuron>(spec.numberOfInputs);
-          // for (const auto &variable : spec.variables) {
-          //   if (variable.first.substr(0, 1) == "X") {
-          //     layer.neurons[variable.second.id] = variable.second;
-          //   }
-          // }
-          // layer.layer_size = layer.neurons.size();
-          // // initialize lower & upper biases space
-          // for (size_t i = 0; i < layer.layer_size; ++i) {
-          //   layer.biases.push_back(0.0);
-          //   layer.lower_biases.push_back(0.0);
-          //   layer.upper_biases.push_back(0.0);
-          // }
-          //
           layer.layer_size = layers[layers.size() - 1].layer_size;
           layer.neurons = std::vector<Neuron>(layer.layer_size);
         } else if (layer.type == LayerType::Relu) {
@@ -584,16 +567,6 @@ private:
     return data;
   }
 
-  void make_sub_layer() { return; }
-
-  void make_div_layer() { return; }
-
-  void make_flatten_layer() { return; }
-
-  void make_relu_layer() { return; }
-
-  void make_weights_biases_layer() { return; }
-
   tensor2d convert4Dto2Dtensor(const tensor4d &weights, size_t input_H,
                                size_t input_W, size_t stride, size_t pad) {
     const size_t output_channels = weights.size();
@@ -610,82 +583,52 @@ private:
                 "The output size is " + std::to_string(output_size));
 
     tensor2d result_weights(output_size, tensor1d(input_size, 0.0f));
-    // FIX: The implementation seems not correct.
-    // size_t row = 0;
-    // for (size_t oc = 0; oc < output_channels; ++oc) {
-    //   for (size_t oh = 0; oh < output_H; ++oh) {
-    //     for (size_t ow = 0; ow < output_W; ++ow) {
-    //
-    //       // bounds check for row (defensive)
-    //       if (row >= output_size) {
-    //         std::cerr << "ERROR: row >= output_size: row=" << row
-    //                   << " output_size=" << output_size << std::endl;
-    //         assert(false);
-    //       }
-    //
-    //       for (size_t ic = 0; ic < input_channels; ++ic) {
-    //         for (size_t kh = 0; kh < kernel_H; ++kh) {
-    //           for (size_t kw = 0; kw < kernel_W; ++kw) {
-    //             // use signed integers for intermediate coordinates
-    //             int ih = static_cast<int>(oh * stride) + static_cast<int>(kh)
-    //             -
-    //                      static_cast<int>(pad);
-    //             int iw = static_cast<int>(ow * stride) + static_cast<int>(kw)
-    //             -
-    //                      static_cast<int>(pad);
-    //
-    //             // only write when ih/iw inside input bounds
-    //             if (ih >= 0 && ih < static_cast<int>(input_H) && iw >= 0 &&
-    //                 iw < static_cast<int>(input_W)) {
-    //
-    //               size_t col = ic * (input_H * input_W) +
-    //                            static_cast<size_t>(ih) * input_W +
-    //                            static_cast<size_t>(iw);
-    //
-    //               // defensive check for col bounds
-    //               if (col >= input_size) {
-    //                 std::cerr << "ERROR: computed col out of range: col=" <<
-    //                 col
-    //                           << " input_size=" << input_size
-    //                           << " (oc,ic,oh,ow,kh,kw)=(" << oc << "," << ic
-    //                           << "," << oh << "," << ow << "," << kh << ","
-    //                           << kw << ")\n";
-    //                 assert(false);
-    //               }
-    //
-    //               // write weight value
-    //               result_weights[row][col] = weights[oc][ic][kh][kw];
-    //             }
-    //           }
-    //         }
-    //       }
-    //       ++row;
-    //     }
-    //   }
-    // }
+    size_t row = 0;
+    for (size_t oc = 0; oc < output_channels; ++oc) {
+      for (size_t oh = 0; oh < output_H; ++oh) {
+        for (size_t ow = 0; ow < output_W; ++ow) {
 
-    // TEST: marabou way
-    for (size_t i = 0; i < output_W; ++i) {
-      for (size_t j = 0; j < output_H; ++j) {
-        for (size_t k = 0; k < output_channels; ++k) {
-          size_t row = k * (output_H * output_W) + j * output_W + i;
+          // bounds check for row (defensive)
+          if (row >= output_size) {
+            std::cerr << "ERROR: row >= output_size: row=" << row
+                      << " output_size=" << output_size << std::endl;
+            assert(false);
+          }
 
-          for (size_t di = 0; di < kernel_W; ++di) {
-            for (size_t dj = 0; dj < kernel_H; ++dj) {
-              for (size_t dk = 0; dk < input_channels; ++dk) {
-                int wIndex = static_cast<int>(stride * i + di - pad);
-                int hIndex = static_cast<int>(stride * j + dj - pad);
+          for (size_t ic = 0; ic < input_channels; ++ic) {
+            for (size_t kh = 0; kh < kernel_H; ++kh) {
+              for (size_t kw = 0; kw < kernel_W; ++kw) {
+                // use signed integers for intermediate coordinates
+                int ih = static_cast<int>(oh * stride) + static_cast<int>(kh) -
+                         static_cast<int>(pad);
+                int iw = static_cast<int>(ow * stride) + static_cast<int>(kw) -
+                         static_cast<int>(pad);
 
-                if (wIndex >= 0 && wIndex < (int)input_W && hIndex >= 0 &&
-                    hIndex < (int)input_H) {
-                  size_t col =
-                      dk * (input_H * input_W) + hIndex * input_W + wIndex;
-                  result_weights[row][col] =
-                      weights[k][dk][dj][di]; // same index pattern as Marabou
+                // only write when ih/iw inside input bounds
+                if (ih >= 0 && ih < static_cast<int>(input_H) && iw >= 0 &&
+                    iw < static_cast<int>(input_W)) {
+
+                  size_t col = ic * (input_H * input_W) +
+                               static_cast<size_t>(ih) * input_W +
+                               static_cast<size_t>(iw);
+
+                  // defensive check for col bounds
+                  if (col >= input_size) {
+                    std::cerr << "ERROR: computed col out of range: col=" << col
+                              << " input_size=" << input_size
+                              << " (oc,ic,oh,ow,kh,kw)=(" << oc << "," << ic
+                              << "," << oh << "," << ow << "," << kh << ","
+                              << kw << ")\n";
+                    assert(false);
+                  }
+
+                  // write weight value
+                  result_weights[row][col] = weights[oc][ic][kh][kw];
                 }
               }
             }
           }
+          ++row;
         }
       }
     }

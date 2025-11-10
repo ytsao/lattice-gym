@@ -2,7 +2,7 @@
 
 Welcome to lattice-gym!
 
-In this repository, we are providing lots of interesting stuffs that you can explore and contribute.
+In this repository, we provide lots of interesting stuffs that you can explore/contribute the knowledge about lattice theory and its applications.
 
 Let's climb on lattices!
 

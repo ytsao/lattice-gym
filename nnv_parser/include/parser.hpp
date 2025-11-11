@@ -228,18 +228,18 @@ public:
                 (input_width + 2 * layer.pads - layer.kernel_width) /
                     layer.strides +
                 1;
-            layer.weights =
-                convert4Dto2Dtensor(layer.convolution_weights, input_height,
-                                    input_width, layer.strides, layer.pads);
+            layer.weights = convert4Dto2Dtensor(
+                layer.convolution_weights, layer.conv_input_height,
+                layer.conv_input_width, layer.strides, layer.pads);
 
             layer.layer_size = layer.weights.size();
             input_height =
-                std::floor((input_height + 2 * layer.pads -
+                std::floor((layer.conv_input_height + 2 * layer.pads -
                             layer.dilation * (layer.kernel_height - 1) - 1) /
                                layer.strides +
                            1);
             input_width =
-                std::floor((input_width + 2 * layer.pads -
+                std::floor((layer.conv_input_width + 2 * layer.pads -
                             layer.dilation * (layer.kernel_width - 1) - 1) /
                                layer.strides +
                            1);
@@ -493,23 +493,23 @@ private:
     return data;
   }
 
-  std::vector<std::vector<float>>
-  extract2DTensorData(const onnx::TensorProto &tensor) {
+  tensor2d extract2DTensorData(const onnx::TensorProto &tensor) {
     tensor2d data;
 
-    tensor1d temp_data;
+    tensor1d temp_data = extract1DTensorData(tensor);
 
-    // Case 1: float_data() directly stored
-    if (tensor.float_data_size() > 0) {
-      temp_data.assign(tensor.float_data().begin(), tensor.float_data().end());
-    }
-    // Case 2: raw_data() binary blob
-    else {
-      std::string raw = tensor.raw_data();
-      size_t elem_count = raw.size() / sizeof(float);
-      temp_data.resize(elem_count);
-      std::memcpy(temp_data.data(), raw.data(), raw.size());
-    }
+    // // Case 1: float_data() directly stored
+    // if (tensor.float_data_size() > 0) {
+    //   temp_data.assign(tensor.float_data().begin(),
+    //   tensor.float_data().end());
+    // }
+    // // Case 2: raw_data() binary blob
+    // else {
+    //   std::string raw = tensor.raw_data();
+    //   size_t elem_count = raw.size() / sizeof(float);
+    //   temp_data.resize(elem_count);
+    //   std::memcpy(temp_data.data(), raw.data(), raw.size());
+    // }
 
     // make 1d data vector to 2d data matrix;
     size_t num_rows = tensor.dims(0);
@@ -526,19 +526,20 @@ private:
 
   tensor4d extract4DTensorData(const onnx::TensorProto &tensor) {
 
-    tensor1d flat_data;
+    tensor1d flat_data = extract1DTensorData(tensor);
 
-    // Case 1: float_data() directly stored
-    if (tensor.float_data_size() > 0) {
-      flat_data.assign(tensor.float_data().begin(), tensor.float_data().end());
-    }
-    // Case 2: raw_data() binary blob
-    else {
-      std::string raw = tensor.raw_data();
-      size_t elem_count = raw.size() / sizeof(float);
-      flat_data.resize(elem_count);
-      std::memcpy(flat_data.data(), raw.data(), raw.size());
-    }
+    // // Case 1: float_data() directly stored
+    // if (tensor.float_data_size() > 0) {
+    //   flat_data.assign(tensor.float_data().begin(),
+    //   tensor.float_data().end());
+    // }
+    // // Case 2: raw_data() binary blob
+    // else {
+    //   std::string raw = tensor.raw_data();
+    //   size_t elem_count = raw.size() / sizeof(float);
+    //   flat_data.resize(elem_count);
+    //   std::memcpy(flat_data.data(), raw.data(), raw.size());
+    // }
 
     // Read dims
     if (tensor.dims_size() != 4)
@@ -568,14 +569,14 @@ private:
   }
 
   tensor2d convert4Dto2Dtensor(const tensor4d &weights, size_t input_H,
-                               size_t input_W, size_t stride, size_t pad) {
+                               size_t input_W, size_t strides, size_t pads) {
     const size_t output_channels = weights.size();
     const size_t input_channels = weights[0].size();
     const size_t kernel_H = weights[0][0].size();
     const size_t kernel_W = weights[0][0][0].size();
 
-    const size_t output_H = (input_H + 2 * pad - kernel_H) / stride + 1;
-    const size_t output_W = (input_W + 2 * pad - kernel_W) / stride + 1;
+    const size_t output_H = (input_H + 2 * pads - kernel_H) / strides + 1;
+    const size_t output_W = (input_W + 2 * pads - kernel_W) / strides + 1;
 
     const size_t input_size = input_channels * input_H * input_W;
     const size_t output_size = output_channels * output_H * output_W;
@@ -599,10 +600,10 @@ private:
             for (size_t kh = 0; kh < kernel_H; ++kh) {
               for (size_t kw = 0; kw < kernel_W; ++kw) {
                 // use signed integers for intermediate coordinates
-                int ih = static_cast<int>(oh * stride) + static_cast<int>(kh) -
-                         static_cast<int>(pad);
-                int iw = static_cast<int>(ow * stride) + static_cast<int>(kw) -
-                         static_cast<int>(pad);
+                int ih = static_cast<int>(oh * strides) + static_cast<int>(kh) -
+                         static_cast<int>(pads);
+                int iw = static_cast<int>(ow * strides) + static_cast<int>(kw) -
+                         static_cast<int>(pads);
 
                 // only write when ih/iw inside input bounds
                 if (ih >= 0 && ih < static_cast<int>(input_H) && iw >= 0 &&

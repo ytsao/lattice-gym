@@ -32,6 +32,8 @@ public:
   // for convolutional layer
   size_t input_channels;
   size_t output_channels;
+  size_t input_height;
+  size_t input_width;
   size_t pads;
   size_t strides;
   size_t dilation;

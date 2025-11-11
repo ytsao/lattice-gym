@@ -52,12 +52,18 @@ public:
     to_layer.deeppoly_lower_expressions = from_layer.deeppoly_lower_expressions;
     to_layer.deeppoly_upper_expressions = from_layer.deeppoly_upper_expressions;
 
-    for (size_t dim = 0; dim < to_layer.div_values.size(); ++dim) {
-      for (size_t i = 0; i < to_layer.layer_size; ++i) {
-        to_layer.neurons[i].bounds =
-            (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
-            to_layer.div_values[dim];
-      }
+    // for (size_t dim = 0; dim < to_layer.div_values.size(); ++dim) {
+    //   for (size_t i = 0; i < to_layer.layer_size; ++i) {
+    //     to_layer.neurons[i].bounds =
+    //         (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
+    //         to_layer.div_values[dim];
+    //   }
+    // }
+    for (size_t i = 0; i < to_layer.layer_size; ++i) {
+      int dim = i / (to_layer.input_height * to_layer.input_width);
+      to_layer.neurons[i].bounds =
+          (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
+          to_layer.div_values[dim];
     }
 
     return;

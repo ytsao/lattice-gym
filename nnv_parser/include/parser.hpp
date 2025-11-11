@@ -84,6 +84,8 @@ public:
     // create an additional flatten layer.
     Layer first_layer;
     first_layer.type = LayerType::First;
+    first_layer.input_height = input_height;
+    first_layer.input_width = input_width;
     first_layer.neurons = std::vector<Neuron>(spec.numberOfInputs);
     for (const auto &variable : spec.variables) {
       if (variable.first.substr(0, 1) == "X") {
@@ -288,6 +290,8 @@ public:
             }
           }
           layer.layer_size = layer.neurons.size();
+          layer.input_height = layers[0].input_height;
+          layer.input_width = layers[0].input_width;
           // initialize lower & upper biases space
           for (size_t i = 0; i < layer.layer_size; ++i) {
             layer.biases.push_back(0.0);

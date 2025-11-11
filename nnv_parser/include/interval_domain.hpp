@@ -33,12 +33,18 @@ public:
     to_layer.upper_biases = from_layer.upper_biases;
 
     // Normalization
-    for (size_t dim = 0; dim < from_layer.sub_values.size(); ++dim) {
-      for (size_t i = 0; i < to_layer.layer_size; ++i) {
-        to_layer.neurons[i].bounds =
-            (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
-            to_layer.div_values[dim];
-      }
+    // for (size_t dim = 0; dim < from_layer.sub_values.size(); ++dim) {
+    //   for (size_t i = 0; i < to_layer.layer_size; ++i) {
+    //     to_layer.neurons[i].bounds =
+    //         (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
+    //         to_layer.div_values[dim];
+    //   }
+    // }
+    for (size_t i = 0; i < to_layer.layer_size; ++i) {
+      int dim = i / (to_layer.input_height * to_layer.input_width);
+      to_layer.neurons[i].bounds =
+          (from_layer.neurons[i].bounds - from_layer.sub_values[dim]) /
+          to_layer.div_values[dim];
     }
 
     return;

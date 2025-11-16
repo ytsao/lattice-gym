@@ -331,30 +331,31 @@ public:
 
   Specification parse(const std::string &input) {
     peg::parser parser(R"(
-                            Specifications          <- Statements* 
-                            Statements              <- DeclareVar / Assertion / Comment
-                            Integer                 <- [+-]? [0-9]+
-                            Float                   <- [+-]? [0-9]+ '.' [0-9]+
-                            Identifier              <- [a-zA-Z_][a-zA-Z0-9_]*
-                            BinaryOp                <- '<=' / '>='
-                            LogicOp                 <- 'or' / 'and'
-                            DeclareVar              <- '(declare-const '  Identifier ' Real' ')'
-                            Bound                   <- '(' BinaryOp [ \t]* Identifier [ \t]* (Float / Identifier) [ \t]* ')'
-                            Conjunctive             <- '(' LogicOp [ \t]* Bound* ')' 
-                            Assertion               <- '(assert ' Bound ')' / '(assert (' LogicOp+ Conjunctive* '))' 
+                            Statements              <- (DeclareVar / Assertion / Comment)+
+
+                            Integer                 <- < [+-]? [0-9]+ >
+                            Real                    <- < [+-]? [0-9]+ '.' [0-9]+ >
+                            Identifier              <- < [a-zA-Z_][a-zA-Z0-9_]* >
+
+                            BinaryOp                <- < '<=' / '>=' >
+                            LogicOp                 <- < 'or' / 'and' >
+
+                            DeclareVar              <- '(declare-const'  Identifier 'Real' ')'
+                            Bound                   <- '(' BinaryOp Identifier (Real / Integer / Identifier) ')'
+                            Constraint              <- '(' LogicOp Bound* ')' 
+                            Assertion               <- '(' 'assert' Bound ')' / '(' 'assert' '(' LogicOp+ Constraint* '))' 
+
                             ~Comment                <- ';' [^\n\r]* [ \n\r\t]*
                             %whitespace             <- [ \n\r\t]*
                            )");
     assert(static_cast<bool>(parser) == true);
 
     // setup actions
-    parser["Specifications"] = [this](const SV &sv) {
-      return make_specifications(sv);
-    };
+    parser["Statements"] = [this](const SV &sv) { return make_statements(sv); };
     parser["Integer"] = [](const SV &sv) {
       return ASTNode(sv.token_to_number<int>());
     };
-    parser["Float"] = [](const SV &sv) {
+    parser["Real"] = [](const SV &sv) {
       return ASTNode(sv.token_to_number<double>());
     };
     parser["Identifier"] = [](const SV &sv) {
@@ -366,9 +367,7 @@ public:
       return make_declare_variable(sv);
     };
     parser["Bound"] = [this](const SV &sv) { return make_bound(sv); };
-    parser["Conjunctive"] = [this](const SV &sv) {
-      return make_conjunctive(sv);
-    };
+    parser["Constraint"] = [this](const SV &sv) { return make_constraint(sv); };
     parser["Assertion"] = [this](const SV &sv) { return make_assertion(sv); };
     parser.set_logger([](size_t line, size_t col, const std::string &msg,
                          const std::string &rule) {
@@ -377,7 +376,7 @@ public:
                                             ": " + msg + " in rule " + rule);
     });
 
-    // std::cout << input.c_str() << std::endl;
+    std::cout << input.c_str() << std::endl;
     ASTNode ast;
     Specification spec;
     if (parser.parse(input.c_str(), ast)) {
@@ -392,7 +391,7 @@ public:
   }
 
 private:
-  ASTNode make_specifications(const SV &sv) {
+  ASTNode make_statements(const SV &sv) {
     if (sv.size() == 1) {
       return std::any_cast<ASTNode>(sv[0]);
     } else {
@@ -453,7 +452,7 @@ private:
     return bound_node;
   }
 
-  ASTNode make_conjunctive(const SV &sv) {
+  ASTNode make_constraint(const SV &sv) {
     ASTNode conj_node(ASTNodeType::LOGIC_OP, LogicOp::And); // sv[0];
     for (size_t i = 1; i < sv.size(); ++i) {
       ASTNode bound_node = std::any_cast<ASTNode>(sv[i]);

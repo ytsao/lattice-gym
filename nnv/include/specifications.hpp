@@ -31,14 +31,12 @@ public:
       for (const auto &variable : variables) {
         if (variable.first.substr(0, 1) == "Y") {
           double spec_lb = variable.second.bounds.getLb();
-          double neuron_lb =
-              spec_layer.neurons[variable.second.id].bounds.getLb();
+          double neuron_lb = spec_layer.neurons[variable.second.id].bounds.getLb();
           if (neuron_lb < spec_lb && spec_lb != 0)
             return false;
 
           double spec_ub = variable.second.bounds.getUb();
-          double neuron_ub =
-              spec_layer.neurons[variable.second.id].bounds.getUb();
+          double neuron_ub = spec_layer.neurons[variable.second.id].bounds.getUb();
           if (neuron_ub > spec_ub && spec_ub != 0)
             return false;
         }
@@ -47,24 +45,19 @@ public:
     }
 
     bool *postconditions_verification_result = new bool[A.size()];
-    for (size_t disjunctive_id = 0; disjunctive_id < A.size();
-         ++disjunctive_id) {
+    for (size_t disjunctive_id = 0; disjunctive_id < A.size(); ++disjunctive_id) {
       bool postcondition_satisfied = false;
-      for (size_t conjunctive_id = 0; conjunctive_id < A[disjunctive_id].size();
-           ++conjunctive_id) {
-        size_t neuron_id =
-            disjunctive_id * A[disjunctive_id].size() + conjunctive_id;
+      for (size_t conjunctive_id = 0; conjunctive_id < A[disjunctive_id].size(); ++conjunctive_id) {
+        size_t neuron_id = disjunctive_id * A[disjunctive_id].size() + conjunctive_id;
         if (spec_layer.neurons[neuron_id].bounds.getLb() > 0) {
           postcondition_satisfied |= true;
         } else
           postcondition_satisfied |= false;
       }
-      postconditions_verification_result[disjunctive_id] =
-          postcondition_satisfied;
+      postconditions_verification_result[disjunctive_id] = postcondition_satisfied;
     }
 
-    for (size_t disjunctive_id = 0; disjunctive_id < A.size();
-         ++disjunctive_id) {
+    for (size_t disjunctive_id = 0; disjunctive_id < A.size(); ++disjunctive_id) {
       if (postconditions_verification_result[disjunctive_id] == false) {
         delete[] postconditions_verification_result;
         return false;

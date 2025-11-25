@@ -46,6 +46,6 @@ include_directories(SYSTEM ${ONNX_DIR})
 # Add executable
 add_executable(nnv ./src/main.cpp ${DEPS_ONNX})
 
-target_include_directories(nnv PRIVATE ~/code/side_projects/lattice-gym/nnv/include)
+target_include_directories(nnv PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
 target_include_directories(nnv PRIVATE ${PROTOBUF_DIR}/installed/include)
 target_link_libraries(nnv PRIVATE ${PROTOBUF_LIB})

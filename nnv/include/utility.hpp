@@ -43,9 +43,7 @@ inline std::vector<TaskEntry> read_csv(const std::string &filename) {
 
 inline void print_tasks(const std::vector<TaskEntry> &tasks) {
   for (const auto &t : tasks) {
-    Logger::log(Logger::Level::INFO,
-                "\nVNNLIB: " + t.vnnlib_path + "\nONNX: " + t.onnx_path +
-                    "\nPropagation method: " + t.propagation_method);
+    Logger::log(Logger::Level::INFO,"\nVNNLIB: " + t.vnnlib_path + "\nONNX: " + t.onnx_path + "\nPropagation method: " + t.propagation_method);
   }
 }
 

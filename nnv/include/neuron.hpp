@@ -27,10 +27,8 @@ public:
                           // concrete bounds in gamma function.
   // extract weights from symbolic expression by <layer_id, id>.
   // PS both ids start from 0.
-  std::unordered_map<std::tuple<size_t, size_t>, double, TupleHash>
-      symbolic_lower_expression;
-  std::unordered_map<std::tuple<size_t, size_t>, double, TupleHash>
-      symbolic_upper_expression;
+  std::unordered_map<std::tuple<size_t, size_t>, double, TupleHash> symbolic_lower_expression;
+  std::unordered_map<std::tuple<size_t, size_t>, double, TupleHash> symbolic_upper_expression;
 
   Neuron() : id(0), bounds() {}
 
@@ -39,11 +37,7 @@ public:
   void setLayerId(int _layer_id) { layer_id = _layer_id; }
 
   void dump() {
-    Logger::log(Logger::Level::DEBUG,
-                "Neuron " + std::to_string(id) + " at layer " +
-                    std::to_string(layer_id) + " = [" +
-                    std::to_string(bounds.getLb()) + ", " +
-                    std::to_string(bounds.getUb()) + "]");
+    Logger::log(Logger::Level::DEBUG,"Neuron " + std::to_string(id) + " at layer " + std::to_string(layer_id) + " = [" + std::to_string(bounds.getLb()) + ", " + std::to_string(bounds.getUb()) + "]");
   }
 
   bool operator==(const Neuron &other) const {

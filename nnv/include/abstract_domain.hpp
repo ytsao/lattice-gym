@@ -14,34 +14,16 @@ public:
   virtual void gamma(Network &nnv, const size_t layer_idx) { return; }
 
   virtual void first_layer_transformer(Layer &current_layer) { return; }
-  virtual void subtraction_layer_transformer(const Layer &from_layer,
-                                             Layer &to_layer) {
-    return;
-  };
-  virtual void division_layer_transformer(const Layer &from_layer,
-                                          Layer &to_layer) {
-    return;
-  }
-  virtual void constant_layer_transformer(const Layer &current_layer) {
-    return;
-  }
-  virtual void flatten_layer_transformer(const Layer &from_layer,
-                                         Layer &to_layer) {
-    return;
-  };
+  virtual void subtraction_layer_transformer(const Layer &from_layer,Layer &to_layer) { return; };
+  virtual void division_layer_transformer(const Layer &from_layer,Layer &to_layer) { return; }
+  virtual void constant_layer_transformer(const Layer &current_layer) { return; }
+  virtual void flatten_layer_transformer(const Layer &from_layer,Layer &to_layer) { return; };
   virtual void flatten_layer_transformer(Layer &current_layer) { return; };
-  virtual void relu_layer_transformer(const Layer &from_layer,
-                                      Layer &to_layer) = 0;
-  virtual void matmul_layer_transformer(const Layer &from_layer,
-                                        Layer &to_layer) = 0;
-  virtual void add_layer_transformer(const Layer &from_layer,
-                                     Layer &to_layer) = 0;
-  virtual void gemm_layer_transformer(const Layer &from_layer,
-                                      Layer &to_layer) = 0;
-  virtual void convolutional_layer_transformer(const Layer &from_layer,
-                                               Layer &to_layer) {
-    return;
-  }
+  virtual void relu_layer_transformer(const Layer &from_layer,Layer &to_layer) = 0;
+  virtual void matmul_layer_transformer(const Layer &from_layer,Layer &to_layer) = 0;
+  virtual void add_layer_transformer(const Layer &from_layer,Layer &to_layer) = 0;
+  virtual void gemm_layer_transformer(const Layer &from_layer,Layer &to_layer) = 0;
+  virtual void convolutional_layer_transformer(const Layer &from_layer,Layer &to_layer) { return; }
 };
 
 #endif // ABSTRACT_DOMAIN_HPP

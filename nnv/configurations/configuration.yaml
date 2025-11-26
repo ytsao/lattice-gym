@@ -1,0 +1,21 @@
+# Example of verifying an ONNX model with VNNLIB general specifications
+general:
+  device: cpu # cpu or gpu
+  show_adv_example: true
+  root_path: /home/ytsao/code/vnn/alpha-beta-CROWN/complete_verifier/exp_configs # change to your directory
+  csv_name: instances.csv # it contains vnnlib, onnx file.
+  results_file: out.txt
+  complete_verifier: skip
+model:
+  onnx_path: /home/ytsao/code/vnn/sufficiency/sufficiency/dep/vnn_bench/benchmarks/data/convSmallRELU__Point.onnx
+  input_shape: [1, 1, 28, 28]
+# specification:
+  # VNNLIB file specification.
+  # vnnlib_path: /home/ytsao/code/vnn/sufficiency/sufficiency/dep/vnn_bench/benchmarks/data/mnist/vnnlib/DeepSRGR/0037/mnist_1_local_property.vnnlib
+solver:
+  batch_size: 2048
+  bound_prop_method: alpha-crown # crown, alpha-crown
+  crown:
+    compare_crown_with_ibp: true  # Compare CROWN bounds with IBP bounds given existing intermediate bounds.
+bab:
+  timeout: 3600

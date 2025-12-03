@@ -15,6 +15,7 @@ enum class LayerType {
   Conv,
   Flatten,
   Relu,
+  BatchNormalization
 };
 
 struct Layer {
@@ -24,6 +25,8 @@ public:
   using tensor4d = std::vector<std::vector<std::vector<std::vector<float>>>>;
 
   LayerType type;
+
+  Layer *source_layer; //TODO: for residual neural networks, there might have 1+ source layers.
 
   // for colorful images, we have 3 values
   tensor1d sub_values;
@@ -44,6 +47,14 @@ public:
   size_t conv_input_height;
   size_t conv_output_width;
   size_t conv_output_height;
+
+  // for batchnormalization layer
+  float epsilon;
+  float momentum;
+  tensor1d scale; 
+  tensor1d B; 
+  tensor1d mean;
+  tensor1d var;
 
   tensor2d weights;
   tensor4d convolution_weights;

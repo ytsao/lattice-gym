@@ -58,12 +58,16 @@ public:
     // shape of input.
     const onnx::ValueInfoProto &graph_input = graph.input(0);
     const auto &input_shape = graph_input.type().tensor_type().shape(); // <batch_size, num_channels, input_H, input-W);
-    size_t batch_size = input_shape.dim(0).dim_value();
+    size_t batch_size = input_shape.dim(0).dim_value(); // assume this is always 1. if that is "batch" then it will be defined later.
     size_t input_channels = input_shape.dim(1).dim_value();
     size_t input_height = input_shape.dim(2).dim_value();
     size_t input_width = input_shape.dim(3).dim_value();
-    size_t input_dimension = batch_size * input_channels * input_height * input_width;
-    assert(input_dimension == spec.numberOfInputs);
+    // size_t input_dimension = batch_size * input_channels * input_height * input_width;
+    size_t input_dimension = input_channels * input_height * input_width;
+    std::cout << batch_size << ", " << input_channels << ", " << input_height << ", " << input_width << ", " << input_dimension << std::endl;
+    Logger::log(Logger::DEBUG, "input dimension: " + static_cast<int>(input_dimension));
+    Logger::log(Logger::DEBUG, "spec.numberOfInputs: " + spec.numberOfInputs);
+    assert(input_dimension == spec.numberOfInputs); // ? this assertion is not true for "nn with batch normalization".
 
     // --- Build a map from tensor name → node that produces it
     // This is for linking sub/div node and its input nodes.
@@ -143,6 +147,20 @@ public:
         }
       } else if (node.op_type() == "Relu") {
         layer.type = LayerType::Relu;
+      } else if (node.op_type() == "BatchNormalization") {
+        layer.type = LayerType::BatchNormalization;
+
+        // Attributes
+        for (const auto &attr : node.attribute()){
+          if (attr.ints_size() > 0) {
+            const std::string &attr_name = attr.name();
+            if (attr_name == "epsilon") {
+              layer.epsilon = attr.floats()[0];
+            } else if (attr_name == "momentum") {
+              layer.momentum = attr.floats()[0];
+            }
+          }
+        }
       }
 
       for (const auto &input_name : node.input()) {
@@ -157,9 +175,9 @@ public:
             layer.biases = extract1DTensorData(tensor);
             layer.lower_biases = layer.biases;
             layer.upper_biases = layer.biases;
-            if (layer.type != LayerType::Conv) {
+            if (layer.type == LayerType::Add) {
               layer.layer_size = layer.biases.size();
-            } else {
+            } else if (layer.type == LayerType::Conv) {
               tensor1d expanded_biases(layer.layer_size);
               size_t spatial_size = layer.conv_output_height * layer.conv_output_width;
               Logger::log(Logger::Level::DEBUG,"Spatial size is " + std::to_string(spatial_size) + "Layer size is " + std::to_string(layer.layer_size));
@@ -170,6 +188,8 @@ public:
               layer.biases = expanded_biases;
               layer.lower_biases = expanded_biases;
               layer.upper_biases = expanded_biases;
+            } else if (layer.type == LayerType::BatchNormalization) {
+              // TODO: store each 1d tensor from batch normalization node.
             }
             Logger::log(Logger::Level::DEBUG," (bias tensor, size = " + std::to_string(layer.biases.size()) + ")");
           } else if (tensor.dims().size() == 2) {
@@ -203,11 +223,16 @@ public:
             layer.kernel_width = kernel_width;
             layer.conv_output_height = (input_height + 2 * layer.pads - layer.kernel_height) / layer.strides + 1;
             layer.conv_output_width = (input_width + 2 * layer.pads - layer.kernel_width) / layer.strides + 1;
-            layer.weights = convert4Dto2Dtensor(layer.convolution_weights, layer.conv_input_height,layer.conv_input_width, layer.strides, layer.pads);
+            // TODO: if the converted 2d tensor is too large, this convertion will lead OOM error.
+            // TODO: so, we can use 4dtensor during bound propagation directly.
+            // * we can use the similar way in convertion funtion.
+            // layer.weights = convert4Dto2Dtensor(layer.convolution_weights, layer.conv_input_height,layer.conv_input_width, layer.strides, layer.pads);
 
             layer.layer_size = layer.weights.size();
             input_height = std::floor((layer.conv_input_height + 2 * layer.pads - layer.dilation * (layer.kernel_height - 1) - 1) / layer.strides + 1);
             input_width = std::floor((layer.conv_input_width + 2 * layer.pads - layer.dilation * (layer.kernel_width - 1) - 1) / layer.strides + 1);
+          } else if (layer.type == LayerType::BatchNormalization) {
+            Logger::log(Logger::DEBUG, "tensor size = " + tensor.dims_size());
           }
           layer.neurons = std::vector<Neuron>(layer.layer_size);
         } else if (layer.type == LayerType::Sub || layer.type == LayerType::Div) {
@@ -267,6 +292,8 @@ public:
         } else if (layer.type == LayerType::Relu) {
           layer.layer_size = layers[layers.size() - 1].layer_size;
           layer.neurons = std::vector<Neuron>(layer.layer_size);
+        } else if (layer.type == LayerType::BatchNormalization) {
+          std::cout << "This is a batchnormalization layer." << std::endl;
         }
       }
 
@@ -501,11 +528,14 @@ private:
 
     const size_t input_size = input_channels * input_H * input_W;
     const size_t output_size = output_channels * output_H * output_W;
+    Logger::log(Logger::Level::DEBUG,"The input size is " + std::to_string(input_size));
     Logger::log(Logger::Level::DEBUG,"The output size is " + std::to_string(output_size));
 
-    tensor2d result_weights(output_size, tensor1d(input_size, 0.0f));
+    tensor2d result_weights(output_size, tensor1d(input_size, 0.0f)); // ? if the size is too large, the memory cannot store them into result_weights.
+    Logger::log(Logger::Level::DEBUG, "after creating resulting space.");
     size_t row = 0;
     for (size_t oc = 0; oc < output_channels; ++oc) {
+      Logger::log(Logger::DEBUG, "why?????????");
       for (size_t oh = 0; oh < output_H; ++oh) {
         for (size_t ow = 0; ow < output_W; ++ow) {
 

@@ -25,8 +25,7 @@ class NeuralNetworkParser {
   using tensor4d = std::vector<tensor3d>;
 
 public:
-  bool load_network(const std::string &network_file_directory,
-                    const Specification &spec, std::vector<Layer> &layers) {
+  bool load_network(const std::string &network_file_directory,const Specification &spec, std::vector<Layer> &layers) {
     const std::string model_path = network_file_directory;
 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -45,12 +44,9 @@ public:
     }
 
     const onnx::GraphProto &graph = model.graph();
-    Logger::log(Logger::Level::INFO, "Model name: " + graph.name());
-    Logger::log(Logger::Level::INFO,
-                "Number of nodes: " + std::to_string(graph.node_size()));
-    Logger::log(Logger::Level::INFO,
-                "Number of initializers (weights/biases): " +
-                    std::to_string(graph.initializer_size()));
+    Logger::log(Logger::Level::INFO,"Model name: " + graph.name());
+    Logger::log(Logger::Level::INFO,"Number of nodes: " + std::to_string(graph.node_size()));
+    Logger::log(Logger::Level::INFO,"Number of initializers (weights/biases): " + std::to_string(graph.initializer_size()));
 
     // --- Create a map from tensor name to TensorProto for fast lookup ---
     std::unordered_map<std::string, onnx::TensorProto> tensor_map;
@@ -61,16 +57,12 @@ public:
 
     // shape of input.
     const onnx::ValueInfoProto &graph_input = graph.input(0);
-    const auto &input_shape =
-        graph_input.type()
-            .tensor_type()
-            .shape(); // <batch_size, num_channels, input_H, input-W);
+    const auto &input_shape = graph_input.type().tensor_type().shape(); // <batch_size, num_channels, input_H, input-W);
     size_t batch_size = input_shape.dim(0).dim_value();
     size_t input_channels = input_shape.dim(1).dim_value();
     size_t input_height = input_shape.dim(2).dim_value();
     size_t input_width = input_shape.dim(3).dim_value();
-    size_t input_dimension =
-        batch_size * input_channels * input_height * input_width;
+    size_t input_dimension = batch_size * input_channels * input_height * input_width;
     assert(input_dimension == spec.numberOfInputs);
 
     // --- Build a map from tensor name → node that produces it
@@ -105,16 +97,13 @@ public:
 
     // --- Iterate over nodes (layers) ---
     for (const auto &node : graph.node()) {
-      Logger::log(Logger::Level::INFO,
-                  "Node: " + node.name() + "| OpType: " + node.op_type());
+      Logger::log(Logger::Level::INFO,"Node: " + node.name() + "| OpType: " + node.op_type());
 
       Layer layer;
       if (node.op_type() == "Sub") {
         layer.type = LayerType::Sub;
-        // continue;
       } else if (node.op_type() == "Div") {
         layer.type = LayerType::Div;
-        // continue;
       } else if (node.op_type() == "Constant") {
         // NOTE: We are not adding Constant layer into layers.
         // Instead, we merge constant layer and its corresponding sub/div layer.
@@ -172,49 +161,39 @@ public:
               layer.layer_size = layer.biases.size();
             } else {
               tensor1d expanded_biases(layer.layer_size);
-              size_t spatial_size =
-                  layer.conv_output_height * layer.conv_output_width;
-              Logger::log(Logger::Level::DEBUG,
-                          "Spatial size is " + std::to_string(spatial_size) +
-                              "Layer size is " +
-                              std::to_string(layer.layer_size));
+              size_t spatial_size = layer.conv_output_height * layer.conv_output_width;
+              Logger::log(Logger::Level::DEBUG,"Spatial size is " + std::to_string(spatial_size) + "Layer size is " + std::to_string(layer.layer_size));
               for (const auto &bias : layer.biases) {
-                expanded_biases.insert(expanded_biases.end(), spatial_size,
-                                       bias);
+                expanded_biases.insert(expanded_biases.end(), spatial_size, bias);
               }
+
               layer.biases = expanded_biases;
               layer.lower_biases = expanded_biases;
               layer.upper_biases = expanded_biases;
             }
-            Logger::log(Logger::Level::DEBUG,
-                        " (bias tensor, size = " +
-                            std::to_string(layer.biases.size()) + ")");
+            Logger::log(Logger::Level::DEBUG," (bias tensor, size = " + std::to_string(layer.biases.size()) + ")");
           } else if (tensor.dims().size() == 2) {
             layer.weights = extract2DTensorData(tensor);
-            Logger::log(Logger::Level::DEBUG,
-                        " (weight tensor, size = <" +
-                            std::to_string(layer.weights.size()) + ", " +
-                            std::to_string(layer.weights[0].size()) + ">)");
+            Logger::log(Logger::Level::DEBUG," (weight tensor, size = <" + std::to_string(layer.weights.size()) 
+                                                    + ", " + std::to_string(layer.weights[0].size()) + ">)");
 
             // (output_dimension, input_dimension);
             layer.layer_size = layer.weights[0].size();
-          } else if (tensor.dims().size() == 4 &&
-                     layer.type == LayerType::Conv) {
+          } else if (tensor.dims().size() == 4 && layer.type == LayerType::Conv) {
             layer.convolution_weights = extract4DTensorData(tensor);
+
             // <output_dim, input_dim, kernel_height, kernel_weight>
             size_t output_dim = layer.convolution_weights.size();
             size_t input_dim = layer.convolution_weights[0].size();
             size_t kernel_height = layer.convolution_weights[0][0].size();
             size_t kernel_width = layer.convolution_weights[0][0][0].size();
-            Logger::log(
-                Logger::Level::INFO,
-                " (convolution weight tensor, size = <" +
-                    std::to_string(layer.convolution_weights.size()) + ", " +
-                    std::to_string(layer.convolution_weights[0].size()) + ", " +
-                    std::to_string(layer.convolution_weights[0][0].size()) +
-                    ", " +
-                    std::to_string(layer.convolution_weights[0][0][0].size()) +
-                    ">)");
+            Logger::log(Logger::Level::INFO, 
+              " (convolution weight tensor, size = <" 
+              + std::to_string(layer.convolution_weights.size()) 
+              + ", " + std::to_string(layer.convolution_weights[0].size()) 
+              + ", " + std::to_string(layer.convolution_weights[0][0].size()) 
+              + ", " + std::to_string(layer.convolution_weights[0][0][0].size()) + ">)");
+
             // convert 4d tensor to 2d tensor
             layer.input_channels = input_dim;
             layer.output_channels = output_dim;
@@ -222,33 +201,16 @@ public:
             layer.conv_input_width = input_width;
             layer.kernel_height = kernel_height;
             layer.kernel_width = kernel_width;
-            layer.conv_output_height =
-                (input_height + 2 * layer.pads - layer.kernel_height) /
-                    layer.strides +
-                1;
-            layer.conv_output_width =
-                (input_width + 2 * layer.pads - layer.kernel_width) /
-                    layer.strides +
-                1;
-            layer.weights = convert4Dto2Dtensor(
-                layer.convolution_weights, layer.conv_input_height,
-                layer.conv_input_width, layer.strides, layer.pads);
+            layer.conv_output_height = (input_height + 2 * layer.pads - layer.kernel_height) / layer.strides + 1;
+            layer.conv_output_width = (input_width + 2 * layer.pads - layer.kernel_width) / layer.strides + 1;
+            layer.weights = convert4Dto2Dtensor(layer.convolution_weights, layer.conv_input_height,layer.conv_input_width, layer.strides, layer.pads);
 
             layer.layer_size = layer.weights.size();
-            input_height =
-                std::floor((layer.conv_input_height + 2 * layer.pads -
-                            layer.dilation * (layer.kernel_height - 1) - 1) /
-                               layer.strides +
-                           1);
-            input_width =
-                std::floor((layer.conv_input_width + 2 * layer.pads -
-                            layer.dilation * (layer.kernel_width - 1) - 1) /
-                               layer.strides +
-                           1);
+            input_height = std::floor((layer.conv_input_height + 2 * layer.pads - layer.dilation * (layer.kernel_height - 1) - 1) / layer.strides + 1);
+            input_width = std::floor((layer.conv_input_width + 2 * layer.pads - layer.dilation * (layer.kernel_width - 1) - 1) / layer.strides + 1);
           }
           layer.neurons = std::vector<Neuron>(layer.layer_size);
-        } else if (layer.type == LayerType::Sub ||
-                   layer.type == LayerType::Div) {
+        } else if (layer.type == LayerType::Sub || layer.type == LayerType::Div) {
           // Finding the constant in Sub/Div node
           if (producer_map.find(input_name) != producer_map.end()) {
             const onnx::NodeProto *producer = producer_map[input_name];
@@ -260,8 +222,7 @@ public:
                 if (tensor.data_type() == onnx::TensorProto::FLOAT) {
                   if (!tensor.raw_data().empty()) {
                     const std::string &raw = tensor.raw_data();
-                    const float *data =
-                        reinterpret_cast<const float *>(raw.data());
+                    const float *data = reinterpret_cast<const float *>(raw.data());
                     size_t numel = raw.size() / sizeof(float);
                     for (size_t i = 0; i < numel; i++) {
                       if (layer.type == LayerType::Sub)
@@ -318,9 +279,6 @@ public:
         layer.neurons[i].setId(i);
         layer.neurons[i].setLayerId(layers.size());
       }
-
-      Logger::log(Logger::Level::WARN, "The layer size should be " +
-                                           std::to_string(layer.layer_size));
       layers.push_back(layer);
     }
 
@@ -352,28 +310,17 @@ public:
 
     // setup actions
     parser["Statements"] = [this](const SV &sv) { return make_statements(sv); };
-    parser["Integer"] = [](const SV &sv) {
-      return ASTNode(sv.token_to_number<int>());
-    };
-    parser["Real"] = [](const SV &sv) {
-      return ASTNode(sv.token_to_number<double>());
-    };
-    parser["Identifier"] = [](const SV &sv) {
-      return ASTNode(sv.token_to_string());
-    };
+    parser["Integer"] = [](const SV &sv) { return ASTNode(sv.token_to_number<int>()); };
+    parser["Real"] = [](const SV &sv) { return ASTNode(sv.token_to_number<double>()); };
+    parser["Identifier"] = [](const SV &sv) { return ASTNode(sv.token_to_string()); };
     parser["BinaryOp"] = [this](const SV &sv) { return make_binary_op(sv); };
     parser["LogicOp"] = [this](const SV &sv) { return make_logic_op(sv); };
-    parser["DeclareVar"] = [this](const SV &sv) {
-      return make_declare_variable(sv);
-    };
+    parser["DeclareVar"] = [this](const SV &sv) { return make_declare_variable(sv); };
     parser["Bound"] = [this](const SV &sv) { return make_bound(sv); };
     parser["Constraint"] = [this](const SV &sv) { return make_constraint(sv); };
     parser["Assertion"] = [this](const SV &sv) { return make_assertion(sv); };
-    parser.set_logger([](size_t line, size_t col, const std::string &msg,
-                         const std::string &rule) {
-      Logger::log(Logger::Level::ERROR, "at line " + std::to_string(line) +
-                                            ", column " + std::to_string(col) +
-                                            ": " + msg + " in rule " + rule);
+    parser.set_logger([](size_t line, size_t col, const std::string &msg, const std::string &rule) {
+      Logger::log(Logger::Level::ERROR, "at line " + std::to_string(line) + ", column " + std::to_string(col) + ": " + msg + " in rule " + rule);
     });
 
     std::cout << input.c_str() << std::endl;
@@ -498,21 +445,7 @@ private:
 
   tensor2d extract2DTensorData(const onnx::TensorProto &tensor) {
     tensor2d data;
-
     tensor1d temp_data = extract1DTensorData(tensor);
-
-    // // Case 1: float_data() directly stored
-    // if (tensor.float_data_size() > 0) {
-    //   temp_data.assign(tensor.float_data().begin(),
-    //   tensor.float_data().end());
-    // }
-    // // Case 2: raw_data() binary blob
-    // else {
-    //   std::string raw = tensor.raw_data();
-    //   size_t elem_count = raw.size() / sizeof(float);
-    //   temp_data.resize(elem_count);
-    //   std::memcpy(temp_data.data(), raw.data(), raw.size());
-    // }
 
     // make 1d data vector to 2d data matrix;
     size_t num_rows = tensor.dims(0);
@@ -528,21 +461,7 @@ private:
   }
 
   tensor4d extract4DTensorData(const onnx::TensorProto &tensor) {
-
     tensor1d flat_data = extract1DTensorData(tensor);
-
-    // // Case 1: float_data() directly stored
-    // if (tensor.float_data_size() > 0) {
-    //   flat_data.assign(tensor.float_data().begin(),
-    //   tensor.float_data().end());
-    // }
-    // // Case 2: raw_data() binary blob
-    // else {
-    //   std::string raw = tensor.raw_data();
-    //   size_t elem_count = raw.size() / sizeof(float);
-    //   flat_data.resize(elem_count);
-    //   std::memcpy(flat_data.data(), raw.data(), raw.size());
-    // }
 
     // Read dims
     if (tensor.dims_size() != 4)
@@ -571,8 +490,7 @@ private:
     return data;
   }
 
-  tensor2d convert4Dto2Dtensor(const tensor4d &weights, size_t input_H,
-                               size_t input_W, size_t strides, size_t pads) {
+  tensor2d convert4Dto2Dtensor(const tensor4d &weights, size_t input_H, size_t input_W, size_t strides, size_t pads) {
     const size_t output_channels = weights.size();
     const size_t input_channels = weights[0].size();
     const size_t kernel_H = weights[0][0].size();
@@ -583,8 +501,7 @@ private:
 
     const size_t input_size = input_channels * input_H * input_W;
     const size_t output_size = output_channels * output_H * output_W;
-    Logger::log(Logger::Level::DEBUG,
-                "The output size is " + std::to_string(output_size));
+    Logger::log(Logger::Level::DEBUG,"The output size is " + std::to_string(output_size));
 
     tensor2d result_weights(output_size, tensor1d(input_size, 0.0f));
     size_t row = 0;
@@ -594,8 +511,7 @@ private:
 
           // bounds check for row (defensive)
           if (row >= output_size) {
-            std::cerr << "ERROR: row >= output_size: row=" << row
-                      << " output_size=" << output_size << std::endl;
+            std::cerr << "ERROR: row >= output_size: row=" << row << " output_size=" << output_size << std::endl;
             assert(false);
           }
 
@@ -603,26 +519,16 @@ private:
             for (size_t kh = 0; kh < kernel_H; ++kh) {
               for (size_t kw = 0; kw < kernel_W; ++kw) {
                 // use signed integers for intermediate coordinates
-                int ih = static_cast<int>(oh * strides) + static_cast<int>(kh) -
-                         static_cast<int>(pads);
-                int iw = static_cast<int>(ow * strides) + static_cast<int>(kw) -
-                         static_cast<int>(pads);
+                int ih = static_cast<int>(oh * strides) + static_cast<int>(kh) - static_cast<int>(pads);
+                int iw = static_cast<int>(ow * strides) + static_cast<int>(kw) - static_cast<int>(pads);
 
                 // only write when ih/iw inside input bounds
-                if (ih >= 0 && ih < static_cast<int>(input_H) && iw >= 0 &&
-                    iw < static_cast<int>(input_W)) {
-
-                  size_t col = ic * (input_H * input_W) +
-                               static_cast<size_t>(ih) * input_W +
-                               static_cast<size_t>(iw);
+                if (ih >= 0 && ih < static_cast<int>(input_H) && iw >= 0 && iw < static_cast<int>(input_W)) {
+                  size_t col = ic * (input_H * input_W) + static_cast<size_t>(ih) * input_W + static_cast<size_t>(iw);
 
                   // defensive check for col bounds
                   if (col >= input_size) {
-                    std::cerr << "ERROR: computed col out of range: col=" << col
-                              << " input_size=" << input_size
-                              << " (oc,ic,oh,ow,kh,kw)=(" << oc << "," << ic
-                              << "," << oh << "," << ow << "," << kh << ","
-                              << kw << ")\n";
+                    std::cerr << "ERROR: computed col out of range: col=" << col << " input_size=" << input_size << " (oc,ic,oh,ow,kh,kw)=(" << oc << "," << ic << "," << oh << "," << ow << "," << kh << "," << kw << ")\n";
                     assert(false);
                   }
 

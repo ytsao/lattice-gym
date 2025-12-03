@@ -65,13 +65,11 @@ inline void log(Level level, const std::string &msg) {
   }
 
   if (level == Level::ERROR) {
-    std::cerr << color(level) << "[" << timestamp() << "]" << tag << "\033[0m"
-              << msg << std::endl;
+    std::cerr << color(level) << "[" << timestamp() << "]" << tag << "\033[0m" << msg << std::endl;
   } else if (level == Level::EMPTY) {
     std::cout << color(level) << tag << "\033[0m" << msg << std::endl;
   } else {
-    std::cout << color(level) << "[" << timestamp() << "]" << tag << "\033[0m"
-              << msg << std::endl;
+    std::cout << color(level) << "[" << timestamp() << "]" << tag << "\033[0m" << msg << std::endl;
   }
 }
 

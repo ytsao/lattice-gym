@@ -61,10 +61,7 @@ protected:
     //           << std::endl;
     // std::cout << "  Number of AND conditions per OR condition: "
     //           << nnv.spec.A[0].size() << std::endl;
-    auxiliary_layer.layer_size =
-        nnv.spec.A.size() *
-        nnv.spec.A[0]
-            .size(); // number of OR conditions * number of AND conditions.
+    auxiliary_layer.layer_size = nnv.spec.A.size() * nnv.spec.A[0].size(); // number of OR conditions * number of AND conditions.
 
     // std::cout << "  Auxiliary layer size: " << auxiliary_layer.layer_size
     //           << std::endl;
@@ -76,14 +73,8 @@ protected:
     }
 
     // Initialize deeppoly expressions for each neuron in the auxiliary_layer
-    auxiliary_layer.deeppoly_lower_expressions =
-        std::vector<std::vector<double>>(
-            auxiliary_layer.layer_size,
-            std::vector<double>(nnv.layers.back().layer_size, 0.0));
-    auxiliary_layer.deeppoly_upper_expressions =
-        std::vector<std::vector<double>>(
-            auxiliary_layer.layer_size,
-            std::vector<double>(nnv.layers.back().layer_size, 0.0));
+    auxiliary_layer.deeppoly_lower_expressions = std::vector<std::vector<double>>(auxiliary_layer.layer_size,std::vector<double>(nnv.layers.back().layer_size, 0.0));
+    auxiliary_layer.deeppoly_upper_expressions = std::vector<std::vector<double>>(auxiliary_layer.layer_size,std::vector<double>(nnv.layers.back().layer_size, 0.0));
 
     // Create a set of new neurons and its lower & upper biases.
     for (size_t i = 0; i < auxiliary_layer.layer_size; ++i) {

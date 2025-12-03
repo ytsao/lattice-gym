@@ -36,8 +36,7 @@ struct ASTNode {
   ASTNode(const std::string &name) : type(ASTNodeType::VARIABLE), value(name) {}
   ASTNode(const int num) : type(ASTNodeType::INTEGER), value(num) {}
   ASTNode(const double num) : type(ASTNodeType::DOUBLE), value(num) {}
-  ASTNode(BinaryOp lop, ASTNode left, ASTNode right)
-      : type(ASTNodeType::LOGIC_OP), value(lop) {
+  ASTNode(BinaryOp lop, ASTNode left, ASTNode right) : type(ASTNodeType::LOGIC_OP), value(lop) {
     children.push_back(left);
     children.push_back(right);
   }
@@ -46,7 +45,6 @@ struct ASTNode {
   ASTNode(ASTNodeType t, const VType &value) : type(t), value(value) {}
 
   void make_specifications(Specification &spec) {
-
     if (type == ASTNodeType::DECLARATION) {
       for (size_t i = 0; i < children.size(); ++i) {
         ASTNode node = children[i];
@@ -186,11 +184,8 @@ struct ASTNode {
   }
 
   void dump_spec_bounds(Specification &spec) const {
-    Logger::log(Logger::Level::INFO,
-                "number of inputs = " + std::to_string(spec.numberOfInputs));
-    Logger::log(Logger::Level::INFO,
-                "number of outputs = " + std::to_string(spec.numberOfOutputs));
-
+    Logger::log(Logger::Level::INFO,"number of inputs = " + std::to_string(spec.numberOfInputs));
+    Logger::log(Logger::Level::INFO,"number of outputs = " + std::to_string(spec.numberOfOutputs));
     Logger::log(Logger::Level::INFO, "Postconditions matrix and bias: ");
     Logger::log(Logger::Level::INFO, "A matrix: ");
     for (auto i : spec.A) {

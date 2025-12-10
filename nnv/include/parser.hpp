@@ -175,15 +175,18 @@ public:
             layer.biases = extract1DTensorData(tensor);
             layer.lower_biases = layer.biases;
             layer.upper_biases = layer.biases;
-            if (layer.type == LayerType::Add) {
+            if (layer.type == LayerType::Add || layer.type == LayerType::Gemm) {
               layer.layer_size = layer.biases.size();
             } else if (layer.type == LayerType::Conv) {
-              tensor1d expanded_biases(layer.layer_size);
+              tensor1d expanded_biases;
+              expanded_biases.reserve(layer.layer_size);
               size_t spatial_size = layer.conv_output_height * layer.conv_output_width;
-              Logger::log(Logger::Level::DEBUG,"Spatial size is " + std::to_string(spatial_size) + "Layer size is " + std::to_string(layer.layer_size));
+              Logger::log(Logger::Level::DEBUG,"Spatial size is " + std::to_string(spatial_size) + " Layer size is " + std::to_string(layer.layer_size));
               for (const auto &bias : layer.biases) {
                 expanded_biases.insert(expanded_biases.end(), spatial_size, bias);
               }
+
+              Logger::log(Logger::Level::DEBUG, "Expanded size: " + std::to_string(expanded_biases.size()) + " layer.layer_size = " + std::to_string(layer.layer_size));
 
               layer.biases = expanded_biases;
               layer.lower_biases = expanded_biases;
@@ -192,6 +195,23 @@ public:
               // TODO: store each 1d tensor from batch normalization node.
             }
             Logger::log(Logger::Level::DEBUG," (bias tensor, size = " + std::to_string(layer.biases.size()) + ")");
+
+            // if (layer.type != LayerType::Conv) {
+            //   layer.layer_size = layer.biases.size();
+            // } else {
+            //   tensor1d expanded_biases;
+            //   expanded_biases.reserve(layer.layer_size);
+            //   size_t spatial_size = layer.conv_output_height * layer.conv_output_width;
+            //   Logger::log(Logger::Level::DEBUG,"Spatial size is " + std::to_string(spatial_size) + "Layer size is " + std::to_string(layer.layer_size));
+            //   for (const auto &bias : layer.biases) {
+            //     expanded_biases.insert(expanded_biases.end(), spatial_size, bias);
+            //   }
+
+            //   layer.biases = expanded_biases;
+            //   layer.lower_biases = expanded_biases;
+            //   layer.upper_biases = expanded_biases;
+            // }
+            // Logger::log(Logger::Level::DEBUG," (bias tensor, size = " + std::to_string(layer.biases.size()) + ")");
           } else if (tensor.dims().size() == 2) {
             layer.weights = extract2DTensorData(tensor);
             Logger::log(Logger::Level::DEBUG," (weight tensor, size = <" + std::to_string(layer.weights.size()) 
@@ -226,7 +246,7 @@ public:
             // TODO: if the converted 2d tensor is too large, this convertion will lead OOM error.
             // TODO: so, we can use 4dtensor during bound propagation directly.
             // * we can use the similar way in convertion funtion.
-            // layer.weights = convert4Dto2Dtensor(layer.convolution_weights, layer.conv_input_height,layer.conv_input_width, layer.strides, layer.pads);
+            layer.weights = convert4Dto2Dtensor(layer.convolution_weights, layer.conv_input_height,layer.conv_input_width, layer.strides, layer.pads);
 
             layer.layer_size = layer.weights.size();
             input_height = std::floor((layer.conv_input_height + 2 * layer.pads - layer.dilation * (layer.kernel_height - 1) - 1) / layer.strides + 1);
@@ -528,14 +548,10 @@ private:
 
     const size_t input_size = input_channels * input_H * input_W;
     const size_t output_size = output_channels * output_H * output_W;
-    Logger::log(Logger::Level::DEBUG,"The input size is " + std::to_string(input_size));
-    Logger::log(Logger::Level::DEBUG,"The output size is " + std::to_string(output_size));
 
     tensor2d result_weights(output_size, tensor1d(input_size, 0.0f)); // ? if the size is too large, the memory cannot store them into result_weights.
-    Logger::log(Logger::Level::DEBUG, "after creating resulting space.");
     size_t row = 0;
     for (size_t oc = 0; oc < output_channels; ++oc) {
-      Logger::log(Logger::DEBUG, "why?????????");
       for (size_t oh = 0; oh < output_H; ++oh) {
         for (size_t ow = 0; ow < output_W; ++ow) {
 

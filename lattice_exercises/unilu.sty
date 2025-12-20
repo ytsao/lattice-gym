@@ -1,0 +1,198 @@
+\typeout{-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-}
+\typeout{unilu.sty: powered by upmc.sty (special thanks to Valerie Menissier Morain)}
+\typeout{-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-}
+
+\def\fileversion{0.1}
+\def\filedate{2006/10/06}
+
+\NeedsTeXFormat{LaTeX2e}[1998/06/01]
+
+\typeout{-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-}
+\typeout{Style LaTeX pour l'UPMC pour TD et TME}
+\typeout{Version \fileversion}
+\typeout{\filedate}
+\typeout{Valerie Menissier-Morain (necessite exam.cls,myendfloat.sty)}
+\typeout{-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-}
+
+\ProvidesPackage{unilu}[\filedate]
+\RequirePackage[utf8]{inputenc}
+
+\RequirePackage{amsmath,amsthm,amssymb,latexsym}
+\RequirePackage{lastpage,multicol,tabularx}
+\RequirePackage{tabularx,times,pifont,alltt,xr}
+\RequirePackage{graphicx,color,tikz,ifthen,ifpdf,float}
+\RequirePackage[formats]{listings}
+\RequirePackage{calc}
+
+% options
+\newif\ifetudiants
+\etudiantstrue
+\newif\ifenseignants
+\enseignantsfalse
+\newif\ifnocomment
+\nocommentfalse
+\DeclareOption{enseignants}{\enseignantstrue \etudiantsfalse}
+\DeclareOption{nocomment}{\nocommenttrue}
+\newif\ifcned
+\cnedfalse
+\DeclareOption{cned}{\cnedtrue \etudiantsfalse}
+\newif\if@reponsesfin
+\@reponsesfinfalse
+\ifcned \@reponsesfintrue \fi
+
+% logo
+\newcommand{\logo}{
+\includegraphics[scale=0.3]{univ-luxembourg-logo.eps}
+}
+% gestion année
+\newcounter{bannee}
+\newcounter{eannee}
+\setcounter{bannee}{2012}
+
+\ProcessOptions\relax
+\setcounter{eannee}{\value{bannee}+1}
+\newcommand{\annee}{\arabic{bannee}-\arabic{eannee}}
+
+% Changer le titre d'une partie destinée aux enseignants
+% environnements spécifiques pour clarifier les sujets
+
+\ifenseignants
+\renewcommand{\solutiontitle}{\noindent\textbf{Solution\,:}\par\noindent}%
+\newenvironment{enseignants}[1][]%
+{\renewcommand{\solutiontitle}{\noindent\textbf{Enseignants
+  \ifthenelse{\equal{#1}{}}{}{ -- #1}\,:}\par\noindent}\begin{TheSolution}}%
+{\end{TheSolution}}
+\newenvironment{reponse}{\begin{TheSolution}}{\end{TheSolution}}
+\ifnocomment
+\newcommand{\revision}{}
+\newcommand{\typesujet}{Version corrig\'ee}
+\newcommand{\auteurs}{{\large avec correction des exercices}}
+\else
+\newcommand{\revision}{ {\large {\it Revu dernièrement par}} \revupar}
+\newcommand{\typesujet}{Version enseignant}
+\newcommand{\auteurs}{{\large \textbf{\'Equipe p\'edagogique}}\\\authorsujet}
+\fi
+\else
+\newenvironment{enseignants}{\par\setbox\z@\vbox\bgroup}{\egroup}
+\newenvironment{reponse}{\par\setbox\z@\vbox\bgroup}{\egroup}
+\newcommand{\revision}{}
+\newcommand{\typesujet}{}
+\newcommand{\auteurs}{}
+\fi
+
+\ifnocomment
+\renewenvironment{enseignants}{\par\setbox\z@\vbox\bgroup}{\egroup}
+\fi
+
+% Titre, entête et bas de page
+\pagestyle{headandfoot}
+\headrule
+\footer{University of Luxembourg, \diplome/\module}{}{\datecours}
+\header{\modulelong}{\ifenseignants\large \emph{\typesujet}\else\fi}{\titrecourt{} -- page \thepage/\numpages}
+
+\newcommand{\entete}{
+\logo
+
+\begin{center}
+{\LARGE \textbf{\titrelong}}
+\bigskip
+
+\auteurs
+\bigskip
+
+\datecours
+\end{center}
+}
+
+\AtBeginDocument{\entete}
+
+\extrawidth{1in}
+\extraheadheight{-0.25in}
+\extrafootheight{-0.25in}
+
+% Exos
+\pointname{}
+\newcounter{exocounter}\setcounter{exocounter}{0}
+\newenvironment{exo}[1][]{
+  \stepcounter{exocounter} \let\@currentlabel\theexocounter
+  % pour que les numéros d'exercices puissent être récupérés par label / ref
+  \pagebreak[3]% pour inciter latex à changer de page avant le début
+  \bigskip\bigskip
+  \noindent \textbf{\large Exercise \arabic{exocounter}
+    \ifthenelse{\equal{#1}{}}{}{ -- #1}}\\}{}
+
+\newenvironment{quest}[1][]{\ifthenelse{\equal{#1}{}}{\question}{\question[\textbf{#1}]}}{}
+
+\newenvironment{Solution}[1][Solution]%
+{\renewcommand{\solutiontitle}{\noindent\textbf{#1:}\par\noindent}%
+\begin{solution}}%
+{\end{solution}}
+
+% Un petit environnement pour les remarques
+\newenvironment{remark}%
+  {\bigskip\par\noindent\textbf{Remarque}:\par\noindent}%
+  {\par\noindent}
+\newenvironment{remarks}%
+  {\bigskip\par\noindent\textbf{Remarques}:\par\noindent\begin{enumerate}}%
+  {\end{enumerate}\par\noindent}
+
+% Deux colonnes souples
+\setlength{\columnseprule}{0.1pt}
+\def\sidebyside{\begin{center}\begin{multicols}{2}\begin{minipage}{\columnwidth}}
+\def\nextto{\end{minipage}\vfill\flushcolumns\begin{minipage}{\columnwidth}}
+\def\endsidebyside{\end{minipage}\end{multicols}\end{center}}
+
+\newcommand{\diplome}{Master in HPC}
+\newcommand{\module}{LTPP}
+\newcommand{\modulelong}{Lattice Theory for Parallel Programming}
+
+\newenvironment{goals}{\noindent\framebox{\Large \textbf{ Goals }}\\
+\begin{dinglist}{79}}{\end{dinglist}\ \par}
+
+\newcommand{\exercices}{\noindent\framebox{\Large\textbf{ Exercises }}}
+
+\def\annee{2021}
+%\def\uepath{/Infos/lmd/2013/licence/ue/\module}
+
+% Supporting Color Palette
+\definecolor{WarmGray}{HTML}{696158}
+\definecolor{StoneGray}{HTML}{717C7D}
+\definecolor{DarkGreen}{HTML}{2C5234}
+\definecolor{LightGreen}{HTML}{509E2F}
+\definecolor{BrightGold}{HTML}{F0CB00}
+
+% Screamers
+\definecolor{Royal}{HTML}{72246C}
+\definecolor{Ocean}{HTML}{006BA6}
+\definecolor{Flash}{HTML}{B52555}
+\definecolor{Citrus}{HTML}{FFB81C}
+\definecolor{Spring}{HTML}{CEDC00}
+
+% Serenity
+\definecolor{Garden}{HTML}{B7CE95}
+\definecolor{Sand}{HTML}{F0E991}
+\definecolor{Bloom}{HTML}{F1E6B2}
+\definecolor{Clay}{HTML}{B7B09C}
+\definecolor{Cloud}{HTML}{BAC5B9}
+
+\definecolor{ForestGreen}{RGB}{34,139,34}
+
+\lstset{
+  basicstyle=\small\ttfamily,
+  keywordstyle=\ttfamily\bfseries,
+  stringstyle=,
+  xleftmargin=1em,
+  showstringspaces=false,
+  commentstyle=\itshape\rmfamily,
+  columns=flexible,
+  keepspaces=true,
+  texcl=true
+}
+
+
+\newcounter{conventions}
+\newcounter{pitfalls}
+
+\newcommand{\convention}[1]{{\color{ForestGreen} \textbf{Convention \arabic{conventions}\stepcounter{conventions}: #1}}}
+\newcommand{\pitfall}[1]{{\color{Citrus} \textbf{Pitfall \arabic{pitfalls}\stepcounter{pitfalls}: #1}}}
+\newcommand{\info}[1]{{\color{Ocean} \textbf{#1}}}

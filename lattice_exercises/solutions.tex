@@ -1,0 +1,291 @@
+\documentclass[11pt,a4paper]{exam}
+
+\usepackage{unilu}
+\usepackage{wasysym}
+% \usepackage[enseignants]{isup}
+\usepackage{hyperref,longtable}
+\usepackage{galois}
+\usepackage{stmaryrd}
+\usepackage{mathrsfs}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{algpseudocode}
+
+\def\titrelong{Lattice Theory for Parallel Programming\\[0.3cm]
+Solutions for exercises}
+\def\titrecourt{}
+\def\authorsujet{}
+\def\datecours{}
+
+\date{}
+
+\setcounter{conventions}{1}
+\setcounter{pitfalls}{1}
+
+\definecolor{ForestGreen}{RGB}{34,139,34}
+
+\algrenewtext{EndIf}{\textbf{fi}}
+\algrenewtext{EndWhile}{\textbf{done}}
+\newcommand\loc[1]{{}^{\color{ForestGreen}\ell_{#1}}}
+\newcommand{\expr}[1]{\mathbf{E}\llbracket #1 \rrbracket}
+\newcommand{\com}[1]{\mathbf{C}\llbracket #1 \rrbracket}
+\newcommand\eqdef{\,\triangleq\,}
+
+\renewcommand{\emptyset}{\varnothing}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Cl}{\mathrm{Cl}}
+\newcommand{\join}{\vee}
+\newcommand{\meet}{\wedge} 
+\newcommand{\union}{\cup}
+\newcommand{\intersection}{\cap}
+\newcommand{\arrowcircle}[1][]{%
+  \begin{tikzpicture}[#1]
+    \draw[->] (0,0ex) -- (2em,0ex);
+    \draw (1em,0ex) circle (0.7ex);
+  \end{tikzpicture}%
+}
+\def\checked{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
+
+\newcommand{\bigmeet}{{\textstyle\bigwedge}}
+\newcommand{\bigjoin}{{\textstyle\bigvee}}
+
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    showstringspaces=false,
+    keywordstyle=\bfseries\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{gray},
+    morekeywords={include, printf} % Add additional keywords if needed
+}
+
+\graphicspath{{images/}}
+
+\begin{document}
+
+\section{Theoretical Exercises}
+
+\begin{exo}
+Show that if $(X,\leq)$ is a poset, then $(X, \leq^{\partial})$ is also a poset.
+\end{exo}
+
+\begin{exo}
+Show that $(\mathbb{P}(X), \Rightarrow)$ is a poset.
+\end{exo}
+
+\begin{exo}
+If $(X, \leq_X)$ and $(Y, \leq_Y)$ are chains, then their linear sum $(X \bigoplus Y, \leq)$ is also a chain.
+\end{exo}
+
+\begin{exo}
+The pointwise order of two posets is an order.
+\end{exo}
+
+\begin{exo}
+If $(X, \leq_X)$ and $(Y, \leq_Y)$ are chains, then the lexicographic order on product is also a chain. However, this is not necessarily ture for the pointwise order on the product.
+\end{exo}
+
+\begin{exo}
+Let $(X, \leq)$ and $(Y, \leq)$ be posets, and let $f \colon X \rightarrow Y$ be a function. 
+The following conditions are equivalent. 
+\begin{enumerate}
+    \item $f$ is an order isomorphism.
+    \item $f$ is a monotone bijective map and the map $f^{-1}$ is monotone.
+\end{enumerate}
+\end{exo}
+
+\begin{exo}
+Prove that the following statements are true.
+\begin{enumerate}
+    \item The function $f \colon (\N, \leq) \rightarrow (\N,\leq)$ defined by $f(n) = 2n$ is order-preserving.
+    \item The function $g \colon (\R, \leq) \rightarrow (\R, \leq)$ defined by $g(x) = x^2$ is not order-preserving. For instance, $-2 < -1$, but $g(-2) = 4 > 1 = g(-1)$.
+    \item The inclusion map $i \colon (\N, \leq) \rightarrow (\Z, \leq)$ defined by $i(n) = n$ is an order-embedding.
+    \item The function $f \colon (\N, \leq) \rightarrow (\N, \leq)$ defined by $f(n) = 2n$ is an order embedding.
+    \item The function $f \colon (\R, \leq) \rightarrow (\R, \leq)$ defined by $f(x) = \lfloor x \rfloor$ is order-preserving but is not an order embedding.
+    \item The function $f \colon (\N, \leq) \rightarrow (\N^{*}, \leq)$ defined by $f(n) = n + 1$ is an order isomorphism.
+    \item The function $h \colon (\N \times \N, \leq) \rightarrow (\N, \leq)$, where $\N \times \N$ is equipped with the pointwise order, defined by $f(x,y) = x + y$ is order-preserving but not an embedding.
+    \item If $(X_1, \leq)$ and $(X_2, \leq)$ are two posets that the projections maps $\pi_1, \pi_2 \colon X_1 \times X_2 \rightarrow X_i$ defined as $\pi_i(x_1,x_2) = x_i$ is order-preserving if $X_1 \times X_2$ is equipped with the pointwise order.
+\end{enumerate}
+\end{exo}
+
+\begin{exo}
+Let $X = \{a,b,c,d\}$. Prove that the powerset poset $(2^X, \subset)$ is isomorphic to the predicate post $(\mathbb{P}, \Rightarrow)$. Then, prove that the previous statement hods for any set $X$ (even an infinite one).
+\end{exo}
+
+\begin{exo}
+Prove that $(\Z, \leq)$ is isomorphic to $(\Z, \leq^\partial)$. Is $(\N,\leq)$ isomorphic to $(\N, \leq^\partial)$?
+\end{exo}
+
+\begin{exo}
+Characterize the $n \in \N$ whose divisor poset is isomorphic to $(2^{\{0,1\}}, \subset)$.
+\end{exo}
+
+\begin{exo}
+Prove that $(\Z,\leq)$ is isomorphic to $(\N, \leq^\partial) \bigoplus (\N,\leq)$.
+\end{exo}
+
+\begin{exo}
+Let $C$ be the set of subset $X$ of $\N$ such that $\N \setminus X$ is finite. Show that $C$ is a filter in $(2^\N, \subset)$.
+\end{exo}
+
+\begin{exo}
+Let $(X, \leq)$ be a poset and $Q \subset X$. We set 
+\begin{enumerate}
+    \item Show that $\downarrow Q$ is an down-set that contains Q. Deduce that $\uparrow Q$ is an up-et that contains Q.
+    \item Let $(Up(X), \supseteq)$ be the set of up-sets of $(X, \leq)$ ordered by reverse inclusion. Show that the map $f \colon X \rightarrow Up(X)$ defined as $f(x) = \uparrow x$ is an order-embedding.
+\end{enumerate}
+\end{exo}
+
+\begin{exo}
+    Prove that if $(X, \leq)$ has a top element, then it is unique. Similarly, if $(X, \leq)$ has a bottom element, then it is unique.
+\end{exo}
+
+\begin{exo}
+    Let $(X, \leq)$ be a poset and $S$ be a subset of $X$. Prove that if $S$ has a least upper bound then it is unique. Deduce that if $S$ has a greatest lower bound, then it is unique.
+\end{exo}
+
+\begin{exo}
+    Prove that in any lattice $(L,\leq)$, for all $x,y,z \in L \colon$
+    \begin{enumerate}
+        \item $x \join y = y \join x$ and $x \meet y = y \meet x$ (commutativity)
+        \item $(x \join y) \join z = x \join (y \join z)$ and $(x \meet y) \meet z = x \meet (y \meet z)$ (associativity)
+        \item $x \join x = x$ and $x \meet x = x$ (idempotence)
+        \item $x \join (x \meet y) = x$ and $x \meet (x \join y) = x$ (absorption)
+    \end{enumerate}
+\end{exo}
+
+\begin{exo}
+    Prove that if $(L, \join, \meet, 0, 1)$ is an algebraic bounded lattice, then in the corresponding order-theoretic lattice $(L, \leq)$, the element $0$ is the bottom element and $1$ is the top element.
+\end{exo}
+
+\begin{exo}
+    Consider the following statements about lattice operations and constructions:
+    \begin{enumerate}
+        \item The disjoint union of lattices is a lattice.
+        \item The linear sum of lattices is a lattice.
+        \item The lexicographic order on the product of lattices might not be a lattice.
+        \item The pointwise order on the product of lattices is always a lattice, with join and meet operations computed pointwise.
+    \end{enumerate}
+    For each statement, provide a proof or a counterexample to justify why the statement is true or false.
+\end{exo}
+
+\begin{exo}
+    If $(L, \meet, \join)$ is a lattice and $S$ is a sublattice of $L$, then $(S, \join, \meet)$ is a lattice.
+\end{exo}
+
+\begin{exo}
+    Let $(L, \join, \meet, 0, 1)$ be a bounded lattice and $S$ be a sublattice of $L$.
+    \begin{enumerate}
+        \item Prove that if $S$ is a 0-sublattice, then $0$ is the bottom element of $S$.
+        \item Prove that if $S$ is a 1-sublattice, then $1$ is the top element of $S$.
+        \item Give an example of a sublattice that has a bottom element different from $0$ and a top element different from $1$.
+    \end{enumerate}
+\end{exo}
+
+\begin{exo}
+    Let $f \colon L_1 \rightarrow L_2$ be a lattice isomorphism. Prove that $f^{-1}$ is a lattice isomorphism.
+\end{exo}
+
+\begin{exo}
+    Prove that if $f \colon L_1 \rightarrow L_2$ is a bounded lattice isomorphism, then $f^{-1} \colon L_2 \rightarrow L_1$ is also a bounded lattice isomorphism. 
+\end{exo}
+
+\begin{exo}
+    Give an example of bounded lattices $L_1$ and $L_2$ and lattice homomorphism $f \colon L_1 \rightarrow L_2$ which is not a bounded lattice homomorphism.
+\end{exo}
+
+\begin{exo}
+    Give a precise inductive definition of the interpretation of a (bounde) lattice term on a (bounded) lattice.
+\end{exo}
+
+\begin{exo}
+    Any lattice satisfies the equation $(x \join y) \join z = x \join (y \join z)$. If $X = \{a, b\}$ then the lattice $(2^X, \union, \intersection)$ satisfies the equation $x \join (y \meet z) = (x \join y) \meet (x \join z)$ while the lattice $N_5$ depicted Fig. 2 doesn't satisfy it.
+\end{exo}
+
+\begin{exo}
+    Let $\mathcal{K}$ be a class of (bounded) lattices and $t = s$ be a class of (bounded) lattice equations. Show that if every element of $\mathcal{K}$ satisfies $t = s$, then every element of $\mathbb{S}(\mathcal{K}), \mathbb{P}(\mathcal{K}) \text{ and } \mathbb{H}(\mathcal{K})$ satisfies $t = s$.
+\end{exo}
+
+\begin{exo}
+    Give an example of a non-distributive lattice whose every element has a complement, but there is a at least one element which has tow complements.
+\end{exo}
+
+\begin{exo}
+    Show that the class of complemented bounded distributive lattices is not equational.
+\end{exo}
+
+\begin{exo}
+    Prove that in a Boolean algebra, De Morgan's laws hold:
+    \[
+        (x \join y)^\prime = x^\prime \meet y^\prime \text{ and } (x \meet y)^\prime = x^\prime \join y^\prime
+    \]
+\end{exo}
+
+\begin{exo}
+    Prove that in a Boolean algebra $B$, the complementation operation is a bounded lattice isomorphism between the underlying bounded lattice of $B$ and its order dual. (\textit{Hint:} Prove that (i) $B^\partial$ equipped with the complementation operation from B is a Boolean algebra, (ii) the complementation operation $\prime \colon B \rightarrow B^\partial$ is a monotone map which is its own inverse.)
+\end{exo}
+
+\begin{exo}
+    Let B be the set of subsets $X$ of $\N$ that satisfy B is finite or $\N \setminus B$ is finite. Show that B is a Boolean algebra.
+\end{exo}
+
+\begin{exo}
+    We adopt the notation of the previous paragraphs.
+    \begin{enumerate}
+        \item Show that $\downarrow f$ is an ideal in $X \arrowcircle Y$.
+        \item Show that $\downarrow f$ is a complete bounded lattice in its own right, with $\emptyset$ and $f$ as bottom and tope element, respectively.
+    \end{enumerate}
+\end{exo}
+
+\begin{exo}
+    Let $c \colon 2^{\R^\infty} \rightarrow 2^{\R^\infty}$ be defined as $c(X) = (\bigjoin X]$.
+    \begin{enumerate}
+        \item Show that $c$ is a closure operator.
+        \item Describe the set K of closed elements. 
+        \item Describe the complete lattice operation on K.
+        \item Describe $c(x)$ in terms of closed elements for every $x \in 2^{\R^\infty}$.
+    \end{enumerate}
+\end{exo}
+
+\begin{exo}
+    Let $(L, \meet, \join, \bot, \top)$ be a bounded lattice, and $X$ be an infinite set of variables. For any $n \geq 0$, let $T_n(X)$ the set of $n-$ary bounded lattice terms over $X$ and set $T(X) \coloneqq \union_{n \geq 0}T_n(X)$. Define $c \colon 2^L \rightarrow 2^L$ by 
+    \[
+        c(A) = \{t^L(a_1,...,a_n) \mid n \geq 0, t \in T_n(X) \text{ and } a_1,...,a_n \in A\}.
+    \]
+    \begin{enumerate}
+        \item Show that $c$ is a closure operator.
+        \item Describe the set K of closed elements.
+        \item Describe the complete lattice operations on K. 
+        \item Describe $c(A)$ in terms of closed elements for every $A \in 2^L$.
+    \end{enumerate}
+\end{exo}
+
+\begin{exo}
+    Show that the constructions of Table 1 define are mutually inverse.
+\end{exo}
+
+\begin{exo}
+    Let $(X, \leq)$ be a poset. Define $U \coloneqq \{\uparrow x \mid x \in X\}$ and $D \coloneqq \{\downarrow x \mid x \in X\}$, as well as the maps $\alpha \colon D \rightarrow U$ and $\gamma \colon U \rightarrow D$ defined as $\gamma(\uparrow x) \coloneqq \downarrow x$ and $\alpha(\downarrow x) \coloneqq \uparrow x$. Prove that 
+
+\end{exo}
+
+\begin{exo}
+Let $(C, \leq)$ be a complete totally ordered set and $\rightarrow$ be the binary operation defined on C by $a \rightarrow b \coloneqq \bigjoin\{x \in C \mid a \meet x \leq b\}$. Prove that for any $a \in C$, we have 
+
+\end{exo}
+
+\begin{exo}
+    (From Galois Connection to Closure Operator). Assume that 
+\end{exo}
+
+\begin{exo}
+    Identify the Galois connections among the Galois connections we have introduced so far.
+\end{exo}
+
+\end{document}

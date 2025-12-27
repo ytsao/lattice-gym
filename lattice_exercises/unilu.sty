@@ -123,10 +123,16 @@
 
 \newenvironment{quest}[1][]{\ifthenelse{\equal{#1}{}}{\question}{\question[\textbf{#1}]}}{}
 
-\newenvironment{Solution}[1][Solution]%
-{\renewcommand{\solutiontitle}{\noindent\textbf{#1:}\par\noindent}%
-\begin{solution}}%
-{\end{solution}}
+% Solutions 
+\pointname{}
+\newcounter{solcounter}\setcounter{solcounter}{0}
+\newenvironment{sol}[1][]{
+  \stepcounter{solcounter} \let\@currentlabel\thesolunter
+  \pagebreak[3]
+  \bigskip\bigskip
+  \noindent \textbf{\large Solution \arabic{solcounter}
+    \ifthenelse{\equal{#1}{}}{}{ -- #1}}\\}{}
+
 
 % Un petit environnement pour les remarques
 \newenvironment{remark}%

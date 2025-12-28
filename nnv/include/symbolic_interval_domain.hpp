@@ -2,6 +2,7 @@
 #define SYMBOLIC_INTERVAL_DOMAIN_HPP
 
 #include "abstract_domain.hpp"
+#include <cblas.h>
 
 class SymbolicIntervalDomain : public AbstractDomain {
 public:

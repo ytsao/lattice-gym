@@ -43,9 +43,21 @@ endif()
 file(GLOB DEPS_ONNX "${ONNX_DIR}/*.cc")
 include_directories(SYSTEM ${ONNX_DIR})
 
-# Add executable
-add_executable(nnv ./src/main.cpp ${DEPS_ONNX})
+# ###########
+### OpenBLAS ##
+#############
+set(BLA_VENDOR OpenBLAS)
+find_package(BLAS REQUIRED)
 
-target_include_directories(nnv PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
-target_include_directories(nnv PRIVATE ${PROTOBUF_DIR}/installed/include)
-target_link_libraries(nnv PRIVATE ${PROTOBUF_LIB})
+if(BLAS_FOUND)
+    message(STATUS "Found BLAS (OpenBLAS): ${BLAS_LIBRARIES}")
+
+    # Add executable
+    add_executable(nnv ./src/main.cpp ${DEPS_ONNX})
+
+    target_include_directories(nnv PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
+    target_include_directories(nnv PRIVATE ${PROTOBUF_DIR}/installed/include)
+    target_link_libraries(nnv PRIVATE ${PROTOBUF_LIB})
+
+    target_link_libraries(nnv PRIVATE BLAS::BLAS)
+endif()

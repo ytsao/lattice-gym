@@ -12,6 +12,7 @@
 #include "layer.hpp"
 #include "log.hpp"
 #include "specifications.hpp"
+#include "<cblas.h>"
 
 #include "../dep/onnx-1.15.0/onnx.proto3.pb.h"
 #include "fstream"

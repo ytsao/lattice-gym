@@ -3,6 +3,7 @@
 
 #include "abstract_domain.hpp"
 #include <cassert>
+#include <cblas.h>
 
 class DeepPolyDomain : public AbstractDomain {
 public:

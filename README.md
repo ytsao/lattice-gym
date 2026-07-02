@@ -5,7 +5,7 @@
 
 # lattice-gym
 
-Welcome to lattice-gym!
+Welcome to the lattice-gym!
 
 In this repository, we provide lots of interesting stuffs that you can explore/contribute the knowledge about lattice theory and its applications.
 

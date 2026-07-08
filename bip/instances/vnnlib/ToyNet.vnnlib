@@ -7,5 +7,5 @@
 (assert (>= X_1 2.0))
 (assert (<= X_1 3.0))
 
-(assert (>= Y_0 0.5))
+(assert (<= Y_0 0.5))
 

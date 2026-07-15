@@ -1,0 +1,968 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global/global}
+    \entry{albarghouthi2021introduction}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=0d930c2a0ea1214f3a3c9da4207f63cc}{%
+           family={Albarghouthi},
+           familyi={A\bibinitperiod},
+           given={Aws},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{0d930c2a0ea1214f3a3c9da4207f63cc}
+      \strng{fullhash}{0d930c2a0ea1214f3a3c9da4207f63cc}
+      \strng{fullhashraw}{0d930c2a0ea1214f3a3c9da4207f63cc}
+      \strng{bibnamehash}{0d930c2a0ea1214f3a3c9da4207f63cc}
+      \strng{authorbibnamehash}{0d930c2a0ea1214f3a3c9da4207f63cc}
+      \strng{authornamehash}{0d930c2a0ea1214f3a3c9da4207f63cc}
+      \strng{authorfullhash}{0d930c2a0ea1214f3a3c9da4207f63cc}
+      \strng{authorfullhashraw}{0d930c2a0ea1214f3a3c9da4207f63cc}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{id='cs.LG' full_name='Machine Learning' is_active=True alt_name=None in_archive='cs' is_general=False description='Papers on all aspects of machine learning research (supervised, unsupervised, reinforcement learning, bandit problems, and so on) including also robustness, explanation, fairness, and methodology. cs.LG is also an appropriate primary category for applications of machine learning methods.'}
+      \field{eprinttype}{arXiv}
+      \field{title}{Introduction to Neural Network Verification}
+      \field{year}{2021}
+      \true{nocite}
+      \verb{eprint}
+      \verb 2109.10317
+      \endverb
+    \endentry
+    \entry{brix2023fourth}{misc}{}{}
+      \name{author}{4}{}{%
+        {{hash=8c805864150e170112921dcfda39f42a}{%
+           family={Brix},
+           familyi={B\bibinitperiod},
+           given={Christopher},
+           giveni={C\bibinitperiod}}}%
+        {{hash=0e1ff231c95a56bcbfd7bd2860cd5ded}{%
+           family={Bak},
+           familyi={B\bibinitperiod},
+           given={Stanley},
+           giveni={S\bibinitperiod}}}%
+        {{hash=0f9c3846c27ef6b23153f98809a2a292}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Changliu},
+           giveni={C\bibinitperiod}}}%
+        {{hash=627930ee62cda289adabf30c1f64cf43}{%
+           family={Johnson},
+           familyi={J\bibinitperiod},
+           given={Taylor\bibnamedelima T.},
+           giveni={T\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \strng{namehash}{39ef272dae4583a168ad82d2e5ab14e6}
+      \strng{fullhash}{f07b5ad40635b42aa2c974c19e038ace}
+      \strng{fullhashraw}{f07b5ad40635b42aa2c974c19e038ace}
+      \strng{bibnamehash}{39ef272dae4583a168ad82d2e5ab14e6}
+      \strng{authorbibnamehash}{39ef272dae4583a168ad82d2e5ab14e6}
+      \strng{authornamehash}{39ef272dae4583a168ad82d2e5ab14e6}
+      \strng{authorfullhash}{f07b5ad40635b42aa2c974c19e038ace}
+      \strng{authorfullhashraw}{f07b5ad40635b42aa2c974c19e038ace}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{id='cs.LG' full_name='Machine Learning' is_active=True alt_name=None in_archive='cs' is_general=False description='Papers on all aspects of machine learning research (supervised, unsupervised, reinforcement learning, bandit problems, and so on) including also robustness, explanation, fairness, and methodology. cs.LG is also an appropriate primary category for applications of machine learning methods.'}
+      \field{eprinttype}{arXiv}
+      \field{title}{The Fourth International Verification of Neural Networks Competition (VNN-COMP 2023): Summary and Results}
+      \field{year}{2023}
+      \true{nocite}
+      \verb{eprint}
+      \verb 2312.16760
+      \endverb
+    \endentry
+    \entry{GehrUnknownTitle2018}{article}{}{}
+      \name{author}{6}{}{%
+        {{hash=68f8af693fe33fbb7d5cb901c673783f}{%
+           family={Gehr},
+           familyi={G\bibinitperiod},
+           given={Timon},
+           giveni={T\bibinitperiod}}}%
+        {{hash=5ec8b756086759854f11bdd221da2cea}{%
+           family={Mirman},
+           familyi={M\bibinitperiod},
+           given={Matthew},
+           giveni={M\bibinitperiod}}}%
+        {{hash=dd068cff9b640b9da2a4b53c30d11b53}{%
+           family={Drachsler-Cohen},
+           familyi={D\bibinithyphendelim C\bibinitperiod},
+           given={Dana},
+           giveni={D\bibinitperiod}}}%
+        {{hash=474c63b054a26dd84028be987d001084}{%
+           family={Tsankov},
+           familyi={T\bibinitperiod},
+           given={Petar},
+           giveni={P\bibinitperiod}}}%
+        {{hash=13f22fd06d523348c1ccd34faee67c9e}{%
+           family={Chaudhuri},
+           familyi={C\bibinitperiod},
+           given={Swarat},
+           giveni={S\bibinitperiod}}}%
+        {{hash=3be48f15f1478336ea1bc8a71ef4fce4}{%
+           family={Vechev},
+           familyi={V\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{6256149e806b7e70790f1fece26a7b49}
+      \strng{fullhash}{68109cbb8c51163e5cee95da209986a0}
+      \strng{fullhashraw}{68109cbb8c51163e5cee95da209986a0}
+      \strng{bibnamehash}{6256149e806b7e70790f1fece26a7b49}
+      \strng{authorbibnamehash}{6256149e806b7e70790f1fece26a7b49}
+      \strng{authornamehash}{6256149e806b7e70790f1fece26a7b49}
+      \strng{authorfullhash}{68109cbb8c51163e5cee95da209986a0}
+      \strng{authorfullhashraw}{68109cbb8c51163e5cee95da209986a0}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{Not available}
+      \field{journaltitle}{2018 IEEE Symposium on Security and Privacy (SP)}
+      \field{month}{5}
+      \field{title}{AI2: Safety and Robustness Certification of Neural Networks with Abstract Interpretation}
+      \field{volume}{Not available}
+      \field{year}{2018}
+      \true{nocite}
+      \field{pages}{Not available}
+      \range{pages}{-1}
+      \verb{doi}
+      \verb 10.1109/sp.2018.00058
+      \endverb
+      \verb{urlraw}
+      \verb https://dx.doi.org/10.1109/sp.2018.00058
+      \endverb
+      \verb{url}
+      \verb https://dx.doi.org/10.1109/sp.2018.00058
+      \endverb
+    \endentry
+    \entry{GhorbalUnknownTitle2009}{article}{}{}
+      \name{author}{3}{}{%
+        {{hash=848b40e1efa8ee0539f6b32f75f25961}{%
+           family={Ghorbal},
+           familyi={G\bibinitperiod},
+           given={Khalil},
+           giveni={K\bibinitperiod}}}%
+        {{hash=e41581883edeaccfb74498d1f19fa885}{%
+           family={Goubault},
+           familyi={G\bibinitperiod},
+           given={Eric},
+           giveni={E\bibinitperiod}}}%
+        {{hash=444f66c011d5d9a40ff37d15884d35a4}{%
+           family={Putot},
+           familyi={P\bibinitperiod},
+           given={Sylvie},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer Berlin Heidelberg}%
+      }
+      \strng{namehash}{7acaf97c3ed94143f8767d6a61ebc5b9}
+      \strng{fullhash}{7acaf97c3ed94143f8767d6a61ebc5b9}
+      \strng{fullhashraw}{7acaf97c3ed94143f8767d6a61ebc5b9}
+      \strng{bibnamehash}{7acaf97c3ed94143f8767d6a61ebc5b9}
+      \strng{authorbibnamehash}{7acaf97c3ed94143f8767d6a61ebc5b9}
+      \strng{authornamehash}{7acaf97c3ed94143f8767d6a61ebc5b9}
+      \strng{authorfullhash}{7acaf97c3ed94143f8767d6a61ebc5b9}
+      \strng{authorfullhashraw}{7acaf97c3ed94143f8767d6a61ebc5b9}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{0302-9743, 1611-3349}
+      \field{journaltitle}{Computer Aided Verification,Lecture Notes in Computer Science}
+      \field{month}{undefined}
+      \field{title}{The Zonotope Abstract Domain Taylor1+}
+      \field{volume}{Not available}
+      \field{year}{2009}
+      \true{nocite}
+      \field{pages}{627\bibrangedash 633}
+      \range{pages}{7}
+      \verb{doi}
+      \verb 10.1007/978-3-642-02658-4_47
+      \endverb
+      \verb{urlraw}
+      \verb https://dx.doi.org/10.1007/978-3-642-02658-4_47
+      \endverb
+      \verb{url}
+      \verb https://dx.doi.org/10.1007/978-3-642-02658-4_47
+      \endverb
+    \endentry
+    \entry{goodfellow2015explaining}{misc}{}{}
+      \name{author}{3}{}{%
+        {{hash=d4f74ef4c79f3bb1e51e378184d8850e}{%
+           family={Goodfellow},
+           familyi={G\bibinitperiod},
+           given={Ian\bibnamedelima J.},
+           giveni={I\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+        {{hash=8f128e70084608a2c29c497ebd794f87}{%
+           family={Shlens},
+           familyi={S\bibinitperiod},
+           given={Jonathon},
+           giveni={J\bibinitperiod}}}%
+        {{hash=ed568d9c3bb059e6bf22899fbf170f86}{%
+           family={Szegedy},
+           familyi={S\bibinitperiod},
+           given={Christian},
+           giveni={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{07b2928cf9addb6cf2d09332e9d7ce18}
+      \strng{fullhash}{07b2928cf9addb6cf2d09332e9d7ce18}
+      \strng{fullhashraw}{07b2928cf9addb6cf2d09332e9d7ce18}
+      \strng{bibnamehash}{07b2928cf9addb6cf2d09332e9d7ce18}
+      \strng{authorbibnamehash}{07b2928cf9addb6cf2d09332e9d7ce18}
+      \strng{authornamehash}{07b2928cf9addb6cf2d09332e9d7ce18}
+      \strng{authorfullhash}{07b2928cf9addb6cf2d09332e9d7ce18}
+      \strng{authorfullhashraw}{07b2928cf9addb6cf2d09332e9d7ce18}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{id='stat.ML' full_name='Machine Learning' is_active=True alt_name=None in_archive='stat' is_general=False description='Covers machine learning papers (supervised, unsupervised, semi-supervised learning, graphical models, reinforcement learning, bandits, high dimensional inference, etc.) with a statistical or theoretical grounding'}
+      \field{eprinttype}{arXiv}
+      \field{title}{Explaining and Harnessing Adversarial Examples}
+      \field{year}{2015}
+      \true{nocite}
+      \verb{eprint}
+      \verb 1412.6572
+      \endverb
+    \endentry
+    \entry{KatzUnknownTitle2017}{article}{}{}
+      \name{author}{5}{}{%
+        {{hash=21b36446cbbfe1c925836bd0a6ab5f54}{%
+           family={Katz},
+           familyi={K\bibinitperiod},
+           given={Guy},
+           giveni={G\bibinitperiod}}}%
+        {{hash=f519b0ade21460e17b744091e47a6c39}{%
+           family={Barrett},
+           familyi={B\bibinitperiod},
+           given={Clark},
+           giveni={C\bibinitperiod}}}%
+        {{hash=d6ad2bcba3ffd5a473e57dd97226e3e6}{%
+           family={Dill},
+           familyi={D\bibinitperiod},
+           given={David\bibnamedelima L.},
+           giveni={D\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+        {{hash=9ecc7cd32381aeacb63cb12963a3dfc7}{%
+           family={Julian},
+           familyi={J\bibinitperiod},
+           given={Kyle},
+           giveni={K\bibinitperiod}}}%
+        {{hash=c3946ec43592957f452c131136bcbd9d}{%
+           family={Kochenderfer},
+           familyi={K\bibinitperiod},
+           given={Mykel\bibnamedelima J.},
+           giveni={M\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer International Publishing}%
+      }
+      \strng{namehash}{57eefd1028a84f5a0212d06429a1f736}
+      \strng{fullhash}{41a61862a86300d49f36f22445bbf11b}
+      \strng{fullhashraw}{41a61862a86300d49f36f22445bbf11b}
+      \strng{bibnamehash}{57eefd1028a84f5a0212d06429a1f736}
+      \strng{authorbibnamehash}{57eefd1028a84f5a0212d06429a1f736}
+      \strng{authornamehash}{57eefd1028a84f5a0212d06429a1f736}
+      \strng{authorfullhash}{41a61862a86300d49f36f22445bbf11b}
+      \strng{authorfullhashraw}{41a61862a86300d49f36f22445bbf11b}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{0302-9743, 1611-3349}
+      \field{journaltitle}{Computer Aided Verification,Lecture Notes in Computer Science}
+      \field{month}{undefined}
+      \field{title}{Reluplex: An Efficient SMT Solver for Verifying Deep Neural Networks}
+      \field{volume}{Not available}
+      \field{year}{2017}
+      \true{nocite}
+      \field{pages}{97\bibrangedash 117}
+      \range{pages}{21}
+      \verb{doi}
+      \verb 10.1007/978-3-319-63387-9_5
+      \endverb
+      \verb{urlraw}
+      \verb https://dx.doi.org/10.1007/978-3-319-63387-9_5
+      \endverb
+      \verb{url}
+      \verb https://dx.doi.org/10.1007/978-3-319-63387-9_5
+      \endverb
+    \endentry
+    \entry{kaulen20256th}{article}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{10}{}{%
+        {{hash=205b26d84e7e5ad546c1a9287ad5ac51}{%
+           family={Kaulen},
+           familyi={K\bibinitperiod},
+           given={Konstantin},
+           giveni={K\bibinitperiod}}}%
+        {{hash=8ae9eda8be278afaac7adcc8523f586d}{%
+           family={Ladner},
+           familyi={L\bibinitperiod},
+           given={Tobias},
+           giveni={T\bibinitperiod}}}%
+        {{hash=0e1ff231c95a56bcbfd7bd2860cd5ded}{%
+           family={Bak},
+           familyi={B\bibinitperiod},
+           given={Stanley},
+           giveni={S\bibinitperiod}}}%
+        {{hash=8c805864150e170112921dcfda39f42a}{%
+           family={Brix},
+           familyi={B\bibinitperiod},
+           given={Christopher},
+           giveni={C\bibinitperiod}}}%
+        {{hash=12ff6e68d7639946fc70593d8d11ea96}{%
+           family={Duong},
+           familyi={D\bibinitperiod},
+           given={Hai},
+           giveni={H\bibinitperiod}}}%
+        {{hash=0f480257b0ea05a13df2e35deaf0be6a}{%
+           family={Flinkow},
+           familyi={F\bibinitperiod},
+           given={Thomas},
+           giveni={T\bibinitperiod}}}%
+        {{hash=627930ee62cda289adabf30c1f64cf43}{%
+           family={Johnson},
+           familyi={J\bibinitperiod},
+           given={Taylor\bibnamedelima T},
+           giveni={T\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+        {{hash=0b71b6b3a68d57d58042f3b6f4fd5939}{%
+           family={Koller},
+           familyi={K\bibinitperiod},
+           given={Lukas},
+           giveni={L\bibinitperiod}}}%
+        {{hash=ebbe4fc1f67755ff316f5325748870a0}{%
+           family={Manino},
+           familyi={M\bibinitperiod},
+           given={Edoardo},
+           giveni={E\bibinitperiod}}}%
+        {{hash=3923da0337076ae059c1e84546f5edc0}{%
+           family={Nguyen},
+           familyi={N\bibinitperiod},
+           given={ThanhVu\bibnamedelima H},
+           giveni={T\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+      }
+      \strng{namehash}{e2fcdd77d2a04043765b8f2be270ddb8}
+      \strng{fullhash}{ca1bc9662db58c4ba1908cd622473500}
+      \strng{fullhashraw}{ca1bc9662db58c4ba1908cd622473500}
+      \strng{bibnamehash}{e2fcdd77d2a04043765b8f2be270ddb8}
+      \strng{authorbibnamehash}{e2fcdd77d2a04043765b8f2be270ddb8}
+      \strng{authornamehash}{e2fcdd77d2a04043765b8f2be270ddb8}
+      \strng{authorfullhash}{ca1bc9662db58c4ba1908cd622473500}
+      \strng{authorfullhashraw}{ca1bc9662db58c4ba1908cd622473500}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2512.19007}
+      \field{title}{The 6th International Verification of Neural Networks Competition (VNN-COMP 2025): Summary and Results}
+      \field{year}{2025}
+      \true{nocite}
+    \endentry
+    \entry{DBLP:journals/corr/abs-1903-06758}{article}{}{}
+      \name{author}{5}{}{%
+        {{hash=0f9c3846c27ef6b23153f98809a2a292}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Changliu},
+           giveni={C\bibinitperiod}}}%
+        {{hash=c20f85029811bfeb80eb3610d81dcfac}{%
+           family={Arnon},
+           familyi={A\bibinitperiod},
+           given={Tomer},
+           giveni={T\bibinitperiod}}}%
+        {{hash=95af2d7c09a2f59640379022037aa4d8}{%
+           family={Lazarus},
+           familyi={L\bibinitperiod},
+           given={Christopher},
+           giveni={C\bibinitperiod}}}%
+        {{hash=fe8e6a6227db1844478fccb8fb59293e}{%
+           family={Barrett},
+           familyi={B\bibinitperiod},
+           given={Clark\bibnamedelima W.},
+           giveni={C\bibinitperiod\bibinitdelim W\bibinitperiod}}}%
+        {{hash=c3946ec43592957f452c131136bcbd9d}{%
+           family={Kochenderfer},
+           familyi={K\bibinitperiod},
+           given={Mykel\bibnamedelima J.},
+           giveni={M\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \strng{namehash}{afaac8df08b6d5019d6ce17795ab7a50}
+      \strng{fullhash}{4133a6a58bdb89d4e266e0c45886426b}
+      \strng{fullhashraw}{4133a6a58bdb89d4e266e0c45886426b}
+      \strng{bibnamehash}{afaac8df08b6d5019d6ce17795ab7a50}
+      \strng{authorbibnamehash}{afaac8df08b6d5019d6ce17795ab7a50}
+      \strng{authornamehash}{afaac8df08b6d5019d6ce17795ab7a50}
+      \strng{authorfullhash}{4133a6a58bdb89d4e266e0c45886426b}
+      \strng{authorfullhashraw}{4133a6a58bdb89d4e266e0c45886426b}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{CoRR}
+      \field{title}{Algorithms for Verifying Deep Neural Networks}
+      \field{volume}{abs/1903.06758}
+      \field{year}{2019}
+      \true{nocite}
+      \verb{eprint}
+      \verb 1903.06758
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/1903.06758
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/1903.06758
+      \endverb
+    \endentry
+    \entry{introduction_rivalyi_2020}{book}{}{}
+      \name{author}{2}{}{%
+        {{hash=c2dcd44d74658704f0b5afac3a529bb5}{%
+           family={Rival},
+           familyi={R\bibinitperiod},
+           given={Xavier},
+           giveni={X\bibinitperiod}}}%
+        {{hash=ad33911cfe40976e3794282954b2b027}{%
+           family={Yi},
+           familyi={Y\bibinitperiod},
+           given={Kwangkeun},
+           giveni={K\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {en}%
+      }
+      \list{publisher}{1}{%
+        {MIT Press}%
+      }
+      \strng{namehash}{123c45aba6236c6ca4e174b9571c5531}
+      \strng{fullhash}{123c45aba6236c6ca4e174b9571c5531}
+      \strng{fullhashraw}{123c45aba6236c6ca4e174b9571c5531}
+      \strng{bibnamehash}{123c45aba6236c6ca4e174b9571c5531}
+      \strng{authorbibnamehash}{123c45aba6236c6ca4e174b9571c5531}
+      \strng{authornamehash}{123c45aba6236c6ca4e174b9571c5531}
+      \strng{authorfullhash}{123c45aba6236c6ca4e174b9571c5531}
+      \strng{authorfullhashraw}{123c45aba6236c6ca4e174b9571c5531}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{A self-contained introduction to abstract interpretation–based static analysis, an essential resource for students, developers, and users. Static program analysis, or static analysis, aims to discover semantic properties of programs without running them. It plays an important role in all phases of development, including verification of specifications and programs, the synthesis of optimized code, and the refactoring and maintenance of software applications. This book offers a self-contained introduction to static analysis, covering the basics of both theoretical foundations and practical considerations in the use of static analysis tools. By offering a quick and comprehensive introduction for nonspecialists, the book fills a notable gap in the literature, which until now has consisted largely of scientific articles on advanced topics. The text covers the mathematical foundations of static analysis, including semantics, semantic abstraction, and computation of program invariants; more advanced notions and techniques, including techniques for enhancing the cost-accuracy balance of analysis and abstractions for advanced programming features and answering a wide range of semantic questions; and techniques for implementing and using static analysis tools. It begins with background information and an intuitive and informal introduction to the main static analysis principles and techniques. It then formalizes the scientific foundations of program analysis techniques, considers practical aspects of implementation, and presents more advanced applications. The book can be used as a textbook in advanced undergraduate and graduate courses in static analysis and program verification, and as a reference for users, developers, and experts.}
+      \field{isbn}{9780262043410}
+      \field{title}{Introduction to Static Analysis}
+      \field{year}{2020}
+      \true{nocite}
+      \field{pages}{315}
+      \range{pages}{1}
+    \endentry
+    \entry{SinghUnknownTitle2019}{article}{}{}
+      \name{author}{4}{}{%
+        {{hash=477da6ebf8a92a2f2265e7bb085c8644}{%
+           family={Singh},
+           familyi={S\bibinitperiod},
+           given={Gagandeep},
+           giveni={G\bibinitperiod}}}%
+        {{hash=68f8af693fe33fbb7d5cb901c673783f}{%
+           family={Gehr},
+           familyi={G\bibinitperiod},
+           given={Timon},
+           giveni={T\bibinitperiod}}}%
+        {{hash=8f4f7b9935992aa7a20147800e695b1e}{%
+           family={Püschel},
+           familyi={P\bibinitperiod},
+           given={Markus},
+           giveni={M\bibinitperiod}}}%
+        {{hash=3be48f15f1478336ea1bc8a71ef4fce4}{%
+           family={Vechev},
+           familyi={V\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery (ACM)}%
+      }
+      \strng{namehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{fullhash}{1e62eaeeaa65eec2836224ea8e924d6a}
+      \strng{fullhashraw}{1e62eaeeaa65eec2836224ea8e924d6a}
+      \strng{bibnamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authorbibnamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authornamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authorfullhash}{1e62eaeeaa65eec2836224ea8e924d6a}
+      \strng{authorfullhashraw}{1e62eaeeaa65eec2836224ea8e924d6a}
+      \field{extraname}{1}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{2475-1421}
+      \field{journaltitle}{Proceedings of the ACM on Programming Languages}
+      \field{month}{1}
+      \field{title}{An abstract domain for certifying neural networks}
+      \field{volume}{3}
+      \field{year}{2019}
+      \true{nocite}
+      \field{pages}{1\bibrangedash 30}
+      \range{pages}{30}
+      \verb{doi}
+      \verb 10.1145/3290354
+      \endverb
+      \verb{urlraw}
+      \verb https://dx.doi.org/10.1145/3290354
+      \endverb
+      \verb{url}
+      \verb https://dx.doi.org/10.1145/3290354
+      \endverb
+    \endentry
+    \entry{Singh2018BoostingRC}{inproceedings}{}{}
+      \name{author}{4}{}{%
+        {{hash=477da6ebf8a92a2f2265e7bb085c8644}{%
+           family={Singh},
+           familyi={S\bibinitperiod},
+           given={Gagandeep},
+           giveni={G\bibinitperiod}}}%
+        {{hash=68f8af693fe33fbb7d5cb901c673783f}{%
+           family={Gehr},
+           familyi={G\bibinitperiod},
+           given={Timon},
+           giveni={T\bibinitperiod}}}%
+        {{hash=8f4f7b9935992aa7a20147800e695b1e}{%
+           family={Püschel},
+           familyi={P\bibinitperiod},
+           given={Markus},
+           giveni={M\bibinitperiod}}}%
+        {{hash=bd321bb3fd28097b3c2d61d70b0f1683}{%
+           family={Vechev},
+           familyi={V\bibinitperiod},
+           given={Martin\bibnamedelima T.},
+           giveni={M\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \strng{namehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{fullhash}{c821f74ec44b0050d576c4cb5639b7c3}
+      \strng{fullhashraw}{c821f74ec44b0050d576c4cb5639b7c3}
+      \strng{bibnamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authorbibnamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authornamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authorfullhash}{c821f74ec44b0050d576c4cb5639b7c3}
+      \strng{authorfullhashraw}{c821f74ec44b0050d576c4cb5639b7c3}
+      \field{extraname}{2}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{International Conference on Learning Representations}
+      \field{title}{Boosting Robustness Certification of Neural Networks}
+      \field{year}{2018}
+      \true{nocite}
+      \verb{urlraw}
+      \verb https://api.semanticscholar.org/CorpusID:196059499
+      \endverb
+      \verb{url}
+      \verb https://api.semanticscholar.org/CorpusID:196059499
+      \endverb
+    \endentry
+    \entry{NEURIPS2018_f2f44698}{inproceedings}{}{}
+      \name{author}{5}{}{%
+        {{hash=477da6ebf8a92a2f2265e7bb085c8644}{%
+           family={Singh},
+           familyi={S\bibinitperiod},
+           given={Gagandeep},
+           giveni={G\bibinitperiod}}}%
+        {{hash=68f8af693fe33fbb7d5cb901c673783f}{%
+           family={Gehr},
+           familyi={G\bibinitperiod},
+           given={Timon},
+           giveni={T\bibinitperiod}}}%
+        {{hash=5ec8b756086759854f11bdd221da2cea}{%
+           family={Mirman},
+           familyi={M\bibinitperiod},
+           given={Matthew},
+           giveni={M\bibinitperiod}}}%
+        {{hash=8f4f7b9935992aa7a20147800e695b1e}{%
+           family={Püschel},
+           familyi={P\bibinitperiod},
+           given={Markus},
+           giveni={M\bibinitperiod}}}%
+        {{hash=3be48f15f1478336ea1bc8a71ef4fce4}{%
+           family={Vechev},
+           familyi={V\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+      }
+      \name{editor}{6}{}{%
+        {{hash=9b411b6c9cefdde16ffea77ecf612142}{%
+           family={Bengio},
+           familyi={B\bibinitperiod},
+           given={S.},
+           giveni={S\bibinitperiod}}}%
+        {{hash=1444141e07dd9549dbb4b8530fe4ec15}{%
+           family={Wallach},
+           familyi={W\bibinitperiod},
+           given={H.},
+           giveni={H\bibinitperiod}}}%
+        {{hash=6c15b92d4ebdbfae091f6548dc7543ae}{%
+           family={Larochelle},
+           familyi={L\bibinitperiod},
+           given={H.},
+           giveni={H\bibinitperiod}}}%
+        {{hash=4f2317ca7fb46f798c6c220e39e332a0}{%
+           family={Grauman},
+           familyi={G\bibinitperiod},
+           given={K.},
+           giveni={K\bibinitperiod}}}%
+        {{hash=9bc86e7523b9aaf7183c5f7e7634048f}{%
+           family={Cesa-Bianchi},
+           familyi={C\bibinithyphendelim B\bibinitperiod},
+           given={N.},
+           giveni={N\bibinitperiod}}}%
+        {{hash=36b98b7ab533936cf1b5716148de704f}{%
+           family={Garnett},
+           familyi={G\bibinitperiod},
+           given={R.},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Curran Associates, Inc.}%
+      }
+      \strng{namehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{fullhash}{3157aac5e95a47108597810dea41d3d1}
+      \strng{fullhashraw}{3157aac5e95a47108597810dea41d3d1}
+      \strng{bibnamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authorbibnamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authornamehash}{6183d076c0c0cfc20b3bca0fd1d5352f}
+      \strng{authorfullhash}{3157aac5e95a47108597810dea41d3d1}
+      \strng{authorfullhashraw}{3157aac5e95a47108597810dea41d3d1}
+      \strng{editorbibnamehash}{233f4c9ba2f85af3db1eed171136508c}
+      \strng{editornamehash}{233f4c9ba2f85af3db1eed171136508c}
+      \strng{editorfullhash}{f08403ac24c2e0a0ae72822c0c0afda6}
+      \strng{editorfullhashraw}{f08403ac24c2e0a0ae72822c0c0afda6}
+      \field{extraname}{3}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Advances in Neural Information Processing Systems}
+      \field{title}{Fast and Effective Robustness Certification}
+      \field{volume}{31}
+      \field{year}{2018}
+      \true{nocite}
+      \verb{urlraw}
+      \verb https://proceedings.neurips.cc/paper_files/paper/2018/file/f2f446980d8e971ef3da97af089481c3-Paper.pdf
+      \endverb
+      \verb{url}
+      \verb https://proceedings.neurips.cc/paper_files/paper/2018/file/f2f446980d8e971ef3da97af089481c3-Paper.pdf
+      \endverb
+    \endentry
+    \entry{Tjeng2017EvaluatingRO}{inproceedings}{}{}
+      \name{author}{3}{}{%
+        {{hash=fc64abf3fe64b8fbb8c70141f6703573}{%
+           family={Tjeng},
+           familyi={T\bibinitperiod},
+           given={Vincent},
+           giveni={V\bibinitperiod}}}%
+        {{hash=e8602e6e904a947e9a5a52b59c77bc93}{%
+           family={Xiao},
+           familyi={X\bibinitperiod},
+           given={Kai\bibnamedelima Y.},
+           giveni={K\bibinitperiod\bibinitdelim Y\bibinitperiod}}}%
+        {{hash=480d067fbc7c00be4a01a0e4902c984e}{%
+           family={Tedrake},
+           familyi={T\bibinitperiod},
+           given={Russ},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{6f05dcc6ab19bba696eba157b3de2b07}
+      \strng{fullhash}{6f05dcc6ab19bba696eba157b3de2b07}
+      \strng{fullhashraw}{6f05dcc6ab19bba696eba157b3de2b07}
+      \strng{bibnamehash}{6f05dcc6ab19bba696eba157b3de2b07}
+      \strng{authorbibnamehash}{6f05dcc6ab19bba696eba157b3de2b07}
+      \strng{authornamehash}{6f05dcc6ab19bba696eba157b3de2b07}
+      \strng{authorfullhash}{6f05dcc6ab19bba696eba157b3de2b07}
+      \strng{authorfullhashraw}{6f05dcc6ab19bba696eba157b3de2b07}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{International Conference on Learning Representations}
+      \field{title}{Evaluating Robustness of Neural Networks with Mixed Integer Programming}
+      \field{year}{2017}
+      \true{nocite}
+      \verb{urlraw}
+      \verb https://api.semanticscholar.org/CorpusID:47016770
+      \endverb
+      \verb{url}
+      \verb https://api.semanticscholar.org/CorpusID:47016770
+      \endverb
+    \endentry
+    \entry{DBLP:journals/corr/abs-2104-02466}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=6bce83f5d3329685daf03ee6a00d928b}{%
+           family={Urban},
+           familyi={U\bibinitperiod},
+           given={Caterina},
+           giveni={C\bibinitperiod}}}%
+        {{hash=f5a65e353c1f698c5b75db2a0914d504}{%
+           family={Miné},
+           familyi={M\bibinitperiod},
+           given={Antoine},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{5cab1923c18b10f3b000e0b1941d0d9e}
+      \strng{fullhash}{5cab1923c18b10f3b000e0b1941d0d9e}
+      \strng{fullhashraw}{5cab1923c18b10f3b000e0b1941d0d9e}
+      \strng{bibnamehash}{5cab1923c18b10f3b000e0b1941d0d9e}
+      \strng{authorbibnamehash}{5cab1923c18b10f3b000e0b1941d0d9e}
+      \strng{authornamehash}{5cab1923c18b10f3b000e0b1941d0d9e}
+      \strng{authorfullhash}{5cab1923c18b10f3b000e0b1941d0d9e}
+      \strng{authorfullhashraw}{5cab1923c18b10f3b000e0b1941d0d9e}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{CoRR}
+      \field{title}{A Review of Formal Methods applied to Machine Learning}
+      \field{volume}{abs/2104.02466}
+      \field{year}{2021}
+      \true{nocite}
+      \verb{eprint}
+      \verb 2104.02466
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/2104.02466
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/2104.02466
+      \endverb
+    \endentry
+    \entry{wang2018efficient}{inproceedings}{}{}
+      \name{author}{5}{}{%
+        {{hash=4762c13030571d33e9f72dc2a071cf2d}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Shiqi},
+           giveni={S\bibinitperiod}}}%
+        {{hash=e07e87b6497cef84fd25157727a44f72}{%
+           family={Pei},
+           familyi={P\bibinitperiod},
+           given={Kexin},
+           giveni={K\bibinitperiod}}}%
+        {{hash=3ccd2fd351ee3b8610036ff513acb361}{%
+           family={Whitehouse},
+           familyi={W\bibinitperiod},
+           given={Justin},
+           giveni={J\bibinitperiod}}}%
+        {{hash=b31f5ef99c10b52d454e9e3257df66b1}{%
+           family={Yang},
+           familyi={Y\bibinitperiod},
+           given={Junfeng},
+           giveni={J\bibinitperiod}}}%
+        {{hash=03829f26d35c66b0a0cd1b49e8866681}{%
+           family={Jana},
+           familyi={J\bibinitperiod},
+           given={Suman},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{d7650e61ccbe732d2cdbd76cb31989b4}
+      \strng{fullhash}{32a987fe2cdd6b5f20d4ec128cea7779}
+      \strng{fullhashraw}{32a987fe2cdd6b5f20d4ec128cea7779}
+      \strng{bibnamehash}{d7650e61ccbe732d2cdbd76cb31989b4}
+      \strng{authorbibnamehash}{d7650e61ccbe732d2cdbd76cb31989b4}
+      \strng{authornamehash}{d7650e61ccbe732d2cdbd76cb31989b4}
+      \strng{authorfullhash}{32a987fe2cdd6b5f20d4ec128cea7779}
+      \strng{authorfullhashraw}{32a987fe2cdd6b5f20d4ec128cea7779}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Advances in Neural Information Processing Systems}
+      \field{title}{Efficient formal safety analysis of neural networks}
+      \field{year}{2018}
+      \true{nocite}
+      \field{pages}{6367\bibrangedash 6377}
+      \range{pages}{11}
+    \endentry
+    \entry{NEURIPS2018_d04863f1}{inproceedings}{}{}
+      \name{author}{5}{}{%
+        {{hash=cfba473a0ef6d69137684e320ea6eac9}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Huan},
+           giveni={H\bibinitperiod}}}%
+        {{hash=226642cd905676c26e3fb80a5e98d4a7}{%
+           family={Weng},
+           familyi={W\bibinitperiod},
+           given={Tsui-Wei},
+           giveni={T\bibinithyphendelim W\bibinitperiod}}}%
+        {{hash=daec437b50b9f8311081b5f018781ff7}{%
+           family={Chen},
+           familyi={C\bibinitperiod},
+           given={Pin-Yu},
+           giveni={P\bibinithyphendelim Y\bibinitperiod}}}%
+        {{hash=8ce122ee46af7bc8820d9d1c340793dc}{%
+           family={Hsieh},
+           familyi={H\bibinitperiod},
+           given={Cho-Jui},
+           giveni={C\bibinithyphendelim J\bibinitperiod}}}%
+        {{hash=0e022143138dba968c035346cd05b365}{%
+           family={Daniel},
+           familyi={D\bibinitperiod},
+           given={Luca},
+           giveni={L\bibinitperiod}}}%
+      }
+      \name{editor}{6}{}{%
+        {{hash=9b411b6c9cefdde16ffea77ecf612142}{%
+           family={Bengio},
+           familyi={B\bibinitperiod},
+           given={S.},
+           giveni={S\bibinitperiod}}}%
+        {{hash=1444141e07dd9549dbb4b8530fe4ec15}{%
+           family={Wallach},
+           familyi={W\bibinitperiod},
+           given={H.},
+           giveni={H\bibinitperiod}}}%
+        {{hash=6c15b92d4ebdbfae091f6548dc7543ae}{%
+           family={Larochelle},
+           familyi={L\bibinitperiod},
+           given={H.},
+           giveni={H\bibinitperiod}}}%
+        {{hash=4f2317ca7fb46f798c6c220e39e332a0}{%
+           family={Grauman},
+           familyi={G\bibinitperiod},
+           given={K.},
+           giveni={K\bibinitperiod}}}%
+        {{hash=9bc86e7523b9aaf7183c5f7e7634048f}{%
+           family={Cesa-Bianchi},
+           familyi={C\bibinithyphendelim B\bibinitperiod},
+           given={N.},
+           giveni={N\bibinitperiod}}}%
+        {{hash=36b98b7ab533936cf1b5716148de704f}{%
+           family={Garnett},
+           familyi={G\bibinitperiod},
+           given={R.},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Curran Associates, Inc.}%
+      }
+      \strng{namehash}{7cdd635fd6fbbd1ac904a520f6569e9b}
+      \strng{fullhash}{092fe138a7f2a45a48c38288dfa22689}
+      \strng{fullhashraw}{092fe138a7f2a45a48c38288dfa22689}
+      \strng{bibnamehash}{7cdd635fd6fbbd1ac904a520f6569e9b}
+      \strng{authorbibnamehash}{7cdd635fd6fbbd1ac904a520f6569e9b}
+      \strng{authornamehash}{7cdd635fd6fbbd1ac904a520f6569e9b}
+      \strng{authorfullhash}{092fe138a7f2a45a48c38288dfa22689}
+      \strng{authorfullhashraw}{092fe138a7f2a45a48c38288dfa22689}
+      \strng{editorbibnamehash}{233f4c9ba2f85af3db1eed171136508c}
+      \strng{editornamehash}{233f4c9ba2f85af3db1eed171136508c}
+      \strng{editorfullhash}{f08403ac24c2e0a0ae72822c0c0afda6}
+      \strng{editorfullhashraw}{f08403ac24c2e0a0ae72822c0c0afda6}
+      \field{extraname}{1}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Advances in Neural Information Processing Systems}
+      \field{title}{Efficient Neural Network Robustness Certification with General Activation Functions}
+      \field{volume}{31}
+      \field{year}{2018}
+      \true{nocite}
+      \verb{urlraw}
+      \verb https://proceedings.neurips.cc/paper_files/paper/2018/file/d04863f100d59b3eb688a11f95b0ae60-Paper.pdf
+      \endverb
+      \verb{url}
+      \verb https://proceedings.neurips.cc/paper_files/paper/2018/file/d04863f100d59b3eb688a11f95b0ae60-Paper.pdf
+      \endverb
+    \endentry
+    \entry{zhang2022general}{misc}{}{}
+      \name{author}{8}{}{%
+        {{hash=cfba473a0ef6d69137684e320ea6eac9}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Huan},
+           giveni={H\bibinitperiod}}}%
+        {{hash=4762c13030571d33e9f72dc2a071cf2d}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Shiqi},
+           giveni={S\bibinitperiod}}}%
+        {{hash=019109ff4c9ff96b9017a5fe4dfacdcd}{%
+           family={Xu},
+           familyi={X\bibinitperiod},
+           given={Kaidi},
+           giveni={K\bibinitperiod}}}%
+        {{hash=edc6407eaf7e13917dd8a8ffc7507f95}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Linyi},
+           giveni={L\bibinitperiod}}}%
+        {{hash=a9c8728e355996d027a7e56b60820a18}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Bo},
+           giveni={B\bibinitperiod}}}%
+        {{hash=03829f26d35c66b0a0cd1b49e8866681}{%
+           family={Jana},
+           familyi={J\bibinitperiod},
+           given={Suman},
+           giveni={S\bibinitperiod}}}%
+        {{hash=8ce122ee46af7bc8820d9d1c340793dc}{%
+           family={Hsieh},
+           familyi={H\bibinitperiod},
+           given={Cho-Jui},
+           giveni={C\bibinithyphendelim J\bibinitperiod}}}%
+        {{hash=0288715a83a3349e44f9292c5c2149f7}{%
+           family={Kolter},
+           familyi={K\bibinitperiod},
+           given={J.\bibnamedelimi Zico},
+           giveni={J\bibinitperiod\bibinitdelim Z\bibinitperiod}}}%
+      }
+      \strng{namehash}{7cdd635fd6fbbd1ac904a520f6569e9b}
+      \strng{fullhash}{9a5b0b95b0929d65a4d3e4c4128afd91}
+      \strng{fullhashraw}{9a5b0b95b0929d65a4d3e4c4128afd91}
+      \strng{bibnamehash}{7cdd635fd6fbbd1ac904a520f6569e9b}
+      \strng{authorbibnamehash}{7cdd635fd6fbbd1ac904a520f6569e9b}
+      \strng{authornamehash}{7cdd635fd6fbbd1ac904a520f6569e9b}
+      \strng{authorfullhash}{9a5b0b95b0929d65a4d3e4c4128afd91}
+      \strng{authorfullhashraw}{9a5b0b95b0929d65a4d3e4c4128afd91}
+      \field{extraname}{2}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{id='cs.LG' full_name='Machine Learning' is_active=True alt_name=None in_archive='cs' is_general=False description='Papers on all aspects of machine learning research (supervised, unsupervised, reinforcement learning, bandit problems, and so on) including also robustness, explanation, fairness, and methodology. cs.LG is also an appropriate primary category for applications of machine learning methods.'}
+      \field{eprinttype}{arXiv}
+      \field{title}{General Cutting Planes for Bound-Propagation-Based Neural Network Verification}
+      \field{year}{2022}
+      \true{nocite}
+      \verb{eprint}
+      \verb 2208.05740
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

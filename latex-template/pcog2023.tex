@@ -1,0 +1,247 @@
+\documentclass[10pt]{beamer}
+
+%% Based on the original theme by Matthias Vogelgesang
+
+\usetheme[progressbar=frametitle]{metropolis}
+\usepackage[utf8]{inputenc}
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage{underscore}
+\usepackage[scale=2]{ccicons}
+
+\definecolor{ForestGreen}{RGB}{34,139,34}
+
+\usepackage{stmaryrd}
+\usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{svg}
+
+
+\usepackage{amsmath}
+\svgsetup{inkscapelatex=false}
+\usepackage{tikz}
+\usetikzlibrary{positioning,decorations.pathreplacing,fit}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{arrows.meta}
+\usepackage{algpseudocode}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{syntax}
+\usepackage{interval}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{optidef}
+\usepackage{xcolor}
+
+% Color for algorithmic comments (\Comment{...})
+\algrenewcomment[1]{\hfill\textcolor{UnccYellow}{\(\triangleright\)\ #1}}
+
+\usepackage{colortbl}
+\usepackage{diagbox}
+
+\usepackage{galois}
+\pgfplotsset{compat=1.18}
+
+\usepackage{url}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{bibliography.bib}
+\AtEveryBibitem{%
+  \clearfield{note}%
+  % \clearfield{issn}%
+  % \clearfield{doi}%
+  % \clearfield{url}%
+  % \clearfield{urldate}%
+  % \clearfield{arxivId}%
+  \clearfield{eprint}%
+  % \clearfield{archivePrefix}%
+  % \clearfield{primaryClass}%
+}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\newcommand\eqdef{\,\triangleq\,}
+\usepackage{mathpartir}
+% \usepackage{pdfpages}
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\newcommand{\tifq}{%
+  \begin{tikzpicture}[baseline={(0,0.02)}]
+    \draw (0,0) circle (0.03); % bottom circle
+    \draw (0,0.05) -- (0,0.1); % vertical line
+    \draw (0,0.1) .. controls (0.25,0.22) and (-0.05, 0.4) .. (-0.07,0.15); % upper arc
+  \end{tikzpicture}%
+}
+
+\newcommand{\tifdotdot}{%
+  \begin{tikzpicture}
+    \draw (0,0) circle (0.03); % bottom circle
+    \draw (0,0.1) circle (0.03); % bottom circle
+  \end{tikzpicture}%
+}
+
+\newcommand{\tifbar}{%
+  \begin{tikzpicture}[baseline={(0,0.07)}]
+    \draw (0,0) -- (0,0.35);
+    \draw (0.05,0) -- (0.05,0.35);
+    \draw (0,0) -- (0.05,0);
+    \draw (0,0.35) -- (0.05,0.35);
+  \end{tikzpicture}%
+}
+
+\newcommand{\tif}[3]{\llparenthesis~ #1 ~\tifq #2 ~\tifdotdot~ #3 ~\rrparenthesis}
+\newcommand{\tifbegin}[2]{\llparenthesis~ #1 ~\tifq #2}
+\newcommand{\tifcase}[2]{\tifbar~ #1 ~\tifq #2}
+\newcommand{\tifend}[1]{\tifdotdot~ #1 ~\rrparenthesis}
+
+\newcommand{\cd}[1]{#1^{\flat}}
+\newcommand{\ad}[1]{#1^{\sharp}}
+\newcommand{\ld}[1]{#1^{\natural}}
+\newcommand{\interpret}[1]{\llbracket #1 \rrbracket}
+\newcommand{\adi}[1]{\interpret{#1}}
+\newcommand{\cdi}[1]{\cd{\interpret{#1}}}
+\newcommand{\fpowerset}{\mathcal{P}_{\mathit{f}}}
+
+\def\ttrue{\mathit{true}}
+\def\ffalse{\mathit{false}}
+\def\unk{\mathit{unknown}}
+\def\placeholder{\mathtt{\_}}
+\newcommand{\dcup}{\;\dot\cup\;}
+\newcommand\empset{\{\}}
+\newcommand\univ{\mathbb{U}}
+\newcommand{\sem}[2]{\mathcal{F}^{#1}\interpret{#2}}
+\newcommand{\asem}[2]{\mathcal{F}^\sharp_{#1}\interpret{#2}}
+\newcommand{\tsem}[2]{\mathcal{T}^{#1}\interpret{#2}}
+\newcommand{\esem}[2]{\mathcal{E}^{#1}\interpret{#2}}
+\newcommand{\dsem}[2]{\mathcal{D}^{#1}\interpret{#2}}
+\newcommand{\csem}[2]{\mathcal{C}^{#1}\interpret{#2}}
+\newcommand{\isem}[1]{\mathcal{I}\interpret{#1}}
+\newcommand{\embed}[3]{\mathit{embed}(#1, #2, #3)}\newcommand{\aadi}[1]{\ad{\interpret{#1}}}
+\newcommand{\audi}[1]{\interpret{#1}_u}
+\newcommand{\aodi}[1]{\interpret{#1}_o}
+\newcommand{\addi}[1]{\rrbracket #1 \llbracket}
+\newcommand{\pff}[2]{#1 \nrightarrow #2}
+\newcommand{\pf}[2]{[\pff{#1}{#2}]}
+\newcommand{\tf}[2]{[#1 \to #2]}
+\newcommand{\pgamma}{\hat{\gamma}}
+\newcommand{\powerset}{\mathcal{P}}
+\newcommand{\substitution}[2]{[#1 \mapsto #2]}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% UNCC Theme Adjustments %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{CanvasBG}{HTML}{FAFAFA}
+
+% From the official style guide
+\definecolor{UnccGreen}{HTML}{00703C}
+\definecolor{UnccGold}{HTML}{B3A369}
+\definecolor{UnccLightGreen}{HTML}{C3D7A4}
+\definecolor{UnccYellow}{HTML}{F0CB00}
+\definecolor{UnccOrange}{HTML}{F3901D}
+\definecolor{UnccLightYellow}{HTML}{FFF6DC}
+\definecolor{UnccBlue}{HTML}{00728F}
+\definecolor{UnccPink}{HTML}{DE3A6E}
+\definecolor{White}{HTML}{FFFFFF}
+\definecolor{LightGray}{HTML}{DDDDDD}
+
+% Supporting Color Palette
+\definecolor{WarmGray}{HTML}{696158}
+\definecolor{StoneGray}{HTML}{717C7D}
+\definecolor{DarkGreen}{HTML}{2C5234}
+\definecolor{LightGreen}{HTML}{509E2F}
+\definecolor{BrightGold}{HTML}{F0CB00}
+
+% Screamers
+\definecolor{Royal}{HTML}{72246C}
+\definecolor{Ocean}{HTML}{006BA6}
+\definecolor{Flash}{HTML}{B52555}
+\definecolor{Citrus}{HTML}{FFB81C}
+\definecolor{Spring}{HTML}{CEDC00}
+
+% Serenity
+\definecolor{Garden}{HTML}{B7CE95}
+\definecolor{Sand}{HTML}{F0E991}
+\definecolor{Bloom}{HTML}{F1E6B2}
+\definecolor{Clay}{HTML}{B7B09C}
+\definecolor{Cloud}{HTML}{BAC5B9}
+
+% for verification workflow
+\definecolor{academicBlue}{HTML}{E6F3FF}
+\definecolor{academicYellow}{HTML}{FFFDF0}
+\definecolor{academicGreen}{HTML}{E8F5E9}
+\definecolor{academicRed}{HTML}{FFEBEE}
+\definecolor{academicOrange}{HTML}{FFF3E0}
+\definecolor{academicGray}{HTML}{F5F5F5}
+\definecolor{darkGray}{HTML}{333333}
+\definecolor{textGreen}{HTML}{2E7D32}
+\definecolor{textRed}{HTML}{C62828}
+\definecolor{textOrange}{HTML}{EF6C00}
+\definecolor{errorred}{HTML}{FCE4D6}
+\newcommand{\erred}[1]{\cellcolor{errorred}#1}
+
+% Set colors here
+\setbeamercolor{frametitle}{bg=UnccGreen}
+\setbeamercolor{progress bar}{bg=BrightGold, fg=UnccGreen}
+\setbeamercolor{alerted text}{fg=Flash}
+
+\setbeamercolor{block title}{bg=LightGreen, fg=White}
+\setbeamercolor{block title example}{bg=Ocean, fg=White}
+\setbeamercolor{block title alerted}{bg=Citrus, fg=White}
+\setbeamercolor{block body}{bg=CanvasBG}
+
+\metroset{titleformat=smallcaps, progressbar=foot}
+
+\makeatletter
+\setlength{\metropolis@progressinheadfoot@linewidth}{2pt}
+\setlength{\metropolis@titleseparator@linewidth}{2pt}
+\setlength{\metropolis@progressonsectionpage@linewidth}{2pt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% UNCC Theme Adjustments %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\lstset{
+  basicstyle=\scriptsize\ttfamily,
+  keywordstyle=\color{Ocean},
+  stringstyle=,
+  xleftmargin=1em,
+  showstringspaces=false,
+  commentstyle=\itshape\rmfamily,
+  columns=flexible,
+  keepspaces=true,
+  texcl=true
+}
+\lstset{escapeinside={<@}{@>}}
+
+\title{{\Large Introduction to Neural Network Verification}}
+\subtitle{\small A Journey into Knowledge and Reasoning}
+\author{\textbf{Yi-Nung Tsao}\\
+\texttt{yi-nung.tsao@uni.lu}}
+\institute[UNI LU]{University of Luxembourg}
+\date[]{9th Jul 2026}
+
+% \titlegraphic{\vspace{4cm}\flushright\includesvg[]{images/University_of_Luxembourg_logo_(fr).svg}}
+\titlegraphic{\vspace{4cm}\flushright\includegraphics[]{images/University_of_Luxembourg_logo_(fr)_svg-raw.pdf}}
+
+
+\begin{document}
+\maketitle
+% \setbeamertemplate{navigation symbols}{
+%   \raisebox{1em}{{\color{black}\scriptsize{\insertframenumber{}\hspace{0.5cm}}}}
+% }
+\begin{frame}{Template}
+    
+\end{frame}
+
+\begin{frame}[standout]
+    Thank you! 
+\end{frame}
+
+% \begin{frame}[allowframebreaks]
+%     \nocite{*}
+
+%     \printbibliography
+% \end{frame}
+
+\end{document}

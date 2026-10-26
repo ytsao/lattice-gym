@@ -1,6 +1,6 @@
-<p align="center">
-    <img src="doc/lattice-gym-cover.png" width="500"/>
-</p>
+<!-- <p align="center"> -->
+<!--     <img src="doc/lattice-gym-cover.png" width="500"/> -->
+<!-- </p> -->
 
 
 # lattice-gym
